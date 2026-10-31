@@ -30,10 +30,9 @@
 </details>
 <div id="pageDisplayControls" class="page-display-controls" hidden><span>Page overlay</span><label><input id="pageImage" type="checkbox"> Page image</label><label><input id="pageWords" type="checkbox"> Show words</label><label id="wdirLabel" title="Bottom to centre follows the writing. Level stands every word upright at the same size." hidden>Word direction <select id="wdir"><option value="ring">Bottom to centre</option><option value="level">Level</option></select></label><label>Boxes <select id="pageBoxes"><option value="fill">Filled</option><option value="outline">Outlines only</option><option value="hidden">Hidden</option></select></label><details id="overlayChoice" class="overlay-choice" hidden><summary>Overlays <span id="overlayCount" class="overlay-count"></span></summary><div id="pageOverlays" class="overlay-list"></div></details><label id="locusChoice" hidden>Locus <select id="pageLocus"></select></label><span class="zoom-tools"><button type="button" id="zoomReset" hidden>Reset view</button><span id="zoomLevel" class="zoom-level"></span></span></div>
 <p id="pageImageStatus" class="page-image-status" role="status" hidden></p>
-<div class="window-status"><strong id="windowSummary" aria-live="polite">Loading…</strong><button type="button" id="restoreHeatmap" hidden>Restore full map</button>
+<div class="window-status"><strong id="windowSummary" aria-live="polite">Loading…</strong><button type="button" id="wordDetailsButton" aria-expanded="false" aria-controls="wordDetails" hidden>Details</button><button type="button" id="restoreHeatmap" hidden>Restore full map</button>
 <label id="sharedChoice" hidden>Word in this shared box <select id="boxWord"></select></label></div>
-<p id="alignmentNote" class="alignment-note" hidden></p>
-<p id="lineNotes" class="line-notes" hidden></p>
+<div id="wordDetails" class="word-details" hidden><p id="alignmentNote" class="alignment-note" hidden></p><p id="lineNotes" class="line-notes" hidden></p></div>
 <div class="contrib" id="contribList" hidden></div>
 <div class="repeat-legend" id="repeatLegend" hidden><span class="single-key">Single occurrence</span><span class="repeat-key">Repeated spelling</span><span class="mixed-key">Shared box: both</span><span>Outlined = clicked word</span></div>
 <div class="legend impact-legend" id="impactLegend" hidden><div class="impact-spectrum"></div><div class="ticks"><span>0%</span><span>50%</span><span>100%</span></div><small>Containing windows affected by this repetition · red = greater impact</small></div>

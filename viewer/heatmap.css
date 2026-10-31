@@ -66,7 +66,9 @@
 .heatmap-atlas #windowSize{width:64px;padding:8px;background:var(--surface);color:var(--ink);border:1px solid var(--line2);border-radius:4px}
 .heatmap-atlas .window-status{order:2;flex-basis:100%;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:12px;min-height:30px}
 .heatmap-atlas .window-status.idle{display:none}
-.heatmap-atlas .window-status strong{font-weight:600;font-variant-numeric:tabular-nums}
+/* the controls are sticky, so a clicked word's summary stays within two lines and the rest waits behind Details */
+.heatmap-atlas .window-status strong{font-weight:600;font-variant-numeric:tabular-nums;flex:1 1 0;min-width:0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.heatmap-atlas .word-details{order:2;flex-basis:100%;max-height:32vh;overflow:auto;display:flex;flex-direction:column;gap:6px}
 .heatmap-atlas .window-status button{margin-left:auto}
 .heatmap-atlas .repeat-legend,.heatmap-atlas .change-legend{display:flex;gap:4px 12px;flex:1 1 180px;max-width:280px;flex-wrap:wrap;font-size:11px;line-height:1.4;color:var(--ink2)}
 .heatmap-atlas .repeat-key{color:var(--heat-repeat)}.heatmap-atlas .single-key{color:var(--heat-single)}.heatmap-atlas .mixed-key{color:var(--heat-mixed)}

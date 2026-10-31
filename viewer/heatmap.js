@@ -24,7 +24,7 @@ function mount({atlas,data,layout,pageDisplay}){
  const editLimit=document.getElementById('editLimit'),candidateUnit=document.getElementById('candidateUnit');
  const rows=[...atlas.querySelectorAll('.bifolio')];
  const scopeDefs=new Map((layout.scopes||[]).map(s=>[s.key,s]));
- const summary=document.getElementById('windowSummary'),restoreButton=document.getElementById('restoreHeatmap');
+ const summary=document.getElementById('windowSummary'),restoreButton=document.getElementById('restoreHeatmap'),detailsPanel=document.getElementById('wordDetails'),detailsButton=document.getElementById('wordDetailsButton');let detailsOpen=false;
  const calculation=document.getElementById('calculationStatus'),calculationProgress=document.getElementById('calculationProgress'),calculationStage=document.getElementById('calculationStage');
  const caption=atlas.querySelector('.caption'),shared=document.getElementById('sharedChoice'),choose=document.getElementById('boxWord');
  const tokenBoxes=new Map(),entries=[],byBox=new WeakMap();
@@ -86,6 +86,10 @@ function mount({atlas,data,layout,pageDisplay}){
    items.push(s);}
   el.replaceChildren(...items);
  }
+ // the clicked word's notes wait behind Details: a tall sticky bar would cover the page and the word itself
+ function syncDetails(){const any=[...detailsPanel.children].some(c=>!c.hidden);detailsButton.hidden=!any;detailsPanel.hidden=!any||!detailsOpen;detailsButton.setAttribute('aria-expanded',String(any&&detailsOpen));detailsButton.textContent=any&&detailsOpen?'Hide details':'Details';}
+ on(detailsButton,'click',()=>anchored(origin,()=>{detailsOpen=!detailsOpen;syncDetails();}));
+ new MutationObserver(()=>{summary.title=summary.textContent;}).observe(summary,{childList:true});   // the full text when it is cut short
  for(const box of atlas.querySelectorAll('rect[data-token-indices]')){
   const entry={box,indices:box.dataset.tokenIndices.split(',').map(Number),title:box.querySelector('title')};
   entries.push(entry);byBox.set(box,entry);
@@ -107,6 +111,7 @@ function mount({atlas,data,layout,pageDisplay}){
   const before=box?.getBoundingClientRect();change();
   const after=box?.getBoundingClientRect();
   if(before?.height&&after?.height&&Math.abs(after.top-before.top)>.5)window.scrollBy({top:after.top-before.top,behavior:'instant'});
+  if(after?.height){const bar=atlas.querySelector('.controls').getBoundingClientRect().bottom+8,top=box.getBoundingClientRect().top;if(top<bar)window.scrollBy({top:top-bar,behavior:'instant'});}   // never under the sticky controls
  }
  function paintColor(value){
   if(!Number.isFinite(value))return 'var(--line2)';
@@ -324,7 +329,7 @@ function mount({atlas,data,layout,pageDisplay}){
   anchored(box,()=>{
    clearMarks();selected=-1;atlas.classList.remove('window-mode');restoreButton.hidden=true;shared.hidden=true;contribList.hidden=true;contribWord=null;
    document.getElementById('alignmentNote').hidden=true;
-   const ln=document.getElementById('lineNotes');if(ln)ln.hidden=true;
+   const ln=document.getElementById('lineNotes');if(ln)ln.hidden=true;syncDetails();
    visibility();instructions();summary.textContent='Click any word to highlight its calculation window on the pages.';
    pageDisplay.labels();
   });
@@ -340,7 +345,7 @@ function mount({atlas,data,layout,pageDisplay}){
   if(advanced()){selectAdvanced(box,pos,toggle);return;}
   const indices=byBox.get(box).indices;
   if(toggle&&indices.includes(selected)){restore();return;}
-  alignmentNote(pos);lineNotes(pos);
+  alignmentNote(pos);lineNotes(pos);syncDetails();
   if(plain()||external()){
    anchored(box,()=>{
     clearMarks();selected=pos;origin=box;restoreButton.hidden=false;shared.hidden=indices.length<2;contribList.hidden=true;
@@ -408,7 +413,7 @@ function mount({atlas,data,layout,pageDisplay}){
  function selectAdvanced(box,pos,toggle){
   if(atlas.hasAttribute('aria-busy')||!sourceStats)return;
   const indices=byBox.get(box).indices;if(toggle&&indices.includes(selected)){restore();return;}
-  alignmentNote(pos);lineNotes(pos);
+  alignmentNote(pos);lineNotes(pos);syncDetails();
   const pool=spatial()?SG_SOURCES.sourcePool(sourceCtx,pos,width,sourceOptions):SG_SOURCES.windowPool(sourceCtx,pos,width,mode);
   const stat=copyView()?SG_COPY.measure(copyCtx,pos,pool,true):SG_SOURCES.measure(sourceCtx,pool,true),active=new Map(),context=new Set(),raw=new Map(pool.indices.map((i,k)=>[i,pool.weights[k]]));
   const distances=new Map(copyView()?stat.items.map(x=>[x.position,x.distance]):[]);
