@@ -1,0 +1,37 @@
+vms-spatial reads data files that are not part of this repository (see
+vmsspatial/resources/data_manifest.json for every file, its SHA-256 and where
+it comes from). Their terms:
+
+Word rectangles (positional-data/*.xml, the live coordinate inventories, and
+every rectangle in words.json.gz and spatial_review.json.gz):
+    Copyright (C) 2014 The Voynichese Project.
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+The toolkit and the viewer are derived uses of those rectangles: colours and
+measures are added, no coordinate is inferred or altered, and no manuscript
+scan image is stored. The viewer loads page images from voynichese.com on
+request only.
+
+Transliteration (ZL_ivtff_raw.txt and the words of every bundle): the ZL
+transliteration of the Voynich manuscript in IVTFF format by René Zandbergen
+and Gabriel Landini (ZL3b, 2025-05-13), published at voynich.nu.
+
+Natural-language comparison texts (data/controls/texts): OCR transcriptions of
+early printed herbals and medical texts and training splits of a reference
+corpus, assembled for the research workspace; they are provided for the
+layout controls only.
+
+Page scans (measured by vmsspatial.images and vmsspatial.ink, never stored
+in this repository): Beinecke Rare Book and Manuscript Library, Yale
+University, Beinecke MS 408 (the Voynich manuscript), digital images served
+by Yale University Library's digital collections under the IIIF Image API
+(https://collections.library.yale.edu/catalog/2002046). The toolkit downloads
+them into a cache outside the repository on request and keeps only numbers
+measured on them.

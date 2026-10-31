@@ -1,0 +1,189 @@
+/* Atlas rules are scoped; the title/menu use the app's standard shell. */
+.heatmap-atlas{--heat-repeat:#c47765;--heat-single:#87b09b;--heat-mixed:#c9ae78;--heat-neutral:#8b9693}
+.heatmap-page .masthead{padding-bottom:22px}
+.heatmap-atlas .controls{position:sticky;top:0;z-index:5;background:var(--bg);border-block:1px solid var(--line2);padding:10px 0;display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;font-size:13px}
+.heatmap-atlas .controls label{display:flex;align-items:center;gap:8px}
+.heatmap-atlas .calculation-status{display:inline-flex;align-items:center;gap:5px;min-width:16px;font-size:11px;font-variant-numeric:tabular-nums;color:var(--ink2);white-space:nowrap}
+.heatmap-atlas .calculation-spinner{display:inline-block;width:14px;height:14px;box-sizing:border-box;border:2px solid var(--line2);border-top-color:var(--heat-single);border-right-color:var(--heat-single);border-radius:50%;animation:heatmap-spin .8s linear infinite}
+.heatmap-atlas .calculation-stage{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+@keyframes heatmap-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.heatmap-atlas .calculation-spinner{animation:none}}
+.heatmap-atlas select{padding:8px;max-width:100%}
+.heatmap-atlas .legend{display:block;min-width:180px;flex:1 1 180px;max-width:300px;order:0}
+.heatmap-atlas #scope{max-width:190px}
+.heatmap-atlas #colorMode{max-width:205px}
+.heatmap-atlas #windowDirection:disabled{opacity:.45;cursor:default}
+.heatmap-atlas .spectrum{height:14px;border-radius:3px;background:linear-gradient(90deg,#a83c35,#d56b43,#e9aa6c,#ead6a1,#a1c5ad,#4e9c92,#185965)}
+.heatmap-atlas .ticks{display:flex;justify-content:space-between;font-size:12px;color:var(--ink2)}
+.heatmap-atlas .ticks span::before{display:none}
+.heatmap-atlas .legend small{display:block;font-size:10px;line-height:1.3;color:var(--ink2)}
+.heatmap-atlas .candidate-legend .ticks{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:11px}
+.heatmap-atlas .impact-spectrum{height:12px;border-radius:3px;background:linear-gradient(90deg,#5eaa98,#ead6a1,#d56b43,#a83c35)}
+.heatmap-atlas .caption{font-size:13px;color:var(--ink2)}
+.heatmap-atlas .bifolio{display:flex;gap:24px;padding:30px 0;border-bottom:1px solid var(--line);align-items:center}
+.heatmap-atlas .bifolio[hidden]{display:none}
+.heatmap-atlas .bifolio header{width:150px;flex-shrink:0}
+.heatmap-atlas .group{font-size:12px;letter-spacing:1px;font-weight:700;color:var(--ink2)}
+.heatmap-atlas h2{font-size:19px;margin:5px 0 12px}
+.heatmap-atlas .bifolio strong{display:block;font-size:35px;line-height:1.2;color:var(--ink)}
+.heatmap-atlas .bifolio header>span:not(.group){font-size:12px;color:var(--ink2)}
+.heatmap-atlas .bar{height:7px;background:var(--line2);margin:9px 0 13px;border-radius:2px;overflow:hidden}
+.heatmap-atlas .bar i{display:block;height:100%}
+.heatmap-atlas .bifolio small{color:var(--ink2)}
+.heatmap-atlas .pages{display:flex;align-items:flex-start;gap:12px;flex:1;min-width:0;overflow-x:auto;padding-bottom:5px}
+.heatmap-atlas figure{margin:0;flex:var(--ratio) 1 0;min-width:105px;max-width:320px}
+.heatmap-atlas figcaption{font-size:12px;color:var(--ink2);padding-bottom:7px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.heatmap-atlas .expand-page{font:16px var(--sans);line-height:1;padding:4px 8px;border:1px solid var(--line2);border-radius:4px;background:var(--surface);color:var(--ink);cursor:pointer}
+.heatmap-atlas .expand-page:hover{border-color:var(--ink)}
+.heatmap-atlas.page-expanded .bifolio:not(.expanded-row),.heatmap-atlas.page-expanded .expanded-row>header,.heatmap-atlas.page-expanded figure:not(.expanded-page){display:none}
+.heatmap-atlas.page-expanded .expanded-row{display:block;padding-top:18px}
+.heatmap-atlas.page-expanded .pages{display:block;overflow:visible}
+.heatmap-atlas.page-expanded figure.expanded-page{width:100%;max-width:1100px;margin:auto;min-width:0}
+.heatmap-atlas.page-expanded figcaption{font-size:16px}
+/* Page surfaces follow the app theme; data colors keep their fixed scale. */
+.heatmap-atlas svg{display:block;width:100%;background:var(--surface);border:1px solid var(--line2)}
+.heatmap-atlas rect[data-token-indices]{cursor:pointer}
+.heatmap-atlas rect[data-token-indices]:hover,.heatmap-atlas rect[data-token-indices]:focus-visible{stroke:var(--ink);stroke-width:3;outline:none}
+.heatmap-atlas[data-colors="repeat"] rect[data-token-indices]{fill:var(--heat-single)}
+.heatmap-atlas[data-colors="repeat"] rect.repeat-word{fill:var(--heat-repeat)}
+.heatmap-atlas[data-colors="repeat"] rect.mixed-word{fill:var(--heat-mixed)}
+.heatmap-atlas[data-colors="repeat"] rect.incomplete{fill:var(--line2)}
+.heatmap-atlas[data-colors="overlay"] rect.repeat-word{stroke:var(--heat-repeat);stroke-width:1.2;vector-effect:non-scaling-stroke}
+.heatmap-atlas[data-colors="overlay"] rect.mixed-word{stroke:var(--heat-mixed);stroke-width:1.2;vector-effect:non-scaling-stroke}
+.heatmap-atlas.window-mode rect:not(.window-member){fill:var(--line2);opacity:.3;stroke:none}
+.heatmap-atlas.window-mode[data-colors="repeat"] rect.window-member{fill:var(--heat-single)}
+.heatmap-atlas.window-mode[data-colors="repeat"] rect.window-member.repeat-word{fill:var(--heat-repeat)}
+.heatmap-atlas.window-mode[data-colors="repeat"] rect.window-member.mixed-word{fill:var(--heat-mixed)}
+.heatmap-atlas.window-mode rect.window-related{stroke:var(--heat-mixed);stroke-width:2;vector-effect:non-scaling-stroke;paint-order:stroke fill}
+.heatmap-atlas.window-mode rect.window-selected{stroke:var(--ink);stroke-width:2;vector-effect:non-scaling-stroke;paint-order:stroke fill;opacity:1}
+.heatmap-atlas .window-context header::after{content:'Window context';display:block;margin-top:10px;font-size:11px;color:var(--ink2)}
+.heatmap-atlas .missing{aspect-ratio:.733;background:var(--surface);display:flex;align-items:center;justify-content:center;text-align:center;flex-direction:column;color:var(--ink2);font-size:12px}
+.heatmap-atlas .missing small{font-size:10px;margin:8px}
+.heatmap-atlas details{margin:24px 0;padding:16px 20px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.heatmap-atlas summary{cursor:pointer;font-weight:650}
+.heatmap-atlas details p{max-width:1000px}
+.heatmap-downloads{display:flex;gap:12px 24px;flex-wrap:wrap}
+.heatmap-atlas #windowSize{width:64px;padding:8px;background:var(--surface);color:var(--ink);border:1px solid var(--line2);border-radius:4px}
+.heatmap-atlas .window-status{order:2;flex-basis:100%;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:12px;min-height:30px}
+.heatmap-atlas .window-status.idle{display:none}
+.heatmap-atlas .window-status strong{font-weight:600;font-variant-numeric:tabular-nums}
+.heatmap-atlas .window-status button{margin-left:auto}
+.heatmap-atlas .repeat-legend,.heatmap-atlas .change-legend{display:flex;gap:4px 12px;flex:1 1 180px;max-width:280px;flex-wrap:wrap;font-size:11px;line-height:1.4;color:var(--ink2)}
+.heatmap-atlas .repeat-key{color:var(--heat-repeat)}.heatmap-atlas .single-key{color:var(--heat-single)}.heatmap-atlas .mixed-key{color:var(--heat-mixed)}
+.heatmap-atlas .controls [hidden]{display:none}
+.heatmap-atlas .source-settings[hidden]{display:none}
+.heatmap-atlas .source-fields{display:flex;gap:12px 24px;flex-wrap:wrap;margin-top:12px}
+.heatmap-atlas .source-fields label{display:flex;align-items:center;gap:7px;font-size:13px}
+.heatmap-atlas .source-fields input{width:66px;padding:7px;background:var(--bg);color:var(--ink);border:1px solid var(--line2);border-radius:4px}
+.heatmap-atlas .source-settings p{font-size:12px;color:var(--ink2);margin-bottom:0}
+.heatmap-atlas .source-guide{pointer-events:none}
+.heatmap-atlas .source-words text{fill:var(--ink);font-family:var(--mono);paint-order:stroke;stroke:var(--surface);stroke-width:.6px}
+.heatmap-atlas rect.invalid-geometry{display:none}
+.heatmap-atlas .copy-settings{display:flex;gap:8px 14px;flex-wrap:wrap}
+.heatmap-atlas .source-guide path{fill:none;stroke:var(--heat-single);stroke-width:1.8;vector-effect:non-scaling-stroke;opacity:.9}
+.heatmap-atlas[aria-busy="true"] .pages{opacity:.55}
+/* the selected window's breakdown: repeated spellings ranked by the diversity they cost; copies colored grey (once), then
+   yellow → orange → red (lightness falls step by step) */
+.heatmap-atlas{--copies-1:#c2c6c4;--copies-2:#d6a52a;--copies-3:#d9772e;--copies-4:#c24a30;--copies-5:#93292a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .heatmap-atlas{--copies-1:#7c8381}}
+:root[data-theme="dark"] .heatmap-atlas{--copies-1:#7c8381}
+.heatmap-atlas .contrib{order:3;flex-basis:100%;display:flex;gap:5px 6px;align-items:center;flex-wrap:wrap;font-size:12px}
+.heatmap-atlas .contrib .contrib-head{color:var(--ink2);margin-right:4px;font-variant-numeric:tabular-nums}
+.heatmap-atlas .contrib button{font:12px var(--sans);padding:2px 8px;border-radius:12px;background:var(--surface);border:1px solid var(--line2)}
+.heatmap-atlas .contrib button b{font:600 12px var(--mono)}.heatmap-atlas .contrib button small{color:var(--ink2);font-variant-numeric:tabular-nums}
+.heatmap-atlas .contrib button[aria-pressed="true"]{color:var(--ink);background:color-mix(in srgb,var(--heat-mixed) 16%,var(--surface));border-color:var(--heat-mixed);box-shadow:inset 0 0 0 1px var(--heat-mixed)}
+.heatmap-atlas .contrib .more{color:var(--ink2)}
+.heatmap-atlas .contrib-key{flex:none;display:flex;gap:8px;color:var(--ink2);font-size:11px;white-space:nowrap;margin-left:6px}
+.heatmap-atlas .contrib-key .ck{display:inline-flex;align-items:center;gap:4px}.heatmap-atlas .contrib-key i{flex:none;width:12px;height:10px;border-radius:2px;display:inline-block}
+@media(max-width:750px){
+ .heatmap-atlas .bifolio{gap:12px}.heatmap-atlas .bifolio header{width:105px}
+ .heatmap-atlas .bifolio strong{font-size:28px}.heatmap-atlas .pages{gap:7px}
+ .heatmap-atlas figure{min-width:135px}.heatmap-atlas .legend{min-width:180px}
+ .heatmap-atlas .controls{gap:8px 14px;font-size:12px}.heatmap-atlas .window-status{font-size:12px}
+}
+.heatmap-atlas .alignment-note{flex-basis:100%;font-size:12px;line-height:1.5;margin:4px 0;padding:8px;border-left:3px solid #a88246}.heatmap-atlas rect.alignment-ambiguous:not(.window-selected){stroke:#a88246;stroke-width:.8;stroke-dasharray:2 2}
+.heatmap-atlas .page-display-controls{order:1;flex-basis:100%;display:flex;align-items:center;flex-wrap:wrap;gap:10px 22px;border-top:1px solid var(--line2);padding-top:8px}
+.heatmap-atlas .page-display-controls>span{font-weight:650}
+.heatmap-atlas .page-display-controls input{accent-color:var(--heat-single)}
+.heatmap-atlas .page-image-status{order:1;flex-basis:100%;font-size:11px;color:var(--ink2);margin:0;line-height:1.4}
+.heatmap-atlas .manuscript-image{pointer-events:none}
+.heatmap-atlas .image-backed svg{background:#eadbb9}
+.heatmap-atlas .image-backed rect[data-token-indices]{fill-opacity:.48}
+.heatmap-atlas .image-backed rect.no-native-box{display:none}
+.heatmap-atlas rect.alignment-ambiguous:not(.window-selected){fill:#a8824626!important;stroke:#a88246;vector-effect:non-scaling-stroke}
+.heatmap-atlas figure[data-box-style="outline"] rect{fill:transparent!important;stroke:var(--box-color,var(--ink2));stroke-width:1;vector-effect:non-scaling-stroke}
+.heatmap-atlas figure[data-box-style="outline"] rect.alignment-ambiguous{fill:transparent!important;stroke:#a88246;stroke-dasharray:2 2}
+.heatmap-atlas.window-mode figure[data-box-style="outline"] rect.window-member{stroke:var(--heat-single);stroke-width:1.5}
+.heatmap-atlas figure[data-box-style="outline"] rect.window-related{stroke:var(--heat-mixed);stroke-width:2}
+.heatmap-atlas figure[data-box-style="outline"] rect.window-selected{stroke:var(--ink);stroke-width:2}
+.heatmap-atlas figure[data-box-style="hidden"] rect{fill:transparent!important;stroke:transparent!important}
+.heatmap-atlas figure[data-box-style="hidden"] rect.alignment-ambiguous{fill:transparent!important;stroke:transparent!important}
+.heatmap-atlas figure[data-box-style="outline"] rect,.heatmap-atlas figure[data-box-style="hidden"] rect{pointer-events:all}
+.heatmap-atlas .page-word-labels{pointer-events:none}
+.heatmap-atlas .page-word-labels text{fill:var(--ink);font-family:var(--mono);paint-order:stroke;stroke:var(--surface);stroke-width:1.6;stroke-linejoin:round}
+.heatmap-atlas.window-mode .page-word-labels text:not(.label-member){opacity:.28}
+.heatmap-atlas .expanded-page .source-words{display:none}
+/* vms-spatial additions: text / rows / order controls and the row statistic */
+.heatmap-atlas #bundle{max-width:300px}
+.heatmap-atlas #grouping,.heatmap-atlas #order{max-width:190px}
+.heatmap-atlas .bifolio header .group{display:block;max-height:3.2em;overflow:hidden;text-overflow:ellipsis}
+.heatmap-atlas .bifolio h2{overflow-wrap:anywhere}
+
+/* atlas page: plain boxes, the Configuration section */
+.heatmap-atlas{--box-plain:#c9cdcb}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .heatmap-atlas{--box-plain:#5d625f}}
+:root[data-theme="dark"] .heatmap-atlas{--box-plain:#5d625f}
+.heatmap-atlas .controls details.config{order:1;flex-basis:100%;margin:0;padding:8px 14px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.heatmap-atlas .controls details.config[hidden]{display:none}
+.heatmap-atlas .controls details.config summary{font-size:12px;font-weight:600;color:var(--ink2)}
+.heatmap-atlas .config-fields{display:flex;gap:10px 28px;flex-wrap:wrap;margin-top:10px}
+.heatmap-atlas .config-group{display:flex;gap:10px 18px;flex-wrap:wrap;align-items:center}
+.heatmap-atlas .config-group[hidden]{display:none}
+.heatmap-atlas .config-group input{width:66px;padding:7px;background:var(--bg);color:var(--ink);border:1px solid var(--line2);border-radius:4px}
+.heatmap-atlas .config-note{font-size:12px;color:var(--ink2);margin:10px 0 2px;max-width:1000px}
+.heatmap-atlas .config-note[hidden]{display:none}
+.heatmap-atlas details.reading{margin:24px 0}
+.heatmap-atlas #order{max-width:220px}
+.heatmap-atlas[data-colors="none"] rect.window-selected{stroke:var(--ink);stroke-width:2;vector-effect:non-scaling-stroke;paint-order:stroke fill}
+/* overlays and notes a bundle brings with it */
+.heatmap-atlas .page-overlays{pointer-events:none}
+.heatmap-atlas .page-overlays .ov{fill:none;stroke:var(--ink);stroke-width:1.6;vector-effect:non-scaling-stroke;opacity:.9}
+.heatmap-atlas .page-overlays circle.ov{fill:var(--ink);stroke:none;opacity:.7}
+.heatmap-atlas .page-overlays .ov-chord{stroke:#2b6cb0}
+.heatmap-atlas .page-overlays .ov-fit{stroke:#c2410c}
+.heatmap-atlas .page-overlays .ov-fit-ext{stroke:#c2410c;stroke-dasharray:6 5;opacity:.75}
+.heatmap-atlas .page-overlays .ov-break-transcript{stroke:#7c3aed;stroke-width:2.4}
+.heatmap-atlas .page-overlays .ov-break-geometric{stroke:#0f766e;stroke-width:2.4;stroke-dasharray:3 3}
+.heatmap-atlas .page-overlays .ov-break-both{stroke:#7c3aed;stroke-width:3}
+.heatmap-atlas .page-overlays circle.ov-baseline{fill:#2b6cb0}
+.heatmap-atlas .page-overlays circle.ov-marker{fill:#c2410c}
+.heatmap-atlas .page-overlays .ov-ls{stroke:#15803d}
+.heatmap-atlas .page-overlays .ov-warp-fit{stroke:#c2410c}
+.heatmap-atlas .page-overlays .ov-warp-flat{stroke:#15803d;stroke-dasharray:6 5;opacity:.8}
+.heatmap-atlas .page-overlays .ov-ink-fit{stroke:#7c3aed}
+.heatmap-atlas .page-overlays circle.ov-intrusion{fill:#c2410c;opacity:.85}
+.heatmap-atlas .page-overlays circle.ov-intrusion-touch{fill:none;stroke:#c2410c;stroke-width:1.4;opacity:.85}
+.heatmap-atlas .page-overlays .ov-break-transcript,.heatmap-atlas .page-overlays .ov-break-geometric,.heatmap-atlas .page-overlays .ov-break-both,.heatmap-atlas .page-overlays circle.ov{pointer-events:all;cursor:help}
+.heatmap-atlas .page-overlays polyline.ov{pointer-events:stroke;cursor:help}
+.heatmap-atlas .overlay-choice{margin:0;padding:0;background:none;border:0;border-radius:0}
+.heatmap-atlas .overlay-choice[open]{flex-basis:100%}
+.heatmap-atlas .overlay-choice[hidden]{display:none}
+.heatmap-atlas .overlay-choice summary{font-weight:400}
+.heatmap-atlas .overlay-count{color:var(--ink2);font-variant-numeric:tabular-nums}
+.heatmap-atlas .overlay-list{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:6px}
+.heatmap-atlas .line-notes{order:2;flex-basis:100%;display:flex;gap:6px 14px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin:0}
+.heatmap-atlas .line-notes b{color:var(--ink);font-weight:600}
+.heatmap-atlas .line-notes .orientation-note{flex-basis:100%;font-style:italic}
+/* zoom and pan of the expanded page (js/zoom_math.js): the svg's viewBox changes, so boxes, image and overlays move together */
+.heatmap-atlas .expanded-page svg{cursor:grab;touch-action:none}
+.heatmap-atlas .expanded-page svg.dragging{cursor:grabbing}
+.heatmap-atlas .expanded-page svg.zoomed rect[data-token-indices]{vector-effect:non-scaling-stroke}
+.heatmap-atlas .zoom-tools{display:inline-flex;align-items:center;gap:8px}
+.heatmap-atlas .zoom-tools button{font:12px var(--sans);padding:4px 10px;border:1px solid var(--line2);border-radius:4px;background:var(--surface);color:var(--ink);cursor:pointer}
+.heatmap-atlas .zoom-tools button[hidden]{display:none}
+.heatmap-atlas .zoom-level{font-size:12px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.heatmap-atlas #pageLocus{max-width:300px}
+/* detected positions (fRos): found on the image by the toolkit, never recorded coordinates; amber like unresolved assignments */
+.heatmap-atlas rect.detected-box:not(.window-selected){stroke:#a88246;stroke-width:.9;stroke-dasharray:3 2;vector-effect:non-scaling-stroke}
+.heatmap-atlas figure[data-box-style="outline"] rect.detected-box{stroke:#a88246;stroke-dasharray:3 2}
+.heatmap-atlas .compare-link{margin-left:auto;font-size:12px;font-weight:600;white-space:nowrap}

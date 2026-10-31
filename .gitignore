@@ -1,0 +1,17 @@
+# full-resolution Beinecke scans: fetched by their IIIF URL (vmsspatial fetch-data --group images)
+data/images/
+# outputs
+scores.csv
+outputs/
+*.png
+!docs/*.png
+# python
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+# editors
+.vscode/
+.idea/

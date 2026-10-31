@@ -1,0 +1,18 @@
+.alignment-review{max-width:1500px;margin:24px auto;padding:0 22px}.alignment-review h1{margin-bottom:10px}.review-controls{display:flex;flex-wrap:wrap;gap:20px;align-items:center;padding:16px}.review-controls label{display:flex;align-items:center;gap:8px}.review-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:20px;align-items:start}.review-layout>.panel{padding:16px}.review-layout aside{position:sticky;top:70px;max-height:85vh;overflow:auto}#reviewCanvas svg{display:block;width:100%;max-height:82vh;aspect-ratio:636/900}#reviewCanvas .audit-box{cursor:pointer}#reviewCanvas .audit-box rect{fill:#d09632;fill-opacity:.14;stroke:#bd7c15;stroke-width:.8}#reviewCanvas .audit-box.clean rect{fill:#277d7b;fill-opacity:.05;stroke:#277d7b;stroke-width:.4}#reviewCanvas .audit-box.dim{opacity:.16}#reviewCanvas .audit-box.selected rect{stroke:#ed145b;stroke-width:2;fill:#ed145b;fill-opacity:.16}#reviewCanvas text{font-family:monospace;fill:#111;paint-order:stroke;stroke:#fff;stroke-width:1.8px;stroke-linejoin:round}.review-table{margin-top:20px;padding:18px;overflow:auto}.review-table table{width:100%;border-collapse:collapse}.review-table th,.review-table td{padding:9px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}.review-table button{font-family:monospace;white-space:normal}.review-table tr.selected{background:#d0963220}.review-flag{display:inline-block;padding:2px 6px;margin:2px;border:1px solid var(--line);border-radius:4px;font-size:12px}#reviewDetails code{overflow-wrap:anywhere}#reviewDetails pre{white-space:pre-wrap;font-size:12px}#reviewImageStatus{font-size:12px}.alignment-review details{padding:16px;margin-top:20px}.alignment-review footer{margin:24px 0;font-size:12px}@media(max-width:850px){.review-layout{grid-template-columns:1fr}.review-layout aside{position:static;max-height:none}}
+.review-crop{margin:14px 0}.review-crop svg{display:block;width:100%;max-height:180px;background:#d3c6a5}.review-crop figcaption{font-size:11px;margin-top:4px}
+#reviewCanvas.source-window .audit-box.source-word rect{fill:#b7d5c4;fill-opacity:.74;stroke:#277d7b;stroke-width:.65}
+#reviewCanvas.source-window .audit-box.selected rect{fill:#edc69e;fill-opacity:.85;stroke:#8e452c;stroke-width:1.5}
+#reviewCanvas.source-window .audit-box.dim{opacity:.10}
+#reviewCanvas.source-window text{stroke-width:1px;stroke:#ffffffe6}
+#reviewCanvas.source-window svg{aspect-ratio:auto}
+#reviewCanvas .source-guide{pointer-events:none}
+#reviewCanvas .source-guide path{fill:none;stroke:#125b50;stroke-width:2;vector-effect:non-scaling-stroke;paint-order:stroke;filter:drop-shadow(0 0 1px #fff)}
+#reviewCanvas .source-guide .left-guide{stroke:#8e452c;stroke-width:2.5}
+#reviewCanvas.green-boxes .audit-box:not(.selected) rect{fill:#b7d5c4;fill-opacity:.14;stroke:#277d7b;stroke-width:.65}
+#reviewCanvas.source-window .audit-box:not(.dim):not(.selected) rect{fill:#b7d5c4;fill-opacity:.74;stroke:#277d7b;stroke-width:.65}
+#reviewCanvas.component-colors .audit-box rect{fill:var(--component-color,transparent);fill-opacity:.58;stroke:var(--component-color,#277d7b);stroke-width:.6}
+#reviewComponentLegend{display:flex;gap:12px;align-items:center;font-size:13px}
+#reviewComponentLegend[hidden]{display:none}
+#reviewComponentLegend .component-spectrum{display:inline-block;width:240px;height:15px;background:linear-gradient(90deg,#a83c35,#d56b43,#e9aa6c,#ead6a1,#a1c5ad,#4e9c92,#185965)}
+.component-overview .review-layout{display:block}
+.component-overview .review-layout aside{display:none}

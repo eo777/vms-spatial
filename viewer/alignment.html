@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>vms-spatial · Alignment review</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="alignment.css"><script src="site_nav.js" defer></script></head>
+<body><nav class="site-nav"></nav><main class="alignment-review">
+<h1>Spatial alignment review</h1>
+<p>ZL words and typed boundaries, associated with the original Voynichese rectangles. A shared box locates a group of words; it does not establish separate word positions. Flags identify assignment questions, not defects in the manuscript or its original boxes.</p>
+<div class="panel review-controls"><label>Page <select id="reviewPage"></select></label>
+<label>Show <select id="reviewFilter"><option value="review">Needs word-location review</option><option value="all">All words</option><option value="shared_box">Shared boxes</option><option value="alignment_corrected">Corrected assignments</option><option value="exact_compound_union">Compound unions</option><option value="image_reviewed_boundary">Image-reviewed boundaries</option><option value="spelling_difference">Different transcription</option><option value="uncertain_boundary">Uncertain spaces</option><option value="disconnected_parts">Disconnected assignments</option><option value="cross_locus">Cross-locus assignments</option><option value="short_wide">Short word / wide assignment</option></select></label>
+<label><input id="reviewImage" type="checkbox" checked> Original Voynichese image</label><label><input id="reviewLabels" type="checkbox"> ZL labels over boxes</label>
+<label><input id="reviewSources" type="checkbox"> Spatial source window</label><label><input id="reviewCloseup" type="checkbox"> Close-up</label>
+<label>Box colors <select id="reviewColors"><option value="review">Alignment review</option><option value="green">Green</option><option value="components">Component diversity</option></select></label>
+<button id="reviewNext" type="button">Next flagged page</button></div>
+<p id="reviewSummary" role="status">Loading the alignment review…</p>
+<p id="reviewComponentLegend" hidden></p>
+<div class="review-layout"><section class="panel"><div id="reviewCanvas"></div><p id="reviewImageStatus" class="muted"></p></section>
+<aside class="panel"><div id="reviewDetails">Select a box or a word in the table.</div></aside></div>
+<section class="panel review-table"><h2>Canonical word assignments</h2><p>Commas are uncertain spaces; periods are certain spaces. Intrusion markers retain their ZL meaning. An empty coordinate assignment keeps the word in the text.</p><table><thead><tr><th>ZL locus</th><th>ZL word + following boundary</th><th>Coordinate spelling / XML index</th><th>Review flags</th></tr></thead><tbody id="reviewRows"></tbody></table></section>
+<details class="panel"><summary>Coverage and limits</summary><p id="reviewCoverage"></p><p>The conservative spatial policy excludes shared or disputed word assignments, cross-locus merges, disconnected pieces and unresolved layout cases. A spelling difference alone is not a rejection. Long gallows and large original rectangles are retained. These checks are conservative screening, not a claim that every accepted word has been visually verified.</p><p>The image overlay uses Voynichese's own cropped display image and its exact display rectangles. Original XML pixel coordinates are retained separately for analyses. No original XML rectangle or ZL spelling was changed. The flag taxonomy and the policies are documented in the toolkit (<code>vmsspatial.audit.flags</code>); <code>vmsspatial audit token &lt;id&gt;</code> describes one word.</p></details>
+<footer>Coordinates and source images: <a href="https://www.voynichese.com/">The Voynichese Project</a>. <a href="NOTICE.txt">Attribution</a> · <a href="../data/manuscript/spatial_review.json.gz">Download the review data</a></footer>
+</main><script src="common.js"></script><script src="../js/sources.js"></script><script src="../js/review.js"></script><script src="alignment.js"></script></body></html>

@@ -1,0 +1,160 @@
+{
+ "page": "fRos",
+ "note": "Seeded layout of the nine-rosette foldout (ZL page fRos = f85v2+f86r4+f86r6 / f85v1+f86r3+f86r5). Circle numbers follow the ZL header (columns: 1 4 7 / 2 5 8 / 3 6 9). Centres were refined on the ink mask (segment.refine_centre); each text band [r0, r1] is the radial extent of the circular text in full-resolution pixels, chosen from the radial ink profile and the detector candidates and checked on the unwrapped strips. Rings are the circular loci (type Cc/Ca) with the rosette they run around; a pair separated by '|' is resolved by comparing the locus's glyph count with the measured ink length of each ring.",
+ "image": {
+  "source": "Beinecke Rare Book and Manuscript Library, MS 408, digital collections canvas '85v and 86r (foldout)', IIIF image 1006231",
+  "url": "https://collections.library.yale.edu/iiif/2/1006231/full/full/0/default.jpg",
+  "width": 7925,
+  "height": 7268,
+  "display_scale": 0.25
+ },
+ "rosettes": {
+  "1": {
+   "cx": 1883,
+   "cy": 1458,
+   "band": [
+    745,
+    810
+   ],
+   "name": "NW"
+  },
+  "2": {
+   "cx": 1937,
+   "cy": 3605,
+   "band": [
+    720,
+    822
+   ],
+   "name": "W"
+  },
+  "3": {
+   "cx": 1940,
+   "cy": 5813,
+   "band": [
+    868,
+    956
+   ],
+   "name": "SW"
+  },
+  "4": {
+   "cx": 4406,
+   "cy": 1289,
+   "band": [
+    747,
+    822
+   ],
+   "name": "N"
+  },
+  "5": {
+   "cx": 4306,
+   "cy": 3596,
+   "band": [
+    930,
+    1015
+   ],
+   "name": "centre"
+  },
+  "6": {
+   "cx": 4235,
+   "cy": 5906,
+   "band": [
+    755,
+    822
+   ],
+   "name": "S"
+  },
+  "7": {
+   "cx": 6653,
+   "cy": 1512,
+   "band": [
+    835,
+    945
+   ],
+   "name": "NE",
+   "irregular": true
+  },
+  "8": {
+   "cx": 6562,
+   "cy": 3638,
+   "band": [
+    772,
+    862
+   ],
+   "name": "E"
+  },
+  "9": {
+   "cx": 6582,
+   "cy": 5839,
+   "band": [
+    938,
+    1026
+   ],
+   "name": "SE"
+  }
+ },
+ "circles": {
+  "clock": {
+   "cx": 1189,
+   "cy": 6440,
+   "band": [
+    92,
+    150
+   ],
+   "name": "Brumbaugh's clock (small circle lower left)"
+  }
+ },
+ "rings": {
+  "2": {
+   "rosette": "1"
+  },
+  "20": {
+   "rosette": "4"
+  },
+  "35": {
+   "rosette": "7"
+  },
+  "36": {
+   "rosette": "7",
+   "spiral": {
+    "r_outer": 690,
+    "r_inner": 540,
+    "turns": 1.5,
+    "height": 70
+   }
+  },
+  "47": {
+   "rosette": "2"
+  },
+  "62": {
+   "rosette": "3"
+  },
+  "87": {
+   "rosette": "5"
+  },
+  "94": {
+   "rosette": "8|9"
+  },
+  "113": {
+   "circle": "clock"
+  },
+  "114": {
+   "circle": "clock"
+  },
+  "122": {
+   "rosette": "6"
+  },
+  "133": {
+   "rosette": "9|8"
+  }
+ },
+ "clock_labels": {
+  "112": "left",
+  "115": "right"
+ },
+ "candidate_filter": {
+  "min_height": 22,
+  "max_height": 140,
+  "min_width": 14
+ },
+ "confidence_floor": 0.25
+}

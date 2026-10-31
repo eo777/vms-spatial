@@ -1,0 +1,2720 @@
+{
+ "version": "2026-10-31.16",
+ "site": "https://eo777.github.io/vms-dynamic-citation/",
+ "description": "Every data file the toolkit reads, with its SHA-256. Files with a url can be downloaded with `vmsspatial fetch-data`; files without one are copied from a research workspace with `--from-workspace` (raw audit inputs).",
+ "files": [
+  {
+   "key": "manuscript/tokens.json",
+   "group": "manuscript",
+   "workspace": "solve/botanical_enrichment/echo7/preservation_model_20261014/data/tokens.json",
+   "url": "https://eo777.github.io/vms-dynamic-citation/experiments/mattr_template_link/data/solve/botanical_enrichment/echo7/preservation_model_20261014/data/tokens.json",
+   "sha256": "557e9fc6dedd3678633fec9ab50359a181c14fe6a0ba3d1917aece31cdc04afe",
+   "bytes": 752572,
+   "note": "The study transcription: 34,977 paragraph-text tokens in 4,130 lines (ZL transliteration, uncertain-reading tokens omitted).",
+   "optional": false
+  },
+  {
+   "key": "manuscript/physical_map.csv",
+   "group": "manuscript",
+   "workspace": "solve/botanical_enrichment/team_golf/data/physical_map.csv",
+   "url": "https://eo777.github.io/vms-dynamic-citation/experiments/mattr_template_link/data/solve/botanical_enrichment/team_golf/data/physical_map.csv",
+   "sha256": "2d5e3ba18fc16f1c1cad6a7904d7edfdc0dd6b282f9b746da032c61a84a4fd96",
+   "bytes": 12023,
+   "note": "Physical structure of every page: quire, leaf, side, bifolium, partner leaf, section, Currier language, hand.",
+   "optional": false
+  },
+  {
+   "key": "manuscript/words.json.gz",
+   "group": "manuscript",
+   "workspace": "apps/spatial_toolkit/data/manuscript/words.json.gz",
+   "url": null,
+   "sha256": "bcc22286800d5fec99dd2a487cc219ee88100cfe20ca73556d28f5dd43146592",
+   "bytes": 3274880,
+   "note": "The manuscript bundle: every page and locus by bifolium, strict geometry in the recorded warp state, with the review block.",
+   "license": "Voynichese Project word coordinates, (C) 2014, Apache License 2.0 (see NOTICE)",
+   "optional": false
+  },
+  {
+   "key": "manuscript/spatial_review.json.gz",
+   "group": "manuscript",
+   "workspace": "apps/spatial_toolkit/data/manuscript/spatial_review.json.gz",
+   "url": null,
+   "sha256": "68fd0480dfcb683f55eb503fcbc7144fbf43eb2719ba67d8b50d0adcd57e5431",
+   "bytes": 2029896,
+   "note": "The alignment review of all 39,026 ZL tokens: assignment groups with the original and display rectangles, flags, and the strict / sensitivity eligibility.",
+   "license": "Voynichese Project word coordinates, (C) 2014, Apache License 2.0 (see NOTICE)",
+   "optional": false
+  },
+  {
+   "key": "manuscript/positional_path1.json.gz",
+   "group": "model",
+   "url": "https://eo777.github.io/voynich-gradient/assets/positional_path1.json.gz",
+   "sha256": "977c5676670d79ffa8fac2f0b5a354278877a45513ba35da489b801158cbfffc",
+   "bytes": 8616854,
+   "note": "Optional, not used by the toolkit: the positional composition model whose bifolium order is resources/path1_order.json (published with the gradient app).",
+   "workspace": "packages/voynich_gradients/src/voynich_gradients/assets/positional_path1.json.gz",
+   "optional": true
+  },
+  {
+   "key": "reference/component_impact_derived.json.gz",
+   "group": "reference",
+   "url": "https://eo777.github.io/vms-dynamic-citation/experiments/mattr_template_link/data/research/timm_geometry_audit_20261026/component_impact_20261027/derived.json.gz",
+   "sha256": "6967ccb24ec09ca15e486ab8b27847fcf4eca44da625f5a00888c6724a0e22c0",
+   "bytes": 6925901,
+   "note": "Optional, not used by the toolkit: the per-token table of the 27 October 2026 component-impact study, for anyone comparing with it (published with the self-citation experiments).",
+   "workspace": "research/timm_geometry_audit_20261026/component_impact_20261027/derived.json.gz",
+   "optional": true
+  },
+  {
+   "key": "raw/ZL_ivtff_raw.txt",
+   "group": "raw",
+   "workspace": "ZL_ivtff_raw.txt",
+   "url": null,
+   "sha256": "bf5b6d4ac1e3a51b1847a9c388318d609020441ccd56984c901c32b09beccafc",
+   "bytes": 411671,
+   "note": "The ZL transliteration (IVTFF); read for the pages outside the study token set and the Rosettes loci.",
+   "optional": false
+  },
+  {
+   "key": "controls/streams/m_timm/generated_text.txt",
+   "group": "controls",
+   "workspace": "research/dynamic_selfcitation_20261024/governed/runs/m_timm/generated_text.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/reproduce/research/dynamic_selfcitation_20261024/governed/runs/m_timm/generated_text.txt",
+   "sha256": "f7f435dbbeefe67716e2464f7ede833e6420d74cefe2a4b8233ce70f3853d31b",
+   "bytes": 257346,
+   "note": "Self-citation generator stream, line-aligned to the 4,130 manuscript lines in Path 1 order.",
+   "optional": false
+  },
+  {
+   "key": "controls/streams/n_noinnov_far0/generated_text.txt",
+   "group": "controls",
+   "workspace": "research/dynamic_selfcitation_20261024/governed/runs/n_noinnov_far0/generated_text.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/reproduce/research/dynamic_selfcitation_20261024/governed/runs/n_noinnov_far0/generated_text.txt",
+   "sha256": "1a7ffb123d7d0f0f534eaa75d3c4d6cefbe61e80479d19815cd1fbf0d3ad1eea",
+   "bytes": 257796,
+   "note": "Self-citation generator stream, line-aligned to the 4,130 manuscript lines in Path 1 order.",
+   "optional": false
+  },
+  {
+   "key": "controls/streams/n_noinnov_far0_s2/generated_text.txt",
+   "group": "controls",
+   "workspace": "research/dynamic_selfcitation_20261024/governed/runs/n_noinnov_far0_s2/generated_text.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/reproduce/research/dynamic_selfcitation_20261024/governed/runs/n_noinnov_far0_s2/generated_text.txt",
+   "sha256": "4fdc77f34b1dfbebb31a0d82ab24af017b5944b6bbfcac2454e1cc884663e840",
+   "bytes": 257841,
+   "note": "Self-citation generator stream, line-aligned to the 4,130 manuscript lines in Path 1 order.",
+   "optional": false
+  },
+  {
+   "key": "controls/streams/n_noinnov_far0_s3/generated_text.txt",
+   "group": "controls",
+   "workspace": "research/dynamic_selfcitation_20261024/governed/runs/n_noinnov_far0_s3/generated_text.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/reproduce/research/dynamic_selfcitation_20261024/governed/runs/n_noinnov_far0_s3/generated_text.txt",
+   "sha256": "f4f943a19a462ad8ca580b580063f719d5e6af5bb286035ab91423f90bb1ea29",
+   "bytes": 257714,
+   "note": "Self-citation generator stream, line-aligned to the 4,130 manuscript lines in Path 1 order.",
+   "optional": false
+  },
+  {
+   "key": "controls/streams/p_timm_spatial/generated_text.txt",
+   "group": "controls",
+   "workspace": "research/dynamic_selfcitation_20261024/governed/runs/p_timm_spatial/generated_text.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/reproduce/research/dynamic_selfcitation_20261024/governed/runs/p_timm_spatial/generated_text.txt",
+   "sha256": "4d17f1e4e5aa84c1c628dfe48ccd2d03a270f9e3fc5f0b0ff9a08aab8e548ab2",
+   "bytes": 257295,
+   "note": "Self-citation generator stream, line-aligned to the 4,130 manuscript lines in Path 1 order.",
+   "optional": false
+  },
+  {
+   "key": "controls/streams/p_timm_spatial_s2/generated_text.txt",
+   "group": "controls",
+   "workspace": "research/dynamic_selfcitation_20261024/governed/runs/p_timm_spatial_s2/generated_text.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/reproduce/research/dynamic_selfcitation_20261024/governed/runs/p_timm_spatial_s2/generated_text.txt",
+   "sha256": "e84b5c3c91ee465ad47972046c73c4bbf59ae9170d9401bed211c6a8900958a7",
+   "bytes": 256943,
+   "note": "Self-citation generator stream, line-aligned to the 4,130 manuscript lines in Path 1 order.",
+   "optional": false
+  },
+  {
+   "key": "controls/streams/p_timm_spatial_s3/generated_text.txt",
+   "group": "controls",
+   "workspace": "research/dynamic_selfcitation_20261024/governed/runs/p_timm_spatial_s3/generated_text.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/reproduce/research/dynamic_selfcitation_20261024/governed/runs/p_timm_spatial_s3/generated_text.txt",
+   "sha256": "3e2cb4c21133fc897531d7ef8d0b93b30c44e24094ad88ef4f0a38aa7c1e3bf8",
+   "bytes": 257181,
+   "note": "Self-citation generator stream, line-aligned to the 4,130 manuscript lines in Path 1 order.",
+   "optional": false
+  },
+  {
+   "key": "controls/streams/p_noinnov_spatial/generated_text.txt",
+   "group": "controls",
+   "workspace": "research/dynamic_selfcitation_20261024/governed/runs/p_noinnov_spatial/generated_text.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/reproduce/research/dynamic_selfcitation_20261024/governed/runs/p_noinnov_spatial/generated_text.txt",
+   "sha256": "0d686bfeaf20cf3d7765783ebc67e5a3c4b50d511b68c3b03c4046890629a5c3",
+   "bytes": 258066,
+   "note": "Self-citation generator stream, line-aligned to the 4,130 manuscript lines in Path 1 order.",
+   "optional": false
+  },
+  {
+   "key": "controls/streams/p_noinnov_spatial_s2/generated_text.txt",
+   "group": "controls",
+   "workspace": "research/dynamic_selfcitation_20261024/governed/runs/p_noinnov_spatial_s2/generated_text.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/reproduce/research/dynamic_selfcitation_20261024/governed/runs/p_noinnov_spatial_s2/generated_text.txt",
+   "sha256": "3031568f9dcd119d804cd9a8bce120c4f19a6643d028143c6047ae97ea43015d",
+   "bytes": 257968,
+   "note": "Self-citation generator stream, line-aligned to the 4,130 manuscript lines in Path 1 order.",
+   "optional": false
+  },
+  {
+   "key": "controls/streams/p_noinnov_spatial_s3/generated_text.txt",
+   "group": "controls",
+   "workspace": "research/dynamic_selfcitation_20261024/governed/runs/p_noinnov_spatial_s3/generated_text.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/reproduce/research/dynamic_selfcitation_20261024/governed/runs/p_noinnov_spatial_s3/generated_text.txt",
+   "sha256": "9ce56140dc23f571a491512bf1dce3122c297cc26517ff146feabaf9ae8133b7",
+   "bytes": 257623,
+   "note": "Self-citation generator stream, line-aligned to the 4,130 manuscript lines in Path 1 order.",
+   "optional": false
+  },
+  {
+   "key": "controls/streams/p_far0_spatial/generated_text.txt",
+   "group": "controls",
+   "workspace": "research/dynamic_selfcitation_20261024/governed/runs/p_far0_spatial/generated_text.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/reproduce/research/dynamic_selfcitation_20261024/governed/runs/p_far0_spatial/generated_text.txt",
+   "sha256": "0086aa0b470dbbeb4d16f30658128598bf5a55d11ce652e4134e55e582c5d63a",
+   "bytes": 257734,
+   "note": "Self-citation generator stream, line-aligned to the 4,130 manuscript lines in Path 1 order.",
+   "optional": false
+  },
+  {
+   "key": "controls/streams/p_far0_spatial_s2/generated_text.txt",
+   "group": "controls",
+   "workspace": "research/dynamic_selfcitation_20261024/governed/runs/p_far0_spatial_s2/generated_text.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/reproduce/research/dynamic_selfcitation_20261024/governed/runs/p_far0_spatial_s2/generated_text.txt",
+   "sha256": "946f0e77ca48ab2c79137df140bf3f5b13062f41480c66050ad6da44e22d7b4e",
+   "bytes": 257557,
+   "note": "Self-citation generator stream, line-aligned to the 4,130 manuscript lines in Path 1 order.",
+   "optional": false
+  },
+  {
+   "key": "controls/streams/p_far0_spatial_s3/generated_text.txt",
+   "group": "controls",
+   "workspace": "research/dynamic_selfcitation_20261024/governed/runs/p_far0_spatial_s3/generated_text.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/reproduce/research/dynamic_selfcitation_20261024/governed/runs/p_far0_spatial_s3/generated_text.txt",
+   "sha256": "511373d11f087eacb7e4bc4e394336530e9b6c660007b6ab68c316e22736ffb1",
+   "bytes": 257704,
+   "note": "Self-citation generator stream, line-aligned to the 4,130 manuscript lines in Path 1 order.",
+   "optional": false
+  },
+  {
+   "key": "controls/streams/timm_native_seed2.json.gz",
+   "group": "controls",
+   "workspace": "research/timm_geometry_audit_20261026/history_prediction/records/model2_source.json.gz",
+   "url": "https://eo777.github.io/vms-dynamic-citation/experiments/mattr_template_link/data/research/timm_geometry_audit_20261026/history_prediction/records/model2_source.json.gz",
+   "sha256": "ef520b019dde909ad71cf8f19f5baeb1f54da9a46acf7fd1fb6504320091c795",
+   "bytes": 92868,
+   "note": "A further native seed of Timm's generator (layout audit), {'lines': [...]} line-aligned.",
+   "optional": false
+  },
+  {
+   "key": "controls/streams/timm_native_seed3.json.gz",
+   "group": "controls",
+   "workspace": "research/timm_geometry_audit_20261026/history_prediction/records/model3_source.json.gz",
+   "url": "https://eo777.github.io/vms-dynamic-citation/experiments/mattr_template_link/data/research/timm_geometry_audit_20261026/history_prediction/records/model3_source.json.gz",
+   "sha256": "1d2c232bffa492ba892956158970b788a9dbf91a007a2e54f627493022ae103c",
+   "bytes": 95987,
+   "note": "A further native seed of Timm's generator (layout audit), {'lines': [...]} line-aligned.",
+   "optional": false
+  },
+  {
+   "key": "controls/streams/timm_native_seed4.json.gz",
+   "group": "controls",
+   "workspace": "research/timm_geometry_audit_20261026/history_prediction/records/model4_source.json.gz",
+   "url": "https://eo777.github.io/vms-dynamic-citation/experiments/mattr_template_link/data/research/timm_geometry_audit_20261026/history_prediction/records/model4_source.json.gz",
+   "sha256": "eeb09a27d1262f192e6383f30c1fb648bf357431c1897560e929707abf6daaaf",
+   "bytes": 93357,
+   "note": "A further native seed of Timm's generator (layout audit), {'lines': [...]} line-aligned.",
+   "optional": false
+  },
+  {
+   "key": "controls/streams/timm_native_seed5.json.gz",
+   "group": "controls",
+   "workspace": "research/timm_geometry_audit_20261026/history_prediction/records/model5_source.json.gz",
+   "url": "https://eo777.github.io/vms-dynamic-citation/experiments/mattr_template_link/data/research/timm_geometry_audit_20261026/history_prediction/records/model5_source.json.gz",
+   "sha256": "5a5fc56e4d0671f329f4d5d5b6bac2849126d7b861d17b8b6da5c080e08cfd9e",
+   "bytes": 95477,
+   "note": "A further native seed of Timm's generator (layout audit), {'lines': [...]} line-aligned.",
+   "optional": false
+  },
+  {
+   "key": "controls/texts/la_macer_milan1482.txt",
+   "group": "controls",
+   "workspace": "research/reference_corpus/texts/la/foxtrot/foxtrot_macer_milan1482_ocr_la.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/experiments/mattr_template_link/data/research/reference_corpus/texts/la/foxtrot/foxtrot_macer_milan1482_ocr_la.txt",
+   "sha256": "f3e3a17be2529282a732f2fc8c9cfc45e4c0443eaa62dcf26c7a5b1198b7e6cf",
+   "bytes": 95428,
+   "note": "Natural-language comparison text (OCR or training split).",
+   "optional": false
+  },
+  {
+   "key": "controls/texts/la_psapuleius1543.txt",
+   "group": "controls",
+   "workspace": "research/reference_corpus/texts/la/foxtrot/foxtrot_psapuleius_paris1543_ocr_la.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/experiments/mattr_template_link/data/research/reference_corpus/texts/la/foxtrot/foxtrot_psapuleius_paris1543_ocr_la.txt",
+   "sha256": "f138ab3cabc363c3c0372f4820f2ade2caa292ec97e2596e756f8594ea0e5c9c",
+   "bytes": 93307,
+   "note": "Natural-language comparison text (OCR or training split).",
+   "optional": false
+  },
+  {
+   "key": "controls/texts/la_galen_simplicium.txt",
+   "group": "controls",
+   "workspace": "research/reference_corpus/texts/la/foxtrot/foxtrot_galen_simplicium_wuerzburg_la.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/experiments/mattr_template_link/data/research/reference_corpus/texts/la/foxtrot/foxtrot_galen_simplicium_wuerzburg_la.txt",
+   "sha256": "aa9d583ac5d7dd3e415822bad26c28fd7cfbe7387c03457b3c556c24ce6f34d7",
+   "bytes": 610283,
+   "note": "Natural-language comparison text (OCR or training split).",
+   "optional": false
+  },
+  {
+   "key": "controls/texts/la_dioscorides_longob.txt",
+   "group": "controls",
+   "workspace": "research/reference_corpus/texts/la/foxtrot/foxtrot_dioscorides_longobardus_ocr_la.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/experiments/mattr_template_link/data/research/reference_corpus/texts/la/foxtrot/foxtrot_dioscorides_longobardus_ocr_la.txt",
+   "sha256": "91b22b430e219adad3ba417422e5636e0c3f746dd4df84b676f2554fbf22ea43",
+   "bytes": 1002845,
+   "note": "Natural-language comparison text (OCR or training split).",
+   "optional": false
+  },
+  {
+   "key": "controls/texts/la_rhazes_almansor.txt",
+   "group": "controls",
+   "workspace": "research/reference_corpus/texts/la/foxtrot/foxtrot_rhazes_almansor_wuerzburg_la.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/experiments/mattr_template_link/data/research/reference_corpus/texts/la/foxtrot/foxtrot_rhazes_almansor_wuerzburg_la.txt",
+   "sha256": "764069de66301354ac619000bfbe9146fc6b097a1c85a3614bf91451b2a1877e",
+   "bytes": 992437,
+   "note": "Natural-language comparison text (OCR or training split).",
+   "optional": false
+  },
+  {
+   "key": "controls/texts/la_hildegard_physica.txt",
+   "group": "controls",
+   "workspace": "research/reference_corpus/texts/la/hildegard_physica_plants_trees_la.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/experiments/mattr_template_link/data/research/reference_corpus/texts/la/hildegard_physica_plants_trees_la.txt",
+   "sha256": "a13b99688afc3efc50a9afa8d9cfed11bb1c5bf18cd5c1dd37d8b0d7639719d8",
+   "bytes": 226421,
+   "note": "Natural-language comparison text (OCR or training split).",
+   "optional": false
+  },
+  {
+   "key": "controls/texts/la_vulgate_train.txt",
+   "group": "controls",
+   "workspace": "research/reference_corpus/derived/legacy_controls/c_lat_train.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/experiments/mattr_template_link/data/research/reference_corpus/derived/legacy_controls/c_lat_train.txt",
+   "sha256": "eb4e60cb1271f0a74d5fa1828720d97ebb4794739070004920eab4f7c251db9f",
+   "bytes": 2889707,
+   "note": "Natural-language comparison text (OCR or training split).",
+   "optional": false
+  },
+  {
+   "key": "controls/texts/de_gart_augsburg1487.txt",
+   "group": "controls",
+   "workspace": "research/reference_corpus/texts/de/foxtrot/foxtrot_gart_augsburg1487_ocr_de.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/experiments/mattr_template_link/data/research/reference_corpus/texts/de/foxtrot/foxtrot_gart_augsburg1487_ocr_de.txt",
+   "sha256": "8ea01d30e31872777153816335aeefa8ae70a812a949d75427e7fb8623e8c4df",
+   "bytes": 966644,
+   "note": "Natural-language comparison text (OCR or training split).",
+   "optional": false
+  },
+  {
+   "key": "controls/texts/mhg_train.txt",
+   "group": "controls",
+   "workspace": "research/reference_corpus/derived/legacy_controls/c_mhg_train.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/experiments/mattr_template_link/data/research/reference_corpus/derived/legacy_controls/c_mhg_train.txt",
+   "sha256": "f1430ff4afcc9591bf52b6d237b091ebf6c0433d12415792354b53c647f5bf26",
+   "bytes": 392721,
+   "note": "Natural-language comparison text (OCR or training split).",
+   "optional": false
+  },
+  {
+   "key": "controls/texts/ita_train.txt",
+   "group": "controls",
+   "workspace": "research/reference_corpus/derived/legacy_controls/c_ita_train.txt",
+   "url": "https://eo777.github.io/vms-dynamic-citation/experiments/mattr_template_link/data/research/reference_corpus/derived/legacy_controls/c_ita_train.txt",
+   "sha256": "63f4ade77812e736d0895a7387109c9eb4b0edd67ed70f8f9276c8024e9f7ab6",
+   "bytes": 430800,
+   "note": "Natural-language comparison text (OCR or training split).",
+   "optional": false
+  },
+  {
+   "key": "manuscript/supplement_fRos.json",
+   "group": "manuscript",
+   "workspace": "apps/spatial_toolkit/data/manuscript/supplement_fRos.json",
+   "url": null,
+   "note": "Detected word positions on the Rosettes foldout (vmsspatial.rosettes; docs/ROSETTES.md): per token box, display box, method, confidence.",
+   "sha256": "334df710b619f6f5013e2d04db3c9b74a6b5515e69e70068f7637444a410b292",
+   "bytes": 122645,
+   "optional": false
+  },
+  {
+   "key": "manuscript/fRos_candidates.json",
+   "group": "manuscript",
+   "workspace": "apps/spatial_toolkit/data/manuscript/fRos_candidates.json",
+   "url": null,
+   "note": "CRAFT detector candidates on the Beinecke scan of the Rosettes (cache for scripts/rosettes_geometry.py).",
+   "sha256": "2d7981380383398e2346d1838debfd0cbf5d5083698288d414dfcc3f2b581b8e",
+   "bytes": 70627,
+   "optional": false
+  },
+  {
+   "key": "images/beinecke/fRos_1006231.jpg",
+   "group": "images",
+   "workspace": null,
+   "url": "https://collections.library.yale.edu/iiif/2/1006231/full/full/0/default.jpg",
+   "note": "Optional (fetch-data --group images): Beinecke MS 408, 85v and 86r foldout (the Rosettes), full resolution 7925 x 7268; Yale University Library digital collections.",
+   "sha256": "4b08afeee514691b0a511099ca299aed544d6fd1782b7dee8df163dfc06354ed",
+   "bytes": 12711585,
+   "optional": true
+  },
+  {
+   "key": "images/beinecke/f116v_1006277.jpg",
+   "group": "images",
+   "workspace": null,
+   "url": "https://collections.library.yale.edu/iiif/2/1006277/full/full/0/default.jpg",
+   "note": "Optional (fetch-data --group images): Beinecke MS 408, f116v, full resolution; Yale University Library digital collections.",
+   "sha256": "0f2e8691a66f255159b28f3fc2984633016f96c30c6d4d89cff6396708e5bb17",
+   "bytes": 1994539,
+   "optional": true
+  },
+  {
+   "key": "raw/coordinate_tokens_aligned.csv",
+   "group": "raw",
+   "workspace": "solve/spatial_alignment/coordinate_tokens_aligned.csv",
+   "url": null,
+   "note": "Optional: the frozen page-wise alignment of ZL tokens to coordinate words from which the alignment review was built.",
+   "optional": true,
+   "sha256": "cc16b550059bb99c915fbc755ca90fbf741ffaf22a9fae4b4332163485dc50f3",
+   "bytes": 4342267
+  },
+  {
+   "key": "raw/voynichese_coordinates.json.gz",
+   "group": "raw",
+   "workspace": "research/spatial_alignment_review_20261028/voynichese_coordinates.json.gz",
+   "url": null,
+   "note": "Optional: the Voynichese site's coordinate inventories per page (vocabulary and display rectangles), the source of the review's display rectangles.",
+   "optional": true,
+   "sha256": "b25396d04cf2a95a9ff999affe046323d2cb8e6054303e89684a62a14d8eda3a",
+   "bytes": 455668
+  },
+  {
+   "key": "raw/positional-data/f100r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f100r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f100r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "1c6200a116b957ce1b2786cfac934d839b8a30abc8b018012d1502701b2b4bd5",
+   "bytes": 8723
+  },
+  {
+   "key": "raw/positional-data/f100v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f100v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f100v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "16e4f3827e107a40292771a45df6ab6dcd412f5e9269dfe1a2dc5557d3e72b8d",
+   "bytes": 7306
+  },
+  {
+   "key": "raw/positional-data/f101r1.xml",
+   "group": "raw",
+   "workspace": "positional-data/f101r1.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f101r1 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "f566d13a19b2735c178f796257ba98b4d306a3d3d18485bb38cfd356864bb94d",
+   "bytes": 15705
+  },
+  {
+   "key": "raw/positional-data/f101v2.xml",
+   "group": "raw",
+   "workspace": "positional-data/f101v2.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f101v2 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "71aeab6b4912abdb373ed3bb600f1d506cab487deffe1016be41528eb671a8a4",
+   "bytes": 16130
+  },
+  {
+   "key": "raw/positional-data/f102r1.xml",
+   "group": "raw",
+   "workspace": "positional-data/f102r1.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f102r1 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "083604aff30e03f2540171f65a3f52bf2472998bda2455c3c31b858e937d1776",
+   "bytes": 8529
+  },
+  {
+   "key": "raw/positional-data/f102r2.xml",
+   "group": "raw",
+   "workspace": "positional-data/f102r2.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f102r2 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "98b9408dbb71a9a9057dea9b0d3876d61ef95783e8e4a97e76d5e0bff095f99a",
+   "bytes": 10275
+  },
+  {
+   "key": "raw/positional-data/f102v1.xml",
+   "group": "raw",
+   "workspace": "positional-data/f102v1.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f102v1 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "a6ac3bdb3e78c2bef0bd0bbc6a5463f62f92d498fef5c2f4f98997266824b949",
+   "bytes": 9870
+  },
+  {
+   "key": "raw/positional-data/f102v2.xml",
+   "group": "raw",
+   "workspace": "positional-data/f102v2.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f102v2 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "226a2d03c680bd25754194ca8d22c000413290f50ffa5726cfe1f3bd02809c6c",
+   "bytes": 13883
+  },
+  {
+   "key": "raw/positional-data/f103r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f103r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f103r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "53d81742f0ec6882b6b1fbd64b25178ca492796221a92eee2ac3f849d13273e8",
+   "bytes": 38657
+  },
+  {
+   "key": "raw/positional-data/f103v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f103v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f103v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "389f370b8fa9d17cf25459fae65931f0d680ddab00b0624e705a169deb7977c9",
+   "bytes": 33096
+  },
+  {
+   "key": "raw/positional-data/f104r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f104r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f104r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "ebc3744bc6a739699c6fd0da6c59c05979cc10faf9ef2c89a9142ae4e98cbab3",
+   "bytes": 32468
+  },
+  {
+   "key": "raw/positional-data/f104v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f104v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f104v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "56f1269a4b1a67b23469237bab7531b28f93e631b95825a96d47a8784592c6a5",
+   "bytes": 34031
+  },
+  {
+   "key": "raw/positional-data/f105r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f105r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f105r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "f242270bed6b05b11298cf3fecbabb145877798df4c3d2938b7d77f98c58c1b7",
+   "bytes": 27450
+  },
+  {
+   "key": "raw/positional-data/f105v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f105v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f105v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "f05e8550f565cab666da491d9d42c2c02139c0aec3c883b0c484c3299a845c00",
+   "bytes": 28924
+  },
+  {
+   "key": "raw/positional-data/f106r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f106r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f106r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "fc717b4efb1f03298c87dbf4b57c36be610258ded87e7cab2e469d065671074b",
+   "bytes": 31276
+  },
+  {
+   "key": "raw/positional-data/f106v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f106v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f106v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "5d943d51db6619526577516381317def6a88e0a0e38b24dad803300eb25944d5",
+   "bytes": 33280
+  },
+  {
+   "key": "raw/positional-data/f107r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f107r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f107r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "d18737cab63d30619ca40f5dcfe8b3b6d74b877aeb9f8310c5d61521041f374e",
+   "bytes": 35957
+  },
+  {
+   "key": "raw/positional-data/f107v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f107v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f107v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "f8c9c3501d8137096a1df968a005ab3d379dec30ae0a2f769775889dc79cc5a0",
+   "bytes": 33640
+  },
+  {
+   "key": "raw/positional-data/f108r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f108r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f108r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "91b58c225a0d3539daf106ef921494bd41b082c61257c6e548e287d90ac4e401",
+   "bytes": 36237
+  },
+  {
+   "key": "raw/positional-data/f108v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f108v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f108v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "5d75374d2094c16daeb9ecb9dafd8286b1b42b3de4bef3394ee4ebc448034014",
+   "bytes": 42143
+  },
+  {
+   "key": "raw/positional-data/f10r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f10r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f10r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "e467be85c717e53be11bf52b89c1b2ed541cfc7bf2bd84ea6bc5cc12e8858f38",
+   "bytes": 7228
+  },
+  {
+   "key": "raw/positional-data/f10v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f10v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f10v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "65352675644bcac31eeb773a52b8edc58a3dc54f96a4794e977e6d3f7029ce52",
+   "bytes": 4488
+  },
+  {
+   "key": "raw/positional-data/f111r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f111r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f111r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "1ccbdd86fcbffb533d032b16a6054ae67327b665f53d5457abe21076466f99df",
+   "bytes": 45217
+  },
+  {
+   "key": "raw/positional-data/f111v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f111v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f111v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "6a54e6e3f42e15ef061578681fac349d75ede1a43b4163199a6dde89f53ca569",
+   "bytes": 41202
+  },
+  {
+   "key": "raw/positional-data/f112r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f112r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f112r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "01ffec5aafb07de7adeedfe1e8aa8da4587f6635ecc6f56573b30dddd89dbe61",
+   "bytes": 29181
+  },
+  {
+   "key": "raw/positional-data/f112v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f112v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f112v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "b205e89d72ed50fb75e170f92a5630ec9e8792eabba6be8b0fd307f4a0f917f6",
+   "bytes": 30769
+  },
+  {
+   "key": "raw/positional-data/f113r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f113r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f113r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "e884c1d367f5133d868ae66636d918ae8709cadbfb6270520ab8a0a5a1ce9ead",
+   "bytes": 38279
+  },
+  {
+   "key": "raw/positional-data/f113v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f113v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f113v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "d8bf9fab6d8754337f3b8c23bd5cd53d787b0695964d97218d22707a2473a08e",
+   "bytes": 35558
+  },
+  {
+   "key": "raw/positional-data/f114r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f114r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f114r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "7d56da314fe8b1467f52cf9a05e2137ddecb5d9752c34001934a451d84545a8a",
+   "bytes": 33118
+  },
+  {
+   "key": "raw/positional-data/f114v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f114v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f114v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "df04a3771dca2b13d38119669c7476bb210abab3784e10033713d3187ffeb025",
+   "bytes": 27067
+  },
+  {
+   "key": "raw/positional-data/f115r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f115r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f115r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "6495fb303caad2d03a5899383a32bcacc386576c20db6934a89026305b7bf327",
+   "bytes": 32859
+  },
+  {
+   "key": "raw/positional-data/f115v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f115v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f115v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "e48c1a685913b7300fc91ea1427d7eb827d277c0dfa9f74934bde38250bb9f4a",
+   "bytes": 29680
+  },
+  {
+   "key": "raw/positional-data/f116r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f116r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f116r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "329483117513d6e4af5f64299f6243dda7c23d439fc1803ed083d36cfb01acc6",
+   "bytes": 39301
+  },
+  {
+   "key": "raw/positional-data/f11r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f11r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f11r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "4b61638ea30d0006d0920335946c6bb94aa57822493cb6a864e7b674914c8195",
+   "bytes": 4735
+  },
+  {
+   "key": "raw/positional-data/f11v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f11v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f11v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "785050cb023805db51e29d3a92b0a13926482fab55a907bebf2b81bce31828eb",
+   "bytes": 4098
+  },
+  {
+   "key": "raw/positional-data/f13r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f13r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f13r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "d8256cae64de504051e0c4494ab24d40f4fc6cd7a8d765bd1d1172d6d18520f2",
+   "bytes": 6218
+  },
+  {
+   "key": "raw/positional-data/f13v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f13v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f13v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "2d90b98dbea36997937b400785aa21461a67fe11ea59eee720e6be8c34c8bfaa",
+   "bytes": 5455
+  },
+  {
+   "key": "raw/positional-data/f14r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f14r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f14r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "6ed4d3df2bd1fecc8dc235e97feb2d5987e3ae89cb0ff7380a6438c0326608df",
+   "bytes": 6189
+  },
+  {
+   "key": "raw/positional-data/f14v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f14v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f14v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "bf74b82d7446fe1ce4e3ad77d62e59f41e75d4f34ed0684bf9906c160045c980",
+   "bytes": 5543
+  },
+  {
+   "key": "raw/positional-data/f15r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f15r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f15r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "c470b9854745c5fb2140eabf55e6bf6ac8435789d89bc78057256fa7b317848c",
+   "bytes": 7219
+  },
+  {
+   "key": "raw/positional-data/f15v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f15v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f15v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "7a4e4beeea7a4ae9deec28aeda95759b0c6239c25735e8260c831608b1cb0bc4",
+   "bytes": 5712
+  },
+  {
+   "key": "raw/positional-data/f16r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f16r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f16r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "b19ec74b5f8c36c50de0e6927a6f8a40764d6d6b436c1a9208ae27132f1284d1",
+   "bytes": 6187
+  },
+  {
+   "key": "raw/positional-data/f16v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f16v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f16v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "ec643f73986a735be62d35dfdb835fefe5485c75bb088ac459ff76fbd3d003ef",
+   "bytes": 5900
+  },
+  {
+   "key": "raw/positional-data/f17r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f17r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f17r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "3d0fdfbf249bffdcf731d6ff4b6e4b05738fe4e499c35763f25abc82012b0edc",
+   "bytes": 6041
+  },
+  {
+   "key": "raw/positional-data/f17v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f17v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f17v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "2ed6f2d0d657fc72e42c0d4768b0e94186d1772e93f32bb04d380193832d1172",
+   "bytes": 10242
+  },
+  {
+   "key": "raw/positional-data/f18r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f18r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f18r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "280cb0bf507a48dda8a6f2a80de02d0d30993181c0b82f03069114a6c7ebc44d",
+   "bytes": 6611
+  },
+  {
+   "key": "raw/positional-data/f18v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f18v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f18v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "a47d89c0e2029c0b2581e7f236866bd5193393291456668ef90b1effc175fd7f",
+   "bytes": 5704
+  },
+  {
+   "key": "raw/positional-data/f19r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f19r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f19r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "b1afef1a3caddd673e30243e412cf4ba33e1b0acfa4775cd68da514b7baa1a17",
+   "bytes": 6078
+  },
+  {
+   "key": "raw/positional-data/f19v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f19v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f19v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "7f6a7d0b40a2184aaaa7f746f6f7fe06c85148da13d130469534fda12b0b7e93",
+   "bytes": 6167
+  },
+  {
+   "key": "raw/positional-data/f1r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f1r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f1r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "3369f6d956d221bcab5a17ddd0fe9ee413483b799ae104ae38117268c2cbdf77",
+   "bytes": 15736
+  },
+  {
+   "key": "raw/positional-data/f1v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f1v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f1v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "8d734f257fc916941cd50ab0dccc08cff3a5aac66b75503ba766c0b7a444e8a1",
+   "bytes": 7080
+  },
+  {
+   "key": "raw/positional-data/f20r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f20r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f20r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "d1030e3f3dfefabf63c0d2d8bdb73c384ad30b01f9d7ddf951858f3f19b537ad",
+   "bytes": 6815
+  },
+  {
+   "key": "raw/positional-data/f20v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f20v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f20v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "8c1a24da7f40558703712412ec14f927608c4c0d325cba22a3c8865449458856",
+   "bytes": 6983
+  },
+  {
+   "key": "raw/positional-data/f21r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f21r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f21r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "e2a0ee58aee04eb0e714f392a0f21c875105428f94eb6497c2292be146c34292",
+   "bytes": 7495
+  },
+  {
+   "key": "raw/positional-data/f21v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f21v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f21v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "1d872914af9d86c575a8b1fa805afe1a2b845920bf8d8bd4a8b92ceeab65d251",
+   "bytes": 4700
+  },
+  {
+   "key": "raw/positional-data/f22r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f22r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f22r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "d995cc7f3b08a0cabcfa3d5b2dbe30ab792ddb78653e1bbc2da4b0666c0374ef",
+   "bytes": 8234
+  },
+  {
+   "key": "raw/positional-data/f22v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f22v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f22v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "ebda95a328c247c01446c1071f1ccae7f914fcece7ea66547dda98994596d61b",
+   "bytes": 6049
+  },
+  {
+   "key": "raw/positional-data/f23r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f23r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f23r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "346a2e1c5aae76100c1f239f27d4e8f5d9f69b2321e884e05bac29f752834a55",
+   "bytes": 8189
+  },
+  {
+   "key": "raw/positional-data/f23v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f23v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f23v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "a123f4117177bbd8d4af7f09a7ff3edd0afc1a1a084a554621c19a7baacd285c",
+   "bytes": 7002
+  },
+  {
+   "key": "raw/positional-data/f24r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f24r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f24r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "f90d86a340f04d0a6f060a1df38f19cf105a89987a875c55efac8be1ed90c47b",
+   "bytes": 8253
+  },
+  {
+   "key": "raw/positional-data/f24v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f24v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f24v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "2cf55c90092e0ffa64a3eaa57f5fd99cb74b89922011c724aaeb8b4611334f3e",
+   "bytes": 6402
+  },
+  {
+   "key": "raw/positional-data/f25r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f25r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f25r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "9c97e37b67f112aee1ba8ebe688c2126b28d1da420858de69d9d554e4e6a2f30",
+   "bytes": 4139
+  },
+  {
+   "key": "raw/positional-data/f25v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f25v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f25v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "33d430d9a2fe2aa9f6e8bfab761915878bd1f939afbfca294ed5f0fbd9ae92b2",
+   "bytes": 4768
+  },
+  {
+   "key": "raw/positional-data/f26r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f26r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f26r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "e3128a17d96b8b2421b240756906d24d643a59fbc6e440c4d7885785e6faac0b",
+   "bytes": 6828
+  },
+  {
+   "key": "raw/positional-data/f26v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f26v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f26v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "dcb50a966ae303303cf1c6ad10b5fcdfd5745d49e751229ac95fccbf4b7e801a",
+   "bytes": 7127
+  },
+  {
+   "key": "raw/positional-data/f27r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f27r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f27r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "1bd5670cb8f66779c3d1ca0c7d795aeb1d9105f98b26864b58dd6d8086991f2d",
+   "bytes": 7131
+  },
+  {
+   "key": "raw/positional-data/f27v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f27v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f27v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "b22952e3e757fe270fa88be74a75e3c91f8f9e0815d397ce8b30a5095d5b001c",
+   "bytes": 4838
+  },
+  {
+   "key": "raw/positional-data/f28r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f28r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f28r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "41726caca5a3ee8edd5ddd189a3ca17ac21fe99964c2834e69b9ab32003a4c7a",
+   "bytes": 5489
+  },
+  {
+   "key": "raw/positional-data/f28v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f28v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f28v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "f06ac92c772315c70461ed7cfc17e66dea08b39680d8ed81bcd1d882fb1c86fa",
+   "bytes": 5517
+  },
+  {
+   "key": "raw/positional-data/f29r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f29r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f29r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "1aabbdd9ac4ce51b54f518ae144638e943ba2715620048294386110f7fc8be24",
+   "bytes": 5314
+  },
+  {
+   "key": "raw/positional-data/f29v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f29v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f29v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "97229b529106c1b3cf107cef4dfce4abb2611cae8adab5ce0f871af06a9ff2a0",
+   "bytes": 7417
+  },
+  {
+   "key": "raw/positional-data/f2r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f2r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f2r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "f3dbae24ffc162eb64cb612e525c81d2a6c35703905837141f8cf5b8230562ce",
+   "bytes": 7746
+  },
+  {
+   "key": "raw/positional-data/f2v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f2v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f2v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "473767eaf210dfb215a66c453db63cb3dc71fe3f0b98904da9239c1d38ec2ebf",
+   "bytes": 5035
+  },
+  {
+   "key": "raw/positional-data/f30r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f30r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f30r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "116c2c7158e44312b6ac205e160fb2f0ee35bd96554832173d4039b500ab3d56",
+   "bytes": 7488
+  },
+  {
+   "key": "raw/positional-data/f30v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f30v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f30v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "b6d0b1ccd4b54253eacaf3f41461f7c92f85fa19a3cb4764f163a75fbc717351",
+   "bytes": 5229
+  },
+  {
+   "key": "raw/positional-data/f31r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f31r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f31r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "ed90dab2e25491cbfff3461f64eb0c16fc2de02f201833e03678cc009d9ba626",
+   "bytes": 7887
+  },
+  {
+   "key": "raw/positional-data/f31v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f31v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f31v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "316688841f50700e2fc93ee6e3618a66135d51b1bda6d8166111307faf365fe7",
+   "bytes": 8393
+  },
+  {
+   "key": "raw/positional-data/f32r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f32r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f32r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "740bba332de958e1badf629cb1dcb4d1eb8900a2ab4d162dd8afb4291d1edd43",
+   "bytes": 6163
+  },
+  {
+   "key": "raw/positional-data/f32v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f32v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f32v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "62e8e2887c92932ebd198bd9d70bd43bc252138e0bf2bc81c4b82d7de70f5f28",
+   "bytes": 6706
+  },
+  {
+   "key": "raw/positional-data/f33r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f33r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f33r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "c3c01d33762cd5efd1c812903f9f7f18b8f2b7697ea0d2d8de9b33ad3632a61f",
+   "bytes": 5834
+  },
+  {
+   "key": "raw/positional-data/f33v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f33v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f33v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "758f06b8a6df2e24edeafab920fde4c526a225d6cd6aaf59e99364caa08b3474",
+   "bytes": 8374
+  },
+  {
+   "key": "raw/positional-data/f34r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f34r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f34r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "12b9a1e4a2649fe222d550a1c522c1285419d51c652172906a1d1b4cad6b6096",
+   "bytes": 10992
+  },
+  {
+   "key": "raw/positional-data/f34v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f34v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f34v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "76df0f63108b0357bfe1bc51e209c10ded3846c6ff394d3f1726f25d77048ff9",
+   "bytes": 8922
+  },
+  {
+   "key": "raw/positional-data/f35r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f35r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f35r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "1fe3b56f23cdcdc5c61d6c7e4401a11b32643762a9199aa22e4340f27003045a",
+   "bytes": 7272
+  },
+  {
+   "key": "raw/positional-data/f35v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f35v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f35v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "50d358625730f86be24070106cf784d252a084325cc9ac1183b55dea1cca83c5",
+   "bytes": 6896
+  },
+  {
+   "key": "raw/positional-data/f36r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f36r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f36r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "17aac9433207dd56d853fae33f513ed5a689fdce795f8e6a9306d9a971aa2434",
+   "bytes": 5097
+  },
+  {
+   "key": "raw/positional-data/f36v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f36v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f36v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "9827aa5cc9c7dcb81aacf40a7613b716874bc455798019dc2e3edfa4710348a7",
+   "bytes": 5750
+  },
+  {
+   "key": "raw/positional-data/f37r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f37r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f37r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "6490713522da8432f8d22949933061ad7f7b6799c3e36d412d8041687b9773b8",
+   "bytes": 6175
+  },
+  {
+   "key": "raw/positional-data/f37v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f37v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f37v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "9fe3a91191a002168810f4c71c15cf12c68036b0ec2b7e073f32dc2bd1f6a641",
+   "bytes": 6990
+  },
+  {
+   "key": "raw/positional-data/f38r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f38r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f38r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "e663bb960e29048f2d1e290b7dc27a1862d20cc2aad4a55b15beba24ae669304",
+   "bytes": 3640
+  },
+  {
+   "key": "raw/positional-data/f38v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f38v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f38v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "90cf899716e369e49088cda751dd52e534ee30c61e235853b64c0ea25b0f095f",
+   "bytes": 5306
+  },
+  {
+   "key": "raw/positional-data/f39r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f39r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f39r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "48c4385e3b3960d32d6c5adc7b86a1fa6ff3878168381b4575fc48705988ec17",
+   "bytes": 11705
+  },
+  {
+   "key": "raw/positional-data/f39v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f39v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f39v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "f798d0c09ec29bb6e5e1babc78cbdb53b9fa3f300e9aea2e6d584c1f0763b092",
+   "bytes": 10823
+  },
+  {
+   "key": "raw/positional-data/f3r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f3r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f3r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "0531142bcd147d93940ef947fa6fd1ee77d6ae8be7bbf5fe190ce396f67481ad",
+   "bytes": 8891
+  },
+  {
+   "key": "raw/positional-data/f3v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f3v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f3v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "9b5f2ff271cf0a38eb069d227c0375978e45e837b9485db5f2003985f2ba358a",
+   "bytes": 6586
+  },
+  {
+   "key": "raw/positional-data/f40r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f40r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f40r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "43b37384d3671e7df32d3ad5ba33225148fc3514a12b4987a46ea0e074253163",
+   "bytes": 7547
+  },
+  {
+   "key": "raw/positional-data/f40v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f40v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f40v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "533b4de77529100e2e0c7c0f1bae16561747a4742429910a5fa3dcbd84c01e18",
+   "bytes": 8229
+  },
+  {
+   "key": "raw/positional-data/f41r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f41r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f41r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "429d089d73622060f292af6c6d53d5f50d172bac666dd12c6a33043f43a39a6c",
+   "bytes": 7769
+  },
+  {
+   "key": "raw/positional-data/f41v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f41v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f41v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "8e98facde07421921b515af4fe1ced16bab058f004de5d9ffd83d35bde1f5441",
+   "bytes": 5602
+  },
+  {
+   "key": "raw/positional-data/f42r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f42r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f42r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "8e9365b2f8fbe991988ea4d260836174d5990176b50819d74633c649fe6207b7",
+   "bytes": 10795
+  },
+  {
+   "key": "raw/positional-data/f42v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f42v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f42v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "60c315c836a688f17b45db19f535e3a48e94875039943733bd67ad167e8de8a0",
+   "bytes": 8734
+  },
+  {
+   "key": "raw/positional-data/f43r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f43r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f43r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "53eb8f4ec7da7ef3da752254d0e8fd152a4297e82c0967ed7d5f7e9ac7e0d816",
+   "bytes": 11558
+  },
+  {
+   "key": "raw/positional-data/f43v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f43v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f43v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "2619307428e0afe48f25577916c81840fc4b23a08bcabe0d86d3b7860edc0f03",
+   "bytes": 11698
+  },
+  {
+   "key": "raw/positional-data/f44r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f44r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f44r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "9dc39a00f492e9705924bd63085923fbb755a0780bd60249b51d6782fba39699",
+   "bytes": 6031
+  },
+  {
+   "key": "raw/positional-data/f44v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f44v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f44v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "266e1ce1890438bc2cc110d9bf665113d9f613f931d57cfe89c88bb7ff187e45",
+   "bytes": 7513
+  },
+  {
+   "key": "raw/positional-data/f45r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f45r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f45r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "00375c1923d59451e62a1bfcdea6c4401eff2ad06b7e5ce50e01743c2fd7c36b",
+   "bytes": 6788
+  },
+  {
+   "key": "raw/positional-data/f45v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f45v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f45v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "3c8917664a3784b2955ba57535a1224dfe5cc898c01f86d04d07773ecb6e3ce0",
+   "bytes": 6824
+  },
+  {
+   "key": "raw/positional-data/f46r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f46r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f46r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "eec80503ef3b0aebe16a870a0c989dd943f92640ded358a353a2237e3f8b4773",
+   "bytes": 11916
+  },
+  {
+   "key": "raw/positional-data/f46v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f46v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f46v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "021ad76a0ecdfce19373600b5bd6e349d9a4ab9b8c37e139b752239f064535e9",
+   "bytes": 8605
+  },
+  {
+   "key": "raw/positional-data/f47r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f47r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f47r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "850f147be3aca744bccbf06bd04ea9a706c6b2e94e59011dcddc45f06acb0e35",
+   "bytes": 6278
+  },
+  {
+   "key": "raw/positional-data/f47v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f47v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f47v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "1b8dc06c833e9db184151342d63188df9240fb69a103f51d5263a8867f3be58d",
+   "bytes": 6770
+  },
+  {
+   "key": "raw/positional-data/f48r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f48r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f48r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "0806be6f769433a14b9770c519245a15a45d8755736ab110bc803d6a066b8f27",
+   "bytes": 7063
+  },
+  {
+   "key": "raw/positional-data/f48v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f48v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f48v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "4d3989a0d051e37dc76fb9bef2afd790b30c0e4060a5263026e3c09dbb9b18c9",
+   "bytes": 9648
+  },
+  {
+   "key": "raw/positional-data/f49r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f49r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f49r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "9f0bf6cc0377906eb20a7a51c3ea9c913fc607fe28aefb7214be2bdcbe058578",
+   "bytes": 8855
+  },
+  {
+   "key": "raw/positional-data/f49v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f49v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f49v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "58ce46e9b939d063495957518af89256aa025c3eced8be528aa787ad38c5b996",
+   "bytes": 12301
+  },
+  {
+   "key": "raw/positional-data/f4r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f4r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f4r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "5fe3c6c8a1a0ad80bcdb95ed5d920a0dfba21961859d86566086d9c82a545c6b",
+   "bytes": 5267
+  },
+  {
+   "key": "raw/positional-data/f4v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f4v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f4v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "9139ff6a208fdb8b371891d398671c0cca05815902b828c984fce88a67c06211",
+   "bytes": 6622
+  },
+  {
+   "key": "raw/positional-data/f50r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f50r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f50r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "b326638dcf45541dd9e411ccbfabf6391750dbf237e4c38970b0301ea26349ff",
+   "bytes": 7067
+  },
+  {
+   "key": "raw/positional-data/f50v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f50v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f50v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "9d353a3e5f475aba372db2780ea9ff66c68ae882c4ffe6c8dd3df4357d732848",
+   "bytes": 7702
+  },
+  {
+   "key": "raw/positional-data/f51r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f51r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f51r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "a3723522d588ab2a3765a4ddae139f9b4e1e58e1606bbc255dead8b12990470b",
+   "bytes": 6940
+  },
+  {
+   "key": "raw/positional-data/f51v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f51v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f51v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "a6e6d2027593c7ed0b130c114c343a15007a6fbc04d5d554c2846d47d352663e",
+   "bytes": 6365
+  },
+  {
+   "key": "raw/positional-data/f52r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f52r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f52r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "9b2eadd2c0e5b565577269329d6c512c2fc14452b318da4db17bca2617d7907b",
+   "bytes": 5533
+  },
+  {
+   "key": "raw/positional-data/f52v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f52v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f52v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "a5386a0b7cd7ffa50f1e3185af88735341abcd6ce0b94a0ea54b45c521d99d7e",
+   "bytes": 6054
+  },
+  {
+   "key": "raw/positional-data/f53r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f53r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f53r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "c200bf30362f6c5065f12274b83807f2449e57c9e5323cd6564544b8adf78fa9",
+   "bytes": 4718
+  },
+  {
+   "key": "raw/positional-data/f53v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f53v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f53v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "9921c929fbe1b7971757c89eb0a3217c1d566089d738a4100287b8804b6b6e36",
+   "bytes": 6069
+  },
+  {
+   "key": "raw/positional-data/f54r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f54r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f54r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "e598fe6f934e5fd92bb4b268379d2d3c4e1f46d9f929f1a443a841e7ded4638f",
+   "bytes": 8558
+  },
+  {
+   "key": "raw/positional-data/f54v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f54v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f54v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "fa08fab9f480df296efe7c13a7c1c92b838b2fb598be4f1223676dd320a1225b",
+   "bytes": 7083
+  },
+  {
+   "key": "raw/positional-data/f55r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f55r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f55r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "3d2afc4e766fdac488067e920bbb63448c4dc630197a3f992650900703297eea",
+   "bytes": 9483
+  },
+  {
+   "key": "raw/positional-data/f55v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f55v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f55v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "10fedd5277e50022b4b4203b7b9d4bb4c09ecc423e5caf5988967d6a8dd26331",
+   "bytes": 8175
+  },
+  {
+   "key": "raw/positional-data/f56r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f56r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f56r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "9e98b8049d19d9bedb702c8f5f4973cf32fad2695d035741744844f8718832c1",
+   "bytes": 7761
+  },
+  {
+   "key": "raw/positional-data/f56v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f56v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f56v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "5a72c367f5ed7ed5d936220f7e4273de618f870c9292d6613a9279c8bcef8cab",
+   "bytes": 6938
+  },
+  {
+   "key": "raw/positional-data/f57r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f57r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f57r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "0f560591af4a6763b765f85bf879c7921b4e0a7058350ed2e0e1ba5715485f1f",
+   "bytes": 6938
+  },
+  {
+   "key": "raw/positional-data/f57v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f57v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f57v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "e1a02ab0579b3b758726493a8ea2a3d769ff139b820a5cc9d6bc3ef6bf48f546",
+   "bytes": 12817
+  },
+  {
+   "key": "raw/positional-data/f58r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f58r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f58r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "d82294ab77b134437854ce09d204b5ad4cff606965763b7e64bb95856899b352",
+   "bytes": 27176
+  },
+  {
+   "key": "raw/positional-data/f58v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f58v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f58v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "2bd8d62463549447efa8b39b9dcc2e7e217bfae6ee838988a09b2f2d6efcad29",
+   "bytes": 26942
+  },
+  {
+   "key": "raw/positional-data/f5r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f5r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f5r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "34772b668e3acf4e432e763aafb9eda84262cd7150af80b6efb05a6d223e4581",
+   "bytes": 4680
+  },
+  {
+   "key": "raw/positional-data/f5v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f5v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f5v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "c3c2f4d6c976aa4b8a43e07090ea366d5126ce2e6dbfb3237317631eae298c68",
+   "bytes": 3920
+  },
+  {
+   "key": "raw/positional-data/f65r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f65r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f65r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "2cb827c2227a3e1c7b6782bf98ce27c0b03720b7f74a62e95c78ee2900181717",
+   "bytes": 936
+  },
+  {
+   "key": "raw/positional-data/f65v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f65v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f65v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "a07221feb9f2cc8a6f0f2e602fbb421a89ef838d80dd7c035e09bb4a4b475bcc",
+   "bytes": 3926
+  },
+  {
+   "key": "raw/positional-data/f66r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f66r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f66r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "84f00795f1f2859fa22b6401594cca55c569344bdaf449fd35fa20b3e235531a",
+   "bytes": 25533
+  },
+  {
+   "key": "raw/positional-data/f66v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f66v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f66v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "ee7630b0ecfdf3cb982bb3eaadbc46c04f8a4dc68cd5d8213dda38470b1b8025",
+   "bytes": 8788
+  },
+  {
+   "key": "raw/positional-data/f67r1.xml",
+   "group": "raw",
+   "workspace": "positional-data/f67r1.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f67r1 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "2f1a58c427188fe97e858cc4bae1fd0d098a58d90035bebb9138d27974c44341",
+   "bytes": 11830
+  },
+  {
+   "key": "raw/positional-data/f67r2.xml",
+   "group": "raw",
+   "workspace": "positional-data/f67r2.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f67r2 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "738d238f53ae44376056d817a9d9330dd054394f8d752cc88de48ebfa64c507b",
+   "bytes": 13329
+  },
+  {
+   "key": "raw/positional-data/f67v1.xml",
+   "group": "raw",
+   "workspace": "positional-data/f67v1.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f67v1 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "ee68eef57f4fc7c2505cd27f99c88388a4f1f5e7f5a8507f5f84129bd3a1f94b",
+   "bytes": 5815
+  },
+  {
+   "key": "raw/positional-data/f67v2.xml",
+   "group": "raw",
+   "workspace": "positional-data/f67v2.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f67v2 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "9000dc81bc929d339590c5df57ff75bda1f624fd3f57e27de21c6b7aa18a02af",
+   "bytes": 5031
+  },
+  {
+   "key": "raw/positional-data/f68r1.xml",
+   "group": "raw",
+   "workspace": "positional-data/f68r1.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f68r1 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "c679b094ae45ca77d7cae3ff4ebccc461005f4aa198583369f48c051d765b38b",
+   "bytes": 5401
+  },
+  {
+   "key": "raw/positional-data/f68r2.xml",
+   "group": "raw",
+   "workspace": "positional-data/f68r2.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f68r2 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "9bdf73eb67897a5b91b171510d964fc9a8ef2aee1bfd49340fa6089432ec756f",
+   "bytes": 6541
+  },
+  {
+   "key": "raw/positional-data/f68r3.xml",
+   "group": "raw",
+   "workspace": "positional-data/f68r3.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f68r3 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "985fcf180dc32e4dc33ad41ff26f761db76bd783686e9f204ea6e129010d1d9f",
+   "bytes": 8040
+  },
+  {
+   "key": "raw/positional-data/f68v1.xml",
+   "group": "raw",
+   "workspace": "positional-data/f68v1.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f68v1 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "9bea8d8a34a296eb2e4bc7bdcbe4638b7483fe7a96d43babeff70cf2d786e2de",
+   "bytes": 7524
+  },
+  {
+   "key": "raw/positional-data/f68v2.xml",
+   "group": "raw",
+   "workspace": "positional-data/f68v2.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f68v2 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "e3c76bbcf12ce5fbfa230d6a963838a1f35bc246c368eda795325ae091da6aec",
+   "bytes": 7867
+  },
+  {
+   "key": "raw/positional-data/f68v3.xml",
+   "group": "raw",
+   "workspace": "positional-data/f68v3.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f68v3 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "c53ee1095643d9fd2e04b1a7b4bd9711f43d3b0106daf8e083bad39d1e911efb",
+   "bytes": 12175
+  },
+  {
+   "key": "raw/positional-data/f69r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f69r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f69r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "6591658be22732219371d5296acb88248a240d020b06180f282a4760fd45938b",
+   "bytes": 12325
+  },
+  {
+   "key": "raw/positional-data/f69v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f69v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f69v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "29ec26ea09d73cfb042aa21954a75bd1e89541f8bb6d29cc5a417547ce748ce8",
+   "bytes": 10441
+  },
+  {
+   "key": "raw/positional-data/f6r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f6r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f6r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "26f636836c6594b8b36b67482fe1fc203cef623821f63670bb36c617f6838f48",
+   "bytes": 6723
+  },
+  {
+   "key": "raw/positional-data/f6v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f6v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f6v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "0524b0ebd3b1e46a4a0caac9cc8a1365c189f6bd9e26543c0d4fa6e9c26fd857",
+   "bytes": 8844
+  },
+  {
+   "key": "raw/positional-data/f70r1.xml",
+   "group": "raw",
+   "workspace": "positional-data/f70r1.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f70r1 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "ef209247f054a875c2cfa1c2857809b850e663b8be7d74909f53d56dacd5fa5e",
+   "bytes": 8666
+  },
+  {
+   "key": "raw/positional-data/f70r2.xml",
+   "group": "raw",
+   "workspace": "positional-data/f70r2.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f70r2 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "0e7559f7dbb3caf208dd74c4c5a72bd649402219f608b3ea3585fade0a21c178",
+   "bytes": 18360
+  },
+  {
+   "key": "raw/positional-data/f70v1.xml",
+   "group": "raw",
+   "workspace": "positional-data/f70v1.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f70v1 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "a0642bc0528df24157bd445a25edb0f7dc8954f1c44aed596377ff74978c786e",
+   "bytes": 6881
+  },
+  {
+   "key": "raw/positional-data/f70v2.xml",
+   "group": "raw",
+   "workspace": "positional-data/f70v2.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f70v2 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "72693a1be054eb0ffb46584fbbee1b1a78e59addd85740b7d05cb002990dc891",
+   "bytes": 10801
+  },
+  {
+   "key": "raw/positional-data/f71r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f71r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f71r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "cb7997881fa7421e3e9f2683ac0b6b02e1d203d390b849719fc8ecdb28ec40f5",
+   "bytes": 7212
+  },
+  {
+   "key": "raw/positional-data/f71v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f71v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f71v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "5de07f45b077057939bd18d374ac448c6f37d8f23f6a1bd13a7623b676549cfd",
+   "bytes": 7826
+  },
+  {
+   "key": "raw/positional-data/f72r1.xml",
+   "group": "raw",
+   "workspace": "positional-data/f72r1.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f72r1 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "1d676479f27c9b3adbe6534f65e4e314eb46111a39832141b0ab86baa48cb1f5",
+   "bytes": 8198
+  },
+  {
+   "key": "raw/positional-data/f72r2.xml",
+   "group": "raw",
+   "workspace": "positional-data/f72r2.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f72r2 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "bf11e91069c88ce30e55adf6895a1d94a4f68c1a641bcbe2ba9bfba52bc75658",
+   "bytes": 8620
+  },
+  {
+   "key": "raw/positional-data/f72r3.xml",
+   "group": "raw",
+   "workspace": "positional-data/f72r3.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f72r3 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "ed6b979bb44a0fee6e33dda9c9fabf297715331089735a5d6c17a412d52b5d62",
+   "bytes": 12839
+  },
+  {
+   "key": "raw/positional-data/f72v1.xml",
+   "group": "raw",
+   "workspace": "positional-data/f72v1.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f72v1 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "54e564512a7ba9be8e4cfd921332677a8080ab0bfcde3d58e8694a9d8e1199b6",
+   "bytes": 8019
+  },
+  {
+   "key": "raw/positional-data/f72v2.xml",
+   "group": "raw",
+   "workspace": "positional-data/f72v2.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f72v2 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "c70741ca5047feb5f41a16be229e2cc88e1f04140ec8b2264a01aa1bac085f8f",
+   "bytes": 8605
+  },
+  {
+   "key": "raw/positional-data/f72v3.xml",
+   "group": "raw",
+   "workspace": "positional-data/f72v3.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f72v3 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "91c39d6bd4ca6079f998ef667b8b54bf6ac12b10119b5585ab229349e5da835d",
+   "bytes": 9402
+  },
+  {
+   "key": "raw/positional-data/f73r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f73r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f73r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "b16dce1da513286a343958e6e5475bdd7c4f5bae4fb54d78d1d07a163d571840",
+   "bytes": 7582
+  },
+  {
+   "key": "raw/positional-data/f73v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f73v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f73v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "8125096c6745e3e9fc07192c27c6bdd5e9fc13130f9fcad0a48c6ea0b7fec024",
+   "bytes": 7645
+  },
+  {
+   "key": "raw/positional-data/f75r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f75r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f75r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "10ad81bb942ba1ca393f98af0c92be277a44f721ddfc4788237713b3f433a502",
+   "bytes": 30979
+  },
+  {
+   "key": "raw/positional-data/f75v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f75v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f75v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "f349a51f89de6e014a987a79f0d4dfead5704a9eb72869c0b7b187d5446e308f",
+   "bytes": 26436
+  },
+  {
+   "key": "raw/positional-data/f76r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f76r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f76r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "d5085307dbec1a3df015e87f8dbaa8403d31a8c8d7de2669714e4c1921732138",
+   "bytes": 40653
+  },
+  {
+   "key": "raw/positional-data/f76v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f76v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f76v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "b0fdcb4a9c637a4f84a02d2c9dda1c09faaf72bfcb8c89628c71dff0718d45b7",
+   "bytes": 29703
+  },
+  {
+   "key": "raw/positional-data/f77r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f77r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f77r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "8b2b59cffb86778ca3a8aac23d0b0fbbc79e01ae796b7867dcb2b3947f48208c",
+   "bytes": 24231
+  },
+  {
+   "key": "raw/positional-data/f77v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f77v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f77v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "029a6630c4015391822e4cd683432cc1729904c79ecfd47518d6e98e9bd886f9",
+   "bytes": 24888
+  },
+  {
+   "key": "raw/positional-data/f78r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f78r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f78r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "d371cd2475c21684cc2d24e7977506f0111a9a707c204c480a8ac3b5004a1d3c",
+   "bytes": 21821
+  },
+  {
+   "key": "raw/positional-data/f78v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f78v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f78v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "dc65ef273e586c47c562498906f5fd4e507b1c75089c78840a41c6821b66abde",
+   "bytes": 21674
+  },
+  {
+   "key": "raw/positional-data/f79r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f79r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f79r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "e19418df27e27c9ff3da036fb98ec6ce26ab9605e3734f4b4cc47b0228c53104",
+   "bytes": 28619
+  },
+  {
+   "key": "raw/positional-data/f79v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f79v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f79v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "6abd7dc7b3af13335ecefffbf9bb485ca76bd7667af15ae4584c1852fb5fba8e",
+   "bytes": 26319
+  },
+  {
+   "key": "raw/positional-data/f7r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f7r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f7r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "290ce2c9950636cdf30044cc2ca22233468de95b10cc4fda9b89407efb65c17f",
+   "bytes": 5166
+  },
+  {
+   "key": "raw/positional-data/f7v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f7v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f7v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "2a217efc99198dff5a90eba7b9bb7027540b0c86957d14f0b54c13e17f969ef8",
+   "bytes": 5905
+  },
+  {
+   "key": "raw/positional-data/f80r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f80r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f80r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "ac4b1535a1c8c7f84909231248d1e3e11f2f45da17992f22ecf7b5322b94a2bb",
+   "bytes": 32470
+  },
+  {
+   "key": "raw/positional-data/f80v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f80v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f80v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "7fb19b68de32d94f384871f74363f137f690cfec61aed8ed8ffdc2143db9f6a9",
+   "bytes": 27911
+  },
+  {
+   "key": "raw/positional-data/f81r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f81r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f81r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "b2c54f454a332798d9816569047397c083651d77302457832394b6562bfe9c85",
+   "bytes": 15495
+  },
+  {
+   "key": "raw/positional-data/f81v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f81v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f81v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "336f80c4cd954bb9a2daf1b83a4979554daf0c41bca561abcfba93de3874bac2",
+   "bytes": 19175
+  },
+  {
+   "key": "raw/positional-data/f82r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f82r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f82r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "2b9078d103ea7dfed762549073708fae8ff0f38d49c60249ab0d644fa928b793",
+   "bytes": 21616
+  },
+  {
+   "key": "raw/positional-data/f82v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f82v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f82v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "629c760c8c4b3f4b36ef9ca81e0bd4c8e881df9ebf2cc25ac71a720ea13881ba",
+   "bytes": 23314
+  },
+  {
+   "key": "raw/positional-data/f83r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f83r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f83r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "ed7be7479a79e82b5fee746d18de321b6574d52c986b8495fe847a2e828a6dfa",
+   "bytes": 25385
+  },
+  {
+   "key": "raw/positional-data/f83v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f83v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f83v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "41ce0ccdd292a13a636ecb6faedc0f64264112f211e2412d072b1a25d72281b0",
+   "bytes": 19635
+  },
+  {
+   "key": "raw/positional-data/f84r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f84r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f84r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "42018ffb27dd2cbd4d895ff00306a7ca614767ffe36bd839a2e78b6c92f9070a",
+   "bytes": 26730
+  },
+  {
+   "key": "raw/positional-data/f84v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f84v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f84v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "eda45d2ffb73b1021646bf19b6ca1e6351930e92f56a5d3add662096bbdf4542",
+   "bytes": 24940
+  },
+  {
+   "key": "raw/positional-data/f85r1.xml",
+   "group": "raw",
+   "workspace": "positional-data/f85r1.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f85r1 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "0f6d3be1f2a6714a90c68743695b3c5801dd29711aaa64b5619322a386a0b0b4",
+   "bytes": 24754
+  },
+  {
+   "key": "raw/positional-data/f85r2.xml",
+   "group": "raw",
+   "workspace": "positional-data/f85r2.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f85r2 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "3b8312675851f301095d2b446159a586aafee532a2e0d950b0518951b6c649b2",
+   "bytes": 11971
+  },
+  {
+   "key": "raw/positional-data/f86v3.xml",
+   "group": "raw",
+   "workspace": "positional-data/f86v3.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f86v3 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "b9dea2f8d788d1f368e94d161d7a17fbf6d580b1cf72abd20a7608da0a60151d",
+   "bytes": 20859
+  },
+  {
+   "key": "raw/positional-data/f86v4.xml",
+   "group": "raw",
+   "workspace": "positional-data/f86v4.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f86v4 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "0e164b45fcdd4b1bcddbadaf957434f8bf4425a8578fabf065572186b9b99352",
+   "bytes": 14254
+  },
+  {
+   "key": "raw/positional-data/f86v5.xml",
+   "group": "raw",
+   "workspace": "positional-data/f86v5.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f86v5 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "92d2b666d0009fa4efd637894003c5ec2eb2894c62bfff22082f814ac75bf7d5",
+   "bytes": 27998
+  },
+  {
+   "key": "raw/positional-data/f86v6.xml",
+   "group": "raw",
+   "workspace": "positional-data/f86v6.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f86v6 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "d283e665b83b83d0d22329867f56b87c45e407830727af18efe5bbf7261589cc",
+   "bytes": 35133
+  },
+  {
+   "key": "raw/positional-data/f87r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f87r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f87r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "6caecf15d8e10826a84f55a0f94ff2b35cc4a7e63c264daaef160e94ee52c65a",
+   "bytes": 7745
+  },
+  {
+   "key": "raw/positional-data/f87v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f87v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f87v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "a8fd5c3c102d6e772f21f105228c68c628846f6306b2202fb6d6c04fdfe67d8e",
+   "bytes": 7099
+  },
+  {
+   "key": "raw/positional-data/f88r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f88r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f88r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "915e68274c651e0057beb1b5ea48c314322b85ed83f1006c78ed5beaf0820f51",
+   "bytes": 11443
+  },
+  {
+   "key": "raw/positional-data/f88v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f88v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f88v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "52a0576b6c5e4a8bca70d02a87d379828392bc984df3bd95e439e4a600256e71",
+   "bytes": 11259
+  },
+  {
+   "key": "raw/positional-data/f89r1.xml",
+   "group": "raw",
+   "workspace": "positional-data/f89r1.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f89r1 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "5be2e6a0435a3df56fbed0f47a082eaafb23020a8cd9bca4aadf8ef7ccdef135",
+   "bytes": 10858
+  },
+  {
+   "key": "raw/positional-data/f89r2.xml",
+   "group": "raw",
+   "workspace": "positional-data/f89r2.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f89r2 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "3e32653247ffe27db3ce7636fe96e3869fc6d825cd24fcd81a35eb6b47120dba",
+   "bytes": 18339
+  },
+  {
+   "key": "raw/positional-data/f89v1.xml",
+   "group": "raw",
+   "workspace": "positional-data/f89v1.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f89v1 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "fc0b6e2630e90f63607f66a3ee5c5617a10efe95fe00ba8de5159ca34664b728",
+   "bytes": 12103
+  },
+  {
+   "key": "raw/positional-data/f89v2.xml",
+   "group": "raw",
+   "workspace": "positional-data/f89v2.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f89v2 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "59e828e995a36bb8a784fbb4c06ba4ada1642129f7bcc5641316690d28b05526",
+   "bytes": 13257
+  },
+  {
+   "key": "raw/positional-data/f8r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f8r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f8r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "68c0630c1bc3b08bb4a7d8a7267b27e97fd661df9d14bdb75e05dddbf2d61b35",
+   "bytes": 11164
+  },
+  {
+   "key": "raw/positional-data/f8v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f8v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f8v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "9dfd55f137de1b33f6ea643852c35bf5394cbef7b72e05add4f26ab3a4ef8584",
+   "bytes": 9213
+  },
+  {
+   "key": "raw/positional-data/f90r1.xml",
+   "group": "raw",
+   "workspace": "positional-data/f90r1.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f90r1 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "be36e82f8f72d5caf896abf230a320c2bb821a83298787be19fb4e699fd1dfab",
+   "bytes": 5687
+  },
+  {
+   "key": "raw/positional-data/f90r2.xml",
+   "group": "raw",
+   "workspace": "positional-data/f90r2.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f90r2 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "98fbd776ab4d1b943f520fda71c8edc122fa4a395a1c268ca9e0149c7ab129de",
+   "bytes": 4168
+  },
+  {
+   "key": "raw/positional-data/f90v1.xml",
+   "group": "raw",
+   "workspace": "positional-data/f90v1.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f90v1 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "85fb4de7275da2ae5844482f7a356beff464c91f6ccae952d9ad6486259f6fb4",
+   "bytes": 7598
+  },
+  {
+   "key": "raw/positional-data/f90v2.xml",
+   "group": "raw",
+   "workspace": "positional-data/f90v2.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f90v2 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "228ff66df27c68875ce896d029e12891e818cf84eb67c239e79640a678a9e5a1",
+   "bytes": 5648
+  },
+  {
+   "key": "raw/positional-data/f93r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f93r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f93r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "40af9821b9b80bf512756072dbdde33d8e89551329c4b26dc4c7c1ed29c76aee",
+   "bytes": 11567
+  },
+  {
+   "key": "raw/positional-data/f93v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f93v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f93v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "1fb4434e89a113040360bd828682509ec0584f833f64dd76a0fd471dfd237361",
+   "bytes": 7021
+  },
+  {
+   "key": "raw/positional-data/f94r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f94r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f94r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "20aa1f04724acf4daa60ef7f3815281a9117ed0f08b0af3b1b433ba78f569fe1",
+   "bytes": 6526
+  },
+  {
+   "key": "raw/positional-data/f94v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f94v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f94v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "07ffd61ee9a0118fe2cec0f3fbfab133ec85c0785afc53c90e40ea0dadef3656",
+   "bytes": 7884
+  },
+  {
+   "key": "raw/positional-data/f95r1.xml",
+   "group": "raw",
+   "workspace": "positional-data/f95r1.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f95r1 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "ad805f491cf409d57bf6f23a0d1b581c8434615400a2fd66b4be66d4b9dc9ad0",
+   "bytes": 8035
+  },
+  {
+   "key": "raw/positional-data/f95r2.xml",
+   "group": "raw",
+   "workspace": "positional-data/f95r2.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f95r2 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "0cd0b8e2533089545b029707e452240849b35832de402ac2f0d2eebea008dd2c",
+   "bytes": 6307
+  },
+  {
+   "key": "raw/positional-data/f95v1.xml",
+   "group": "raw",
+   "workspace": "positional-data/f95v1.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f95v1 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "2fc3fd5b59ae5adeae477017ac9ffa4415405bd5fa8222b96b5705f750e63dfe",
+   "bytes": 9088
+  },
+  {
+   "key": "raw/positional-data/f95v2.xml",
+   "group": "raw",
+   "workspace": "positional-data/f95v2.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f95v2 (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "b25490cbd5c028e7ad87be1bfa8b504e8c6dda40aee9020a13b55c2a54db1c94",
+   "bytes": 5250
+  },
+  {
+   "key": "raw/positional-data/f96r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f96r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f96r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "71effded7b50d0aee7c74321dcc32b3439c68f55343b385bfa80aa7e67b2aa45",
+   "bytes": 6847
+  },
+  {
+   "key": "raw/positional-data/f96v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f96v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f96v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "a882e9cb2f82dbb56c3a5566f00cf58f439104312fe1b1dd59db51ef525c19a4",
+   "bytes": 5074
+  },
+  {
+   "key": "raw/positional-data/f99r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f99r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f99r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "d7c67d6cf712a7935707e29c3fb807c684191b0e19d09e69859ce35087132d7f",
+   "bytes": 14822
+  },
+  {
+   "key": "raw/positional-data/f99v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f99v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f99v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "cdb0759532b6e42b6e991d45fd1bda1dfac78d8c6fed9eb4a7cb07fb5b3e968b",
+   "bytes": 13343
+  },
+  {
+   "key": "raw/positional-data/f9r.xml",
+   "group": "raw",
+   "workspace": "positional-data/f9r.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f9r (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "1bf4f2e138ef9ad40875d9a99c222169beb933e04ae69f6ad3b758059106a10e",
+   "bytes": 6667
+  },
+  {
+   "key": "raw/positional-data/f9v.xml",
+   "group": "raw",
+   "workspace": "positional-data/f9v.xml",
+   "url": null,
+   "note": "Optional: the Voynichese Project's word rectangles for f9v (XML, pixel frame of the page image); the review carries every rectangle.",
+   "optional": true,
+   "sha256": "baa60b73b15b7fe6df9f2bcb1d673d984ab6974df31ef97202daff45151a86a4",
+   "bytes": 6654
+  },
+  {
+   "key": "manuscript/ink_measures.json.gz",
+   "group": "manuscript",
+   "workspace": "apps/spatial_toolkit/data/manuscript/ink_measures.json.gz",
+   "url": null,
+   "note": "Ink measurements on the Beinecke scans (vmsspatial.ink): per located rectangle of the sensitivity bundle the extent, angle, x-height band, ascender, descender and flags, per line the robust fit; recorded frame; keyed by token id and (page, locus).",
+   "sha256": "798fccb21567848ea275f794c5a173f561ea8d26868c4ba1b04bc90013b20d61",
+   "bytes": 1315832,
+   "optional": false
+  },
+  {
+   "key": "manuscript/baselines.json.gz",
+   "group": "manuscript",
+   "workspace": "apps/spatial_toolkit/data/manuscript/baselines.json.gz",
+   "url": null,
+   "note": "Baseline points per token under the four methods (bottom, centre, glyph, ink), recorded warp state, with the words and geometry digests of the sensitivity bundle (vmsspatial.baselines.build_table).",
+   "sha256": "a058081746debca8586c0f411490afc043a20dd60e9899a9bab7f08cb8de2dcd",
+   "bytes": 619770,
+   "optional": false
+  },
+  {
+   "key": "manuscript/page_warp.json.gz",
+   "group": "manuscript",
+   "workspace": "apps/spatial_toolkit/data/manuscript/page_warp.json.gz",
+   "url": null,
+   "note": "The page warp (vmsspatial.warp): per page the fitted shared warp field, per-line leave-one-out coefficients, tilt line, the baseline it was fitted on and the quality; apply with warp.apply / warp.transform / load_bundle(warp='flat').",
+   "sha256": "706b6fd0283802da6028e9a224ffde55be2281bbc60a9232124505c5f74fd46f",
+   "bytes": 397714,
+   "optional": false
+  },
+  {
+   "key": "manuscript/registrations.json.gz",
+   "group": "manuscript",
+   "workspace": "apps/spatial_toolkit/data/manuscript/registrations.json.gz",
+   "url": null,
+   "note": "Registration of the recorded frame to the page images (vmsspatial.images): per page and source the matrix, residual field, per-line shifts keyed by locus and quality. Numbers only.",
+   "sha256": "2758351cb80fc8967595ab50e508be085545b430a4bde5f67c7938db8dbb9658",
+   "bytes": 210360,
+   "optional": false
+  },
+  {
+   "key": "manuscript/coverage_by_page.csv",
+   "group": "manuscript",
+   "workspace": "apps/spatial_toolkit/data/manuscript/coverage_by_page.csv",
+   "url": null,
+   "note": "Coverage of the recorded rectangles per page and locus type: ZL tokens, located tokens under both policies, orientation kinds, detected boxes, and why a token has no usable box.",
+   "sha256": "8a3ac42c23a33a7e8148e35114a814eb356de59b11f0833fc6594f3f9b5e7a29",
+   "bytes": 37734,
+   "optional": false
+  },
+  {
+   "key": "manuscript/wheels.json.gz",
+   "group": "manuscript",
+   "workspace": "apps/spatial_toolkit/data/manuscript/wheels.json.gz",
+   "url": null,
+   "note": "The wheels of the circular text (vmsspatial.wheels): per page the accepted wheels (centre, radius, rings with their fits and member tokens, nearby labels) and the rejected circular loci with reasons; recorded frame and warp state (fRos detected).",
+   "sha256": "45fa3b351b69fbb3557fae538a203969242cb0f5a852606460722e8861d92e89",
+   "bytes": 11160,
+   "optional": false
+  }
+ ],
+ "note": "Shipped entries travel with the repository; optional entries (optional: true) are referenced by their published URL or their path in the research workspace and are never published (publish.py skips them). The toolkit reads an optional file when it is present and never requires one."
+}

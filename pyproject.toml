@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vms-spatial"
+version = "0.1.0"
+description = "2-D spatial analysis of the Voynich manuscript text on its recorded word rectangles: page geometry, source pools, per-token measures, layout-preserving controls, the alignment review, and an atlas viewer."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+dependencies = ["numpy>=1.21"]
+
+[project.optional-dependencies]
+figures = ["matplotlib>=3.5"]
+plot = ["matplotlib>=3.5"]
+images = ["opencv-python>=4.5", "scikit-image>=0.19", "scipy>=1.7", "Pillow>=9"]
+test = ["pytest>=7"]
+
+[project.scripts]
+vmsspatial = "vmsspatial.cli:main"
+
+[tool.setuptools]
+packages = ["vmsspatial", "vmsspatial.audit", "vmsspatial.audit._zl"]
+
+[tool.setuptools.package-data]
+vmsspatial = ["resources/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["slow: takes more than about ten seconds"]

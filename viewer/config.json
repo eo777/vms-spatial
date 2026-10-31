@@ -1,0 +1,5 @@
+{
+ "dataBase": "data/",
+ "defaultBundle": "manuscript",
+ "note": "dataBase is the folder (or URL) holding index.json, layout.json.gz and <bundle>/words.json.gz as written by `vmsspatial viewer-data`; index.json names the alignment review file relative to it. A ?data=<url> field in the page hash overrides it."
+}

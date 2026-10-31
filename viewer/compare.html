@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>vms-spatial · Compare</title>
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="compare.css">
+<script src="site_nav.js" defer></script>
+</head><body class="compare-page"><nav class="site-nav"></nav>
+<header class="masthead"><div class="eyebrow">VOYNICH MANUSCRIPT · RECORDED WORD POSITIONS</div>
+<h1>Compare</h1><p class="sub">Two pages laid over each other on their recorded word rectangles, moved by one translation and nothing else. The scores say how much area and wording the two blocks share; they describe resemblance, not copying.</p></header>
+<main class="compare">
+<div class="toolbar">
+<div class="pair">
+<label>A <select id="pageA" aria-label="Page A"></select></label><span class="pager"><button type="button" id="prevA" aria-label="Previous A">‹</button><button type="button" id="nextA" aria-label="Next A">›</button></span>
+<label>B <select id="pageB" aria-label="Page B"></select></label><span class="pager"><button type="button" id="prevB" aria-label="Previous B">‹</button><button type="button" id="nextB" aria-label="Next B">›</button></span>
+<span class="pager-group" title="Step A and B together, keeping the gap between them">Both <span class="pager"><button type="button" id="prevPair" aria-label="Previous pair">‹</button><button type="button" id="nextPair" aria-label="Next pair">›</button></span></span>
+<button type="button" id="swap" aria-label="Swap A and B" data-tip="Swap A and B">⇄</button>
+<label>Order <select id="order"></select></label>
+<label title="How far the arrows move: a page, a sheet or a paragraph">Step <select id="step"><option value="page">Page</option><option value="bifolio">Bifolio</option><option value="paragraph">Paragraph</option></select></label>
+</div>
+<div class="seg" id="views" role="group" aria-label="View"><button type="button" data-view="overlay">Overlay</button><button type="button" data-view="side">Side by side</button><button type="button" data-view="composite">Composite</button><button type="button" data-view="segments">Segments</button><button type="button" data-view="matches">Top matches</button><button type="button" data-view="wheels">Wheels</button></div>
+<label>Text <select id="text"><option value="page">Whole page</option><option value="1">Top 1</option><option value="2">Top 2</option><option value="3">Top 3</option><option value="4">Top 4</option><option value="5">Top 5</option><option value="custom">Custom</option></select></label>
+<span class="pager zoom"><button type="button" id="zoomFit" style="width:auto;padding:5px 9px">Fit</button><button type="button" id="zoomIn" aria-label="Zoom in">+</button><button type="button" id="zoomOut" aria-label="Zoom out">−</button><span id="zoomLevel" class="zoom-level"></span></span>
+<label class="check"><input type="checkbox" id="words"> Show words</label>
+<label id="wdirLabel" title="Bottom to centre follows the writing. Level stands every word upright at the same size." hidden>Word direction <select id="wdir"><option value="ring">Bottom to centre</option><option value="level">Level</option></select></label>
+<label>Boxes <select id="boxes"><option value="fill">Filled</option><option value="outline">Outline</option><option value="hidden">Hidden</option></select></label>
+<label>Colour <select id="color"><option value="pages">Pages</option><option value="js">Overlap JS</option><option value="sim">Overlap similarity</option><option value="area">Shared area</option></select></label>
+<label class="check"><input type="checkbox" id="drift"> Show drift guide</label>
+<details class="settings" id="settings"><summary>Settings</summary>
+<div class="settings-fields">
+<label>Alignment <select id="align"><option value="starts">Block starts</option><option value="page">Page positions</option></select></label>
+<label>Coordinates <select id="coords"><option value="flat">Flat</option><option value="recorded">Recorded</option></select></label>
+<label>Scale <select id="scale"><option value="pixels">Pixels</option><option value="body">Body heights</option></select></label>
+<label>Scope <select id="scope"><option value="pages">Pages</option><option value="bifolia">Bifolia</option></select></label>
+<label id="faceLabel" hidden>Face <select id="face"><option value="inner">Inner</option><option value="outer">Outer</option><option value="both">Both</option></select></label>
+<span class="field-group"><label>Block A <select id="blockA"></select></label>
+<label>Block B <select id="blockB"></select></label>
+<label>Lines <select id="cutoff"><option value="1">Top 1</option><option value="2">Top 2</option><option value="3">Top 3</option><option value="4">Top 4</option><option value="5">Top 5</option><option value="all">All</option></select></label></span>
+<label>Ranking <select id="metric"><option value="both">Combined</option><option value="dice">Dice</option><option value="js">JS distance</option><option value="spatial">Position-constrained EVA</option></select></label>
+<label>Guide slope <select id="gain"><option value="1">×1</option><option value="5">×5</option><option value="10">×10</option></select></label>
+<button type="button" id="export">Export JSON</button>
+</div>
+<details class="method"><summary>Method</summary>
+<p class="settings-note" id="baselineNote"></p>
+<p class="settings-note">Each page's block is translated so that its first box's baseline anchor (or, with Page positions, the page's opening anchor) lies at the origin; nothing is rotated or scaled. Text chooses the block of both pages at once: the whole page with every line scored, or the opening block with the top lines scored; Custom takes the Block A, Block B and Lines choices here. Flat coordinates remove the stored page warp; Body heights multiply each page by 30 / its median box height. Lines beyond the cutoff stay as faint context. Dice is the shared occupied area over the two areas; Direct EVA compares each box with the boxes overlapping it by a fifth of the smaller area; Nearby EVA takes each box's best match within half a body width and height; JS is the Jensen-Shannon distance of the two blocks' glyph-pair histograms, which ignores positions. Colour paints each scored box live against the boxes of the other page that touch it: Overlap JS is the JS distance between the box's own glyph-pair histogram and that of the touching words joined, Overlap similarity the EVA edit similarity to its best touching partner, Shared area the share of the box covered by the other page; a box nothing touches keeps a grey outline. The drift guide is the page's median signed baseline chord angle (positive falls to the right) drawn through the origin; Guide slope steepens the line for display, never the quoted angle. Rankings come from the first-line scan (19,701 page pairs; bifolium faces 666 / 780 / 595); a metric other than Combined re-sorts the 50 shipped matches. Anchors, policy and data version are stated above; <code>vmsspatial compare</code> and <code>docs/COMPARE.md</code> give the same numbers from Python.</p>
+</details>
+</details>
+</div>
+<p id="status" class="status" role="status" aria-live="polite">Loading…</p>
+<div id="viewTools" class="view-tools" hidden></div>
+<div id="figure" class="figure" aria-live="off"></div>
+<div id="readout" class="readout"></div>
+<div id="extra" class="extra"></div>
+<details class="reading"><summary>How to read these</summary>
+<p><b>Dice</b> is the occupied area the two blocks share after the translation, twice the intersection over the sum of the two areas; one box and two adjoining boxes covering the same space score alike, so a word boundary is not a mismatch. <b>Direct EVA</b> compares every box with the boxes of the other page that overlap it by at least a fifth of the smaller area, as the edit distance of their EVA atoms over the longer string, weighted by the shared area. <b>Nearby EVA</b> is the best single-box similarity within half a body word width and half a body box height, averaged over the boxes that have such a neighbour. <b>JS</b> is the Jensen-Shannon distance between the two blocks' histograms of adjacent glyph units with the words joined into one line; it compares wording only and sees no positions.</p>
+<p><b>Boxes.</b> A is blue, B orange; filled boxes are scored, faint ones are context beyond the line cutoff, the dashed box is the anchor that sets the origin, and it is scored like the others. Thick strokes on a baseline mark an intrusion break in the transcription. Click a page's name above the figure to hide or show its boxes; the scores keep both pages. Click a line number or a word to pull the two corresponding lines apart and read them; the partner line is the one with the nearest baseline, and the arrows step through the pairs. Scores are computed on the untouched blocks.</p>
+<p><b>Margin.</b> The left margin gives each page's line labels, A1 and B1. A bar beside them spans each paragraph, with its number at the top: labels and ring text are in no paragraph and have no bar. Click a line label to read that line beside its partner.</p>
+<p><b>Boxes.</b> Filled, Outline or Hidden changes how the word rectangles are drawn and nothing else: the scores stay the same, hidden boxes still answer to hover and clicks, and with boxes hidden the colour modes paint the words instead.</p>
+<p><b>Colour.</b> The three colour modes paint every scored box against the boxes of the other page that touch it, teal for alike or well covered and warm for different or barely covered: Overlap JS (the glyph-pair histogram of the word against that of the touching words joined; a one-glyph word has no pairs and stays grey), Overlap similarity (edit similarity to the best touching partner) and Shared area (the share of the box under the other page). The value is in the box's tooltip. These are per-box descriptions of the same overlay, not new scores.</p>
+<p><b>Drift guide.</b> For every horizontal paragraph line with at least four located boxes the signed angle of the chord from its first to its last baseline anchor; the page value is the median over the qualifying lines and is drawn through the origin (dashed for B), the per-line chords along their lines. Recorded coordinates give the angle before the warp correction, flat coordinates after it. The angles mix writing direction with camera rotation and page deformation.</p>
+<p><b>Word direction.</b> A word's size comes from its length along its own direction, not from the width of its box, so the words at 3 and 9 o'clock are as large as those at 12 o'clock. Bottom to centre turns each ring word the way it is written, with its bottom towards the wheel's centre, and rotated lines along their chord. Level stands the same words upright to read them. Only the labels turn: the boxes stay where they were measured.</p>
+<p><b>What the scores do not mean.</b> Pages share layouts for many reasons (a drawing's shape, line length habits, a ruled margin), and a high Dice is common between pages of one section. A rank is a retrieval order, not a probability. A translation-only overlay has no direction: A on B equals B on A, so it cannot tell copying from a shared template or from writing habits. The centred wheel composite moves each wheel to a common centre and changes nothing else; it is a display transform, not measured geometry.</p>
+</details>
+</main>
+<footer><p>Coordinates: © 2014 The Voynichese Project, Apache-2.0 (<a href="NOTICE.txt">attribution</a>). ZL transliteration and Path 1 ordering. Built with <a href="https://github.com/eo777/vms-spatial">vms-spatial</a>.</p></footer>
+<script src="common.js"></script><script src="js/compare_math.js"></script><script src="js/word_labels.js"></script><script src="compare_state.js"></script><script src="compare.js"></script></body></html>

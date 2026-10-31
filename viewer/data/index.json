@@ -1,0 +1,88 @@
+{
+ "bundles": [
+  {
+   "key": "manuscript",
+   "label": "Manuscript (strict geometry, bifolia order, measures in the flat state)",
+   "path": "manuscript/words.json.gz",
+   "order": "bifolia",
+   "tokens": 38876,
+   "components": "zattera; lossless; within-word pairs only",
+   "warp": "flat",
+   "pages": "all"
+  },
+  {
+   "key": "markov_whole",
+   "label": "Markov word-bigram chain, whole, typeset",
+   "path": "markov_whole/words.json.gz",
+   "order": "bifolia",
+   "tokens": 33065,
+   "components": "zattera; lossless; within-word pairs only",
+   "warp": "flat",
+   "pages": "paragraph"
+  },
+  {
+   "key": "prose_la_vulgate_train",
+   "label": "Natural text la_vulgate_train, lines filled to the character budget, typeset",
+   "path": "prose_la_vulgate_train/words.json.gz",
+   "order": "bifolia",
+   "tokens": 31156,
+   "components": "letters; letter pairs",
+   "warp": "flat",
+   "pages": "paragraph"
+  },
+  {
+   "key": "prose_native_de_gart_augsburg1487",
+   "label": "Natural text de_gart_augsburg1487 in its own printed lines, typeset",
+   "path": "prose_native_de_gart_augsburg1487/words.json.gz",
+   "order": "bifolia",
+   "tokens": 20202,
+   "components": "letters; letter pairs",
+   "warp": "flat",
+   "pages": "paragraph"
+  },
+  {
+   "key": "stream_noinnov_spatial",
+   "label": "Generator stream noinnov_spatial, typeset",
+   "path": "stream_noinnov_spatial/words.json.gz",
+   "order": "bifolia",
+   "tokens": 40481,
+   "components": "zattera; lossless; within-word pairs only",
+   "warp": "flat",
+   "pages": "paragraph"
+  },
+  {
+   "key": "stream_timm",
+   "label": "Generator stream timm, typeset",
+   "path": "stream_timm/words.json.gz",
+   "order": "bifolia",
+   "tokens": 37891,
+   "components": "zattera; lossless; within-word pairs only",
+   "warp": "flat",
+   "pages": "paragraph"
+  },
+  {
+   "key": "stream_timm_spatial",
+   "label": "Generator stream timm_spatial, typeset",
+   "path": "stream_timm_spatial/words.json.gz",
+   "order": "bifolia",
+   "tokens": 38030,
+   "components": "zattera; lossless; within-word pairs only",
+   "warp": "flat",
+   "pages": "paragraph"
+  }
+ ],
+ "layout": "layout.json.gz",
+ "review": "../../data/manuscript/spatial_review.json.gz",
+ "default_order": "bifolia",
+ "compare": {
+  "pages": "compare/pages.json.gz",
+  "wheels": "compare/wheels.json.gz",
+  "orders": "compare/orders.json",
+  "rankings": "compare/rankings.json.gz",
+  "version": "2026.10.31.1",
+  "bundle": "manuscript",
+  "baseline": "auto",
+  "policy": "sensitivity",
+  "math": "../js/compare_math.js"
+ }
+}
