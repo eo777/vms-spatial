@@ -5,7 +5,7 @@
 (async()=>{
  const {$,esc}=SG,S=COMPARE_STATE,M=VMS_COMPARE,Words=VMS_WORDS,NS='http://www.w3.org/2000/svg';
  const status=$('status'),figure=$('figure'),readout=$('readout'),extra=$('extra'),tools=$('viewTools'),zoomLevel=$('zoomLevel');
- const ctl={a:$('pageA'),b:$('pageB'),order:$('order'),text:$('text'),cutoff:$('cutoff'),words:$('words'),wdir:$('wdir'),boxes:$('boxes'),step:$('step'),drift:$('drift'),color:$('color'),align:$('align'),coords:$('coords'),scale:$('scale'),scope:$('scope'),face:$('face'),blockA:$('blockA'),blockB:$('blockB'),metric:$('metric'),gain:$('gain')};
+ const ctl={a:$('pageA'),b:$('pageB'),order:$('order'),text:$('text'),cutoff:$('cutoff'),words:$('words'),expand:$('expand'),wdir:$('wdir'),boxes:$('boxes'),step:$('step'),drift:$('drift'),color:$('color'),align:$('align'),coords:$('coords'),scale:$('scale'),scope:$('scope'),face:$('face'),blockA:$('blockA'),blockB:$('blockB'),metric:$('metric'),gain:$('gain')};
  function fail(message){status.textContent='Error: '+message;status.classList.add('error-text');}
  addEventListener('error',e=>fail(e.message||String(e.error)));addEventListener('unhandledrejection',e=>fail((e.reason&&e.reason.message)||String(e.reason)));
  const el=(tag,attrs={},text)=>{const n=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))if(v!=null&&v!=='')n.setAttribute(k,String(v));if(text!=null)n.textContent=text;return n;};
@@ -75,13 +75,14 @@
   res=S.resolveText(state);ctl.cutoff.value=res.cutoff;
  }
  function syncControls(){
-  ctl.order.value=state.order;ctl.text.value=state.text;ctl.words.checked=state.words;ctl.wdir.value=state.wdir;ctl.boxes.value=state.boxes;ctl.step.value=pagesMode()?state.step:'bifolio';ctl.step.disabled=!pagesMode();ctl.drift.checked=state.drift;ctl.color.value=state.color;ctl.align.value=state.align;ctl.coords.value=state.coords;ctl.scale.value=state.scale;
+  ctl.order.value=state.order;ctl.text.value=state.text;ctl.words.checked=state.words;ctl.expand.checked=state.expand;$('expandLabel').hidden=!stackable();ctl.wdir.value=state.wdir;ctl.boxes.value=state.boxes;ctl.step.value=pagesMode()?state.step:'bifolio';ctl.step.disabled=!pagesMode();ctl.drift.checked=state.drift;ctl.color.value=state.color;ctl.align.value=state.align;ctl.coords.value=state.coords;ctl.scale.value=state.scale;
   ctl.scope.value=state.scope;ctl.face.value=state.face;ctl.metric.value=state.metric;ctl.gain.value=String(state.gain);$('faceLabel').hidden=pagesMode();
   ctl.color.disabled=state.view==='composite'||state.view==='wheels';
   for(const b of $('views').querySelectorAll('button')){const on=b.dataset.view===state.view;b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on));}
   fillPickers();
  }
  function save(){SG.setHash({data:SG.hash().data,...S.serialize(state)});}
+ const stackable=()=>state.view==='overlay'||state.view==='matches',stacked=()=>state.expand&&stackable();   // Expand all lines applies in these views
  function clearTransient(){state.lines=[];state.seg=null;groupHit=null;}
  function clearPanels(){clearTransient();state.max=null;kept.clear();}          // the panels themselves change
  // ---- selections and panels
@@ -143,7 +144,7 @@
  const toolbarHeight=()=>document.querySelector('.compare .toolbar').offsetHeight;
  function setMax(k){if(k!=null)overviewScroll=scrollY;state.max=k;render();scrollTo({top:k==null?overviewScroll:figure.getBoundingClientRect().top+scrollY-toolbarHeight()-8,behavior:'instant'});}   // the toolbar is sticky: stop below it
  function drawPanel(p,F,{det,hit,k,many}){
-  const wrap=h('div','panel'),head=h('h3'),split=p.split;
+  const wrap=h('div','panel'),head=h('h3'),split=p.split,open=split&&split.bands;
   if(p.title)head.append(h('span','',p.title));
   for(const s of p.sels){if(!s.sel)continue;head.append(tagButton(s,sideName(s)+(s.panels>1?' (+'+(s.panels-1)+' more panels)':''),S.hideKey(state,s.tag)));}
   if(many)head.append(maxButton(p,k));
@@ -151,7 +152,8 @@
   if(p.sels.length>2)svg.classList.add('many');if(hit)svg.classList.add('dim');if(p.sels.some(s=>s.ov))svg.classList.add('colored');
   svg.append(el('line',{class:'zero',x1:F.x,x2:F.x+F.w,y1:0,y2:0}));
   const sels=p.sels;sels.forEach((s,i)=>{s.draw=s.sel?(split?split.selections[i]:s.sel):null;});
-  if(split){
+  if(open)for(const [y0,y1] of split.bands)svg.append(el('rect',{class:'band',x:F.x,y:y0,width:F.w,height:y1-y0}));
+  else if(split){
    svg.append(el('rect',{class:'band',x:F.x,y:split.start,width:F.w,height:split.end-split.start}));
    split.row_tops.forEach((y,k)=>svg.append(el('text',{class:'band-head',x:F.x+12,'data-px':margin.px+4,y:y-5,style:'--c:'+color(sels[k].k)},(k?'B ':'A ')+sels[k].sel.folio+' · line '+(split.indices[k]+1))));
   }
@@ -163,7 +165,7 @@
   sels.forEach((s,i)=>{
    if(!s.draw||hidden(s))return;
    const g=el('g',{class:'page-layer',style:'--c:'+color(s.k),'data-side':s.k}),vis=S.visible(s.draw,res.cutoff);
-   const hitIds=hit?new Set(s.tag==='A'?hit.a:s.tag==='B'?hit.b:[]):null,bandLine=split?split.indices[i]:null;
+   const hitIds=hit?new Set(s.tag==='A'?hit.a:s.tag==='B'?hit.b:[]):null,bandLine=split&&!open?split.indices[i]:null;
    const paint=new Map();
    for(const u of vis){
     const cls=['u',u.anchor?'anchor':u.selected?'':'ctx',hitIds&&hitIds.has(u.id)?'hit':''].filter(Boolean);
@@ -184,8 +186,8 @@
     g.append(el('line',{class:'pbar',x1:F.x,x2:F.x,y1:sp.y0-.7*H,y2:sp.y1+.15*H,'data-px':column+margin.bar,'data-tip':tip}));
     if(margin.numbers)g.append(el('text',{class:'pnum',x:F.x,y:sp.y0,'data-px':column+margin.bar+4,'data-tip':tip},'¶'+sp.n));
    }
-   if(sels.length<=2)for(const row of S.lineRows(s.draw,res.cutoff)){g.append(el('text',{class:'lnum',x:F.x,y:row.baseline,'data-px':column,'data-side':s.k,'data-line':row.index,'data-tip':`<b>${esc(sideName(s))}</b> · line ${row.index+1}${lineViews.includes(state.view)?'<div class="tipsub">click to read this line beside its partner</div>':''}<div class="tipsub">${esc(row.text)}</div>`},(s.tag==='A'||s.tag==='B'?s.tag:'')+(row.index+1)));}
-   const shown=vis.filter(u=>state.words||u.line===bandLine),faces=wordFaces(shown);
+   if(sels.length<=2)for(const row of S.lineRows(s.draw,res.cutoff)){g.append(el('text',{class:'lnum',x:F.x,y:row.baseline,'data-px':column,'data-side':s.k,'data-line':row.index,'data-tip':`<b>${esc(sideName(s))}</b> · line ${row.index+1}${lineViews.includes(state.view)&&!open?'<div class="tipsub">click to read this line beside its partner</div>':''}<div class="tipsub">${esc(row.text)}</div>`},(s.tag==='A'||s.tag==='B'?s.tag:'')+(row.index+1)));}
+   const shown=vis.filter(u=>state.words||open||u.line===bandLine),faces=wordFaces(shown);
    for(const u of shown){
     const cls='w'+(u.selected||u.anchor||u.line===bandLine?'':' ctx')+(hitIds&&hitIds.has(u.id)?' hit':''),f=faces.get(u.id),style=state.boxes==='hidden'&&paint.has(u.id)?`fill:${paint.get(u.id)}`:null;   // boxes hidden: the colour modes paint the word
     if(f){g.append(wordLabel(f,cls,u.text,style));continue;}
@@ -312,7 +314,7 @@
  function renderTools(ps){
   tools.replaceChildren();tools.hidden=true;
   for(const [,,k] of [...state.lines].sort((x,y)=>x[2]-y[2])){
-   const lp=ps[k];if(!lp||!lp.split)continue;
+   const lp=ps[k];if(!lp||!lp.split||lp.split.bands)continue;
    const sp=lp.split,row=h('span','reading'),prev=h('button','','‹'),next=h('button','','›'),close=h('button','','Close');prev.type=next.type=close.type='button';
    prev.setAttribute('aria-label','Previous line pair');next.setAttribute('aria-label','Next line pair');
    prev.onclick=()=>stepSplit(-1,k);next.onclick=()=>stepSplit(1,k);close.onclick=()=>{state.lines=S.setLine(state.lines,k,null);render();};
@@ -357,12 +359,15 @@
   const on=state.max==null?ps:[ps[state.max]],allSels=on.flatMap(p=>p.sels.map(s=>s.sel).filter(Boolean));   // the panels drawn; the readouts stay on all of them
   let F=S.frame(allSels,res.cutoff);
   const panelPx=Math.max(300,(figure.clientWidth||900)/Math.min(on.length,4)),scale=panelPx/F.w,open=[];let y0=F.y,y1=F.y+F.h;
-  if(state.view==='overlay'||state.view==='matches')for(const line of state.lines){
+  if(stacked()){
+   const splits=on.map(p=>p.split=p.sels.length===2?S.expandLines(p.sels[0].sel,p.sels[1].sel,res.cutoff,scale,p.sels.map(hidden)):null).filter(Boolean);
+   if(splits.length){y0=Math.min(...splits.map(s=>s.ymin));y1=Math.max(...splits.map(s=>s.ymax));}           // the frame is the stack of bands
+  }else{if(stackable())for(const line of state.lines){
    const k=line[2],p=ps[k];if(!p||!readable(pairAt(k)))continue;
    if(on.includes(p)){const split=M.splitLines(p.sels[0].sel,p.sels[1].sel,line.slice(0,2),scale,res.cutoff);if(!split)continue;y0=Math.min(y0,split.ymin);y1=Math.max(y1,split.ymax);p.split=split;}
    open.push(line);
   }
-  state.lines=open;F={x:F.x,y:y0,w:F.w,h:y1-y0};
+  state.lines=open;}F={x:F.x,y:y0,w:F.w,h:y1-y0};
   margin=panelPx<NARROW_PANEL?NARROW_MARGIN:WIDE_MARGIN;
   if(ps.some(p=>p.sels.length<=2))F=S.withGutter(F,allSels,res.cutoff,panelPx,margin.px);
   const key=JSON.stringify([F,on.length,state.view]);if(key!==frameKey){view=pendingZoom?S.clampView(pendingZoom,F):null;pendingZoom=null;frameKey=key;}
@@ -372,7 +377,7 @@
   const hit=det?(groupHit&&det.connected.includes(groupHit)?{kind:'group',a:groupHit.a,b:groupHit.b,record:groupHit}:state.seg?S.partners(det,state.seg.side,state.seg.id):null):null;
   if(det&&groupHit&&!det.connected.includes(groupHit))groupHit=null;
   assignColors(ps);
-  figure.style.setProperty('--panels',String(Math.min(on.length,4)));figure.classList.toggle('maximized',state.max!=null);figure.style.setProperty('--toolbar',toolbarHeight()+'px');
+  figure.style.setProperty('--panels',String(Math.min(on.length,4)));figure.classList.toggle('maximized',state.max!=null);figure.classList.toggle('expanded',stacked());figure.style.setProperty('--toolbar',toolbarHeight()+'px');
   figure.replaceChildren(...on.map(p=>drawPanel(p,F,{det,hit,k:ps.indexOf(p),many:ps.length>1})));
   panels=[...figure.querySelectorAll('svg')];for(const svg of panels)SG.attachTips(svg);SG.attachTips(figure);
   applyView();renderReadout(ps,det,hit);renderTools(ps);SG.attachTips(tools);describe(ps);save();
@@ -410,7 +415,7 @@
    }
    svg.append(g);
   }
-  wrap.append(head,svg);figure.style.setProperty('--panels','1');figure.classList.remove('maximized');figure.replaceChildren(wrap);panels=[svg];SG.attachTips(svg);SG.attachTips(figure);SG.attachTips(tools);applyView();
+  wrap.append(head,svg);figure.style.setProperty('--panels','1');figure.classList.remove('maximized','expanded');figure.replaceChildren(wrap);panels=[svg];SG.attachTips(svg);SG.attachTips(figure);SG.attachTips(tools);applyView();
   const nw=drawn.reduce((s,e)=>s+e.lay.wheels.length,0),nr=drawn.reduce((s,e)=>s+e.lay.wheels.reduce((t,w)=>t+w.rings.length,0),0),nb=drawn.reduce((s,e)=>s+e.lay.wheels.reduce((t,w)=>t+w.boxes.length,0),0);
   const spread=Math.max(...drawn.flatMap(e=>e.lay.wheels.map(w=>w.spread)));
   readout.append(h('p','note',`${drawn.length} ${drawn.length===1?'page':'pages'} · ${nw} ${nw===1?'wheel':'wheels'} · ${nr} rings · ${nb} boxes on rings${state.labels?' · '+drawn.reduce((s,e)=>s+e.lay.wheels.reduce((t,w)=>t+w.labels.length,0),0)+' nearby labels':''} · largest centre spread ${spread.toFixed(1)} px. Centring is a display transform: every wheel is moved so that its centre lies at the common origin; sizes, angles and spacing are unchanged, and the dashed circles are the fitted ring radii (recorded coordinates).`));
@@ -432,7 +437,7 @@
   state.lines=S.setLine(state.lines,pair.panel,same?null:[la,lb]);render();
  }
  // the line the keyboard acts on: the maximized panel's, or the latest opened
- function activeLine(){if(state.max!=null)return S.lineAt(state.lines,state.max)?state.max:null;const l=state.lines[state.lines.length-1];return l?l[2]:null;}
+ function activeLine(){if(stacked())return null;if(state.max!=null)return S.lineAt(state.lines,state.max)?state.max:null;const l=state.lines[state.lines.length-1];return l?l[2]:null;}
  function stepSplit(delta,k){const open=S.lineAt(state.lines,k),pair=pairAt(k);if(!open||!readable(pair))return;const rows=S.lineRows(pair.a,res.cutoff),i=rows.findIndex(r=>r.index===open[0]),j=Math.max(0,Math.min(rows.length-1,i+delta));if(j===i||i<0)return;const row=rows[j],n=S.nearestLine(S.lineRows(pair.b,res.cutoff),row.baseline);if(!n)return;state.lines=S.setLine(state.lines,k,[row.index,n.index]);render();}
  // a page move keeps each panel's open line: it stays on the page that stays, or on A when both move, and the other page takes its partner
  function keepLines(sides){
@@ -452,7 +457,7 @@
   const t=e.target instanceof Element?e.target:null;if(!t)return;
   const num=t.closest('.lnum'),box=t.closest('.u');
   if(state.view==='segments'&&pagesMode()&&box&&box.dataset.id!=null){const side=box.dataset.side==='0'?'a':'b',id=Number(box.dataset.id);state.seg=state.seg&&state.seg.side===side&&state.seg.id===id?null:{side,id};groupHit=null;render();return;}
-  const hit=num||box;if(!hit||hit.dataset.line==null||!lineViews.includes(state.view))return;
+  const hit=num||box;if(!hit||hit.dataset.line==null||!lineViews.includes(state.view)||stacked())return;
   const k=Number(hit.closest('svg').dataset.panel),pair=pairAt(k);
   if(readable(pair))setSplit(Number(hit.dataset.side),Number(hit.dataset.line),k);
   else if(pair){const none=[pair.a,pair.b].find(s=>!s||!s.all.length);status.textContent=`${none?none.folio:'This slot'} has no located boxes in this selection, so there is no line to compare.`;}
@@ -496,7 +501,7 @@
  ctl.blockA.onchange=()=>{state=S.customize(state,{blocka:ctl.blockA.value});state.lines=[];render();};
  ctl.blockB.onchange=()=>{state=S.customize(state,{blockb:ctl.blockB.value});state.lines=[];render();};
  ctl.cutoff.onchange=()=>{state=S.customize(state,{cutoff:ctl.cutoff.value});render();};
- ctl.words.onchange=()=>{state.words=ctl.words.checked;render();};ctl.drift.onchange=()=>{state.drift=ctl.drift.checked;render();};
+ ctl.words.onchange=()=>{state.words=ctl.words.checked;render();};ctl.expand.onchange=()=>{state.expand=ctl.expand.checked;render();};ctl.drift.onchange=()=>{state.drift=ctl.drift.checked;render();};
  for(const k of ['align','coords','scale','metric','color','wdir','boxes'])ctl[k].onchange=()=>{state[k]=ctl[k].value;render();};
  ctl.step.onchange=()=>{const was=state.step;state.step=ctl.step.value;if(was==='paragraph'&&state.step!=='paragraph'){state=S.setText(state,'page');state.lines=[];}syncControls();render();};   // leaving paragraph steps returns to whole pages
  ctl.gain.onchange=()=>{state.gain=Number(ctl.gain.value);render();};

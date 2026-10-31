@@ -198,6 +198,7 @@ test('a line comparison can name its panel, and two-number links still open',()=
  assert.deepEqual(S.parse({lines:'2,3,1;4,5,1'}).lines,[[4,5,1]]);assert.deepEqual(S.parse({lines:'2,3;x'}).lines,[]);assert.equal('lines' in S.serialize(S.parse({})),false);
  const open=[[2,3,0],[4,5,1]];assert.deepEqual(S.lineAt(open,1),[4,5,1]);assert.equal(S.lineAt(open,2),null);
  assert.deepEqual(S.setLine(open,0,[6,7]),[[4,5,1],[6,7,0]]);assert.deepEqual(S.setLine(open,1,null),[[2,3,0]]);
+ assert.equal(S.parse({expand:'1'}).expand,true);assert.equal(S.parse({}).expand,false);assert.equal(S.serialize(S.parse({expand:'1'})).expand,'1');assert.equal('expand' in S.serialize(S.parse({})),false);
  // the maximized panel
  assert.equal(S.parse({max:'1'}).max,1);assert.equal(S.parse({max:'x'}).max,null);assert.equal(S.parse({}).max,null);
  assert.equal(S.serialize(S.parse({max:'0'})).max,'0');assert.equal('max' in S.serialize(S.parse({})),false);
@@ -219,6 +220,30 @@ test('a page move keeps the open line by number, or the nearest number a short p
  assert.deepEqual(S.carriedLines(a,b,0,9),[3,5]);                               // a short page: its last line
  assert.deepEqual(S.carriedLines(rows([0,10],[1,40],[4,130]),b,0,3),[4,5]);     // a gap in the numbers: the nearest
  assert.equal(S.carriedLines([],b,0,1),null);assert.equal(S.carriedLines(a,[],1,1),null);
+});
+test('Expand all lines shows every line of both pages once, each beside its partner',{skip:!have},()=>{
+ const opt={block:'page',cutoff:'all',coordinates:'flat',alignment:'starts',scale:'pixels'},sel=f=>M.selectUnits(compact.pages[f],words,opt);
+ const a=sel('f20v'),b=sel('f21r'),rows=[a,b].map(s=>S.lineRows(s,'all')),pairs=S.linePairs(rows[0],rows[1]);
+ for(const k of [0,1])assert.deepEqual(pairs.filter(p=>p[k]).map(p=>p[k].index).sort((x,y)=>x-y),rows[k].map(r=>r.index));    // each line once
+ for(const [x,y] of pairs)if(x&&y){assert.equal(S.nearestLine(rows[1],x.baseline),y);assert.equal(S.nearestLine(rows[0],y.baseline),x);}
+ const e=S.expandLines(a,b,'all',.5);assert.equal(e.frame,'display');assert.equal(e.bands.length,pairs.length);
+ e.bands.forEach(([y0,y1],i)=>{assert.ok(y1>y0);if(i)assert.ok(y0>=e.bands[i-1][1]-1e-9,'bands do not overlap');});
+ e.selections.forEach((s,k)=>{const src=[a,b][k];assert.equal(s.all.length,src.all.length);
+  s.all.forEach((u,i)=>{const o=src.all[i];assert.equal(u.rect[0],o.rect[0]);assert.equal(u.rect[2],o.rect[2]);assert.ok(Math.abs((u.rect[3]-u.rect[1])-(o.rect[3]-o.rect[1]))<1e-9);
+   assert.ok(e.bands.some(([y0,y1])=>u.rect[1]>=y0-1e-6&&u.rect[3]<=y1+1e-6),'every box lies inside a band');});});
+ const within=src=>new Map(src.all.map(u=>[u.id,u.rect[1]]));                    // a line moves as one, so its slope is kept
+ const A=within(a),dys=new Map();for(const u of e.selections[0].all){const d=u.rect[1]-A.get(u.id);if(dys.has(u.line))assert.ok(Math.abs(dys.get(u.line)-d)<1e-9);dys.set(u.line,d);}
+ assert.deepEqual(S.lineRows(a,'all').map(r=>r.index),rows[0].map(r=>r.index));    // the scored selection is untouched
+});
+test('Expand all lines leaves out a hidden or missing page and keeps rings in their shape',{skip:!have},()=>{
+ const opt={block:'page',cutoff:'all',coordinates:'flat',alignment:'starts',scale:'pixels'},sel=f=>M.selectUnits(compact.pages[f],words,opt);
+ const a=sel('f20v'),b=sel('f21r'),n=S.lineRows(b,'all').length;
+ assert.equal(S.expandLines(a,b,'all',1,[true,false]).bands.length,n);assert.equal(S.expandLines(null,b).bands.length,n);assert.equal(S.expandLines(b,null).selections[1],null);
+ assert.equal(S.expandLines(null,null),null);assert.equal(S.expandLines(a,b,'all',1,[true,true]),null);
+ const ring=sel('f72r1'),e=S.expandLines(ring,null),moved=e.selections[0].all,kinds=new Set(ring.line_info.map(l=>l.orientation));
+ assert.ok(kinds.size>1||!kinds.has('horizontal'));
+ const level=new Set(ring.line_info.filter(l=>l.orientation==='horizontal').map(l=>l.index)),d=moved.map((u,i)=>[u,u.rect[1]-ring.all[i].rect[1]]).filter(([u])=>!level.has(u.line)).map(x=>x[1]);
+ assert.ok(d.length&&d.every(v=>Math.abs(v-d[0])<1e-9),'rings move together');
 });
 test('the label gutter clears the leftmost box at fit zoom and leaves a wide enough margin alone',{skip:!have},()=>{
  const sel=M.selectUnits(compact.pages.f20v,words,{block:'page',cutoff:'all',coordinates:'flat',alignment:'starts',scale:'pixels'}),F=S.frame([sel],'all');

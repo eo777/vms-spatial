@@ -13,7 +13,7 @@ const ALIGNS=['starts','page'],COORDS=['flat','recorded'],SCALES=['pixels','body
 const SLOTS={inner:['Av','Br'],outer:['Bv','Ar'],both:['Av','Br','Bv','Ar']};
 const MIN_ZOOM=0.25,MAX_ZOOM=40,MAX_PAGES=12;
 const DEFAULTS={a:'f20v',b:'f21r',view:'overlay',text:'page',cutoff:'all',order:'bifolia',scope:'pages',face:'inner',align:'starts',coords:'flat',scale:'pixels',
-  blocka:'opening',blockb:'opening',metric:'both',gain:1,color:'pages',boxes:'fill',step:'page',words:false,wdir:'ring',drift:false,rings:true,labels:false,pages:[],hide:[],lines:[],max:null,zoom:null,seg:null};
+  blocka:'opening',blockb:'opening',metric:'both',gain:1,color:'pages',boxes:'fill',step:'page',words:false,wdir:'ring',drift:false,expand:false,rings:true,labels:false,pages:[],hide:[],lines:[],max:null,zoom:null,seg:null};
 const pick=(value,allowed,fallback)=>allowed.includes(value)?value:fallback;
 const folio=v=>typeof v==='string'&&/^[A-Za-z0-9:_.-]{1,24}$/.test(v)?v:null;
 const BLOCK=/^(opening|page|p\d+|l\d+)$/;
@@ -34,7 +34,7 @@ function parse(h={}){
   s.text=pick(h.text,TEXTS,null);
   if(s.text===null){const custom=h.blocka!=null||h.blockb!=null;s.text=!custom&&CUTOFFS.includes(String(h.cutoff))&&h.cutoff!=='all'?String(h.cutoff):(custom||h.cutoff!=null)?'custom':'page';}
   s.gain=GAINS.includes(Number(h.gain))?Number(h.gain):DEFAULTS.gain;
-  s.words=h.words==='1';s.drift=h.drift==='1';s.labels=h.labels==='1';s.rings=h.rings!=='0';
+  s.words=h.words==='1';s.drift=h.drift==='1';s.expand=h.expand==='1';s.labels=h.labels==='1';s.rings=h.rings!=='0';
   s.pages=typeof h.pages==='string'?[...new Set(h.pages.split(',').map(folio).filter(Boolean))].slice(0,MAX_PAGES):[];
   s.hide=typeof h.hide==='string'?[...new Set(h.hide.split(',').filter(x=>x==='a'||x==='b'||folio(x)))]:[];
   if(typeof h.lines==='string'){const ms=h.lines.split(';').map(x=>/^(\d+),(\d+)(?:,(\d+))?$/.exec(x));s.lines=ms.every(Boolean)?ms.reduce((all,m)=>setLine(all,Number(m[3]||0),[Number(m[1]),Number(m[2])]),[]):[];}
@@ -48,7 +48,7 @@ function serialize(s){
   for(const k of ['view','text','order','scope','face','align','coords','scale','metric','color','wdir','boxes','step'])if(s[k]!==DEFAULTS[k])o[k]=s[k];
   if(s.text==='custom'){for(const k of ['blocka','blockb','cutoff'])if(s[k]!==DEFAULTS[k])o[k]=s[k];}
   if(s.gain!==DEFAULTS.gain)o.gain=String(s.gain);
-  if(s.words)o.words='1';if(s.drift)o.drift='1';if(s.labels)o.labels='1';if(!s.rings)o.rings='0';
+  if(s.words)o.words='1';if(s.drift)o.drift='1';if(s.expand)o.expand='1';if(s.labels)o.labels='1';if(!s.rings)o.rings='0';
   if(s.pages&&s.pages.length)o.pages=s.pages.join(',');
   if(s.hide&&s.hide.length)o.hide=s.hide.join(',');
   if(s.lines&&s.lines.length)o.lines=s.lines.map(l=>(l[2]?l:l.slice(0,2)).join(',')).join(';');
@@ -164,6 +164,33 @@ function paragraphSpans(sel,cutoff){
   return out;
 }
 function nearestLine(rows,y){let best=null;for(const r of rows){const d=Math.abs(r.baseline-y);if(!best||d<best.d)best={d,row:r};}return best?best.row:null;}
+/* linePairs(rowsA, rowsB) -> every line of both pages once, in reading order: [rowA, rowB] when each is the other's nearest
+   by baseline, [row, null] or [null, row] for a line with no such partner */
+function linePairs(ra,rb){
+  const near=new Map([...ra.map(r=>[r,nearestLine(rb,r.baseline)]),...rb.map(r=>[r,nearestLine(ra,r.baseline)])]),mutual=r=>{const n=near.get(r);return n&&near.get(n)===r?n:null;};
+  return [...ra.map(r=>[r,mutual(r)]),...rb.filter(r=>!mutual(r)).map(r=>[null,r])].sort((x,y)=>(x[0]||x[1]).baseline-(y[0]||y[1]).baseline);
+}
+/* expandLines(a, b, cutoff, scale, hide) -> display-only vertical translations that open every line at once, like
+   M.splitLines for one: each band holds a horizontal line and its partner, a above b, and the other text (rings, rays) stays
+   together below the bands, in its own shape. Sizes, x positions and within-line slopes are unchanged. hide leaves a side
+   out of the layout. Returns {frame, warp, selections, bands: [[y0, y1]], ymin, ymax}, or null when no line is shown. */
+function expandLines(a,b,cutoff='all',scale=1,hide=[false,false],gapPx=3,paddingPx=7){
+  const sels=[a,b],rows=sels.map((s,k)=>!s||hide[k]?[]:lineRows(s,cutoff).map(r=>({...r,top:Math.min(...r.units.map(u=>u.rect[1])),bottom:Math.max(...r.units.map(u=>u.rect[3]))})));
+  const shownRows=rows.flat();if(!shownRows.length)return null;
+  const level=(k,r)=>sels[k].line_info[r.index].orientation==='horizontal',gap=gapPx/scale,padding=paddingPx/scale,shift=[new Map(),new Map()],bands=[];
+  const ymin=Math.min(...shownRows.map(r=>r.top))-padding;let y=ymin;
+  for(const pair of linePairs(rows[0].filter(r=>level(0,r)),rows[1].filter(r=>level(1,r)))){
+    const start=y;y+=padding;
+    pair.forEach((r,k)=>{if(r){shift[k].set(r.index,y-r.top);y+=r.bottom-r.top+gap;}});
+    y+=padding-gap;bands.push([start,y]);
+  }
+  const rest=rows.map((r,k)=>r.filter(x=>!level(k,x)));
+  if(rest.flat().length){const top=Math.min(...rest.flat().map(r=>r.top));y+=padding;rest.forEach((r,k)=>r.forEach(x=>shift[k].set(x.index,y-top)));y+=Math.max(...rest.flat().map(r=>r.bottom))-top+padding;}
+  const selections=sels.map((s,k)=>{if(!s)return null;
+    const all=s.all.map(u=>{const dy=shift[k].get(u.line)||0;return {...u,rect:[u.rect[0],u.rect[1]+dy,u.rect[2],u.rect[3]+dy],baseline:u.baseline+dy};}),chosen=new Set(s.chosen.map(u=>u.id));
+    return {...s,all,chosen:all.filter(u=>chosen.has(u.id)),frame:'display',display_of:s.frame};});
+  return {frame:'display',warp:(a||b).warp,selections,bands,ymin,ymax:y};
+}
 /* carriedLines(rowsA, rowsB, side, line) -> [a, b]: the pair to read after a page move. Page `side` (0 A, 1 B) keeps the
    line's number, or the nearest number it has; the other page takes the partner a click would give. null when a page has no lines */
 function carriedLines(rowsA,rowsB,side,line){
@@ -245,6 +272,6 @@ function exportRecord(s,meta,a,b,scores,det,perLine,drift){
     note:'Translation-only overlay scores describe resemblance, not copying (docs/COMPARE.md).'};
 }
 const api={VIEWS,CUTOFFS,TEXTS,ORDERS,SCOPES,FACES,ALIGNS,COORDS,SCALES,METRICS,GAINS,COLORS,COLOR_LABELS,WORD_DIRS,BOXES,STEPS,SLOTS,DEFAULTS,MIN_ZOOM,MAX_ZOOM,MAX_PAGES,parse,serialize,resolveText,setText,customize,hideKey,isHidden,toggleHidden,
-  pageList,sheetList,step,stepPair,stepSheet,paragraphKeys,stepParagraph,slotPages,wheelPages,visible,frame,withGutter,clampView,zoomAt,pan,zoomScale,isFit,lineRows,paragraphSpans,nearestLine,carriedLines,lineAt,setLine,partners,overlapValues,colorDomain,colorIndex,matchRows,matchIndex,wheelLayout,exportRecord};
+  pageList,sheetList,step,stepPair,stepSheet,paragraphKeys,stepParagraph,slotPages,wheelPages,visible,frame,withGutter,clampView,zoomAt,pan,zoomScale,isFit,lineRows,paragraphSpans,nearestLine,linePairs,expandLines,carriedLines,lineAt,setLine,partners,overlapValues,colorDomain,colorIndex,matchRows,matchIndex,wheelLayout,exportRecord};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.COMPARE_STATE=api;
 })(typeof window!=='undefined'?window:globalThis);
