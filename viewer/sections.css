@@ -1,0 +1,38 @@
+/* The Sections page, on top of compare.css. Every layer reads its own opacity variable, so a slider changes no geometry and redraws nothing. */
+.sections .layer-row{display:flex;gap:6px 16px;flex-wrap:wrap;align-items:center;font-size:13px;padding:10px 0 6px;color:var(--ink2)}
+.sections .layer-row label{display:flex;align-items:center;gap:5px;cursor:pointer}
+.sections .layer-row input{accent-color:var(--ink2);margin:0}
+.sections .opacity-panel,.sections .settings,.sections .page-key,.sections .how{margin:6px 0;font-size:13px;color:var(--ink2)}
+.sections .opacity-panel summary,.sections .settings summary,.sections .page-key summary,.sections .how summary{cursor:pointer;font-weight:600;font-size:12.5px;color:var(--ink)}
+.sections .sliders{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px 22px;margin:8px 0}
+.sections .slider{display:grid;grid-template-columns:130px 1fr 40px;gap:8px;align-items:center;font-size:12.5px}
+.sections .slider input{width:100%;min-width:0;accent-color:var(--ink2);margin:0}
+.sections .slider .pct{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.sections .settings-row{display:flex;gap:8px 16px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.sections .settings-row label{display:flex;align-items:center;gap:6px}
+.sections .status{font-size:12px;color:var(--ink2);margin:8px 0}
+.sections .note{font-size:12.5px;color:var(--ink2)}
+.sections .how p{line-height:1.55;max-width:80ch}
+.sections .zoom-level{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.sections .panel{background:var(--surface);padding:10px 12px}
+.sections .panel h3{justify-content:space-between}
+.sections .panel h3 .count{font-weight:400;color:var(--muted)}
+.sections .group-open{border:0;background:none;padding:0;font:inherit;font-weight:600;color:var(--ink);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.sections .panel svg{max-height:86vh;background:var(--bg)}
+.sections .figure.grid .panel svg{max-height:60vh}
+.sections .heat{opacity:var(--o-heatmap,1);image-rendering:pixelated;pointer-events:none}
+.sections .pg{transition:opacity .12s}
+.sections .boxes{fill:var(--c);stroke:none;opacity:var(--o-boxes,.15);pointer-events:none}
+.sections .poly{fill:var(--c);fill-opacity:var(--o-fill,0);stroke:var(--c);stroke-opacity:var(--o-outline,.5);stroke-width:1.2;vector-effect:non-scaling-stroke;stroke-linejoin:round;pointer-events:stroke;cursor:pointer}
+.sections .mark{fill:none;stroke:var(--c);stroke-width:1.6;vector-effect:non-scaling-stroke;pointer-events:stroke;cursor:pointer}
+.sections .breaks{opacity:var(--o-breaks,.7);stroke-width:2.4}
+.sections .starts{opacity:var(--o-starts,.7)}
+.sections .ends{opacity:var(--o-ends,.7)}
+.sections .figure.focused .pg:not(.on){opacity:.07}
+.sections .heat-legend{display:flex;flex-wrap:wrap;gap:0;align-items:stretch;font-size:11px;margin:8px 0}
+.sections .heat-legend .legend-title{flex-basis:100%;color:var(--ink2);margin-bottom:4px;font-size:12px}
+.sections .swatch-cell{flex:1 1 56px;text-align:center;padding:3px 0;color:var(--ink);border-top:10px solid var(--swatch);opacity:max(var(--o-heatmap,1),.35)}
+.sections .chips{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0;max-height:150px;overflow:auto}
+.sections .chip{font:12px var(--sans);padding:2px 7px;border:1px solid var(--line2);border-left:5px solid var(--c);border-radius:4px;background:var(--surface);color:var(--ink);cursor:pointer}
+.sections .chip.on{border-color:var(--ink);border-left-color:var(--c);font-weight:600}
+.sections .chip:disabled{opacity:.45;cursor:default}

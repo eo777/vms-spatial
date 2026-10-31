@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>vms-spatial · Sections</title>
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="compare.css"><link rel="stylesheet" href="sections.css">
+<script src="site_nav.js" defer></script>
+</head><body class="compare-page"><nav class="site-nav"></nav>
+<header class="masthead"><div class="eyebrow">VOYNICH MANUSCRIPT · RECORDED WORD POSITIONS</div>
+<h1>Sections</h1><p class="sub">Every page of a section or Golf group laid over each other: paragraph polygons, paragraph starts and ends, annotated breaks, and a heatmap of where the pages have text. Pages are moved by translation only.</p></header>
+<main class="compare sections">
+<div class="toolbar">
+<label>Group by <select id="by"><option value="section">Sections</option><option value="golf">Golf 2.1 groups</option></select></label>
+<label>Group <select id="group" aria-label="Group"></select></label>
+<span class="pager"><button type="button" id="prevGroup" aria-label="Previous group">‹</button><button type="button" id="nextGroup" aria-label="Next group">›</button></span>
+<label>Align <select id="align"><option value="page">Page positions</option><option value="starts">All paragraph starts</option></select></label>
+<label>Anchor <select id="anchor"><option value="opening">Opening word</option><option value="top-left">Text top-left</option><option value="bottom-left">Text bottom-left</option></select></label>
+<label>Colour by <select id="color"><option value="page">Page</option><option value="bifolium">Bifolium</option><option value="group">Golf group</option><option value="section">Section</option></select></label>
+<span class="pager zoom"><button type="button" id="zoomFit" style="width:auto;padding:5px 9px">Fit</button><button type="button" id="zoomIn" aria-label="Zoom in">+</button><button type="button" id="zoomOut" aria-label="Zoom out">−</button></span><span id="zoomLevel" class="zoom-level"></span>
+</div>
+<div class="layer-row" id="layers" role="group" aria-label="Layers"></div>
+<details class="opacity-panel" open><summary>Opacity</summary>
+<div class="sliders" id="sliders"></div>
+<button type="button" id="resetOpacity">Reset opacity</button>
+</details>
+<details class="settings"><summary>Settings</summary>
+<div class="settings-row">
+<label>Heatmap cell <select id="cell"><option value="10">10 units</option><option value="20">20 units</option><option value="40">40 units</option><option value="80">80 units</option></select></label>
+<label>Heatmap colours <select id="palette"><option value="blues">Blues</option><option value="gray">Gray, for overlays</option><option value="amber">Amber</option></select></label>
+<label>Coordinates <select id="coords"><option value="flat">Flat</option><option value="recorded">Recorded</option></select></label>
+<label>Scale <select id="scale"><option value="pixels">Source pixels</option><option value="body_height">Body height</option></select></label>
+</div>
+</details>
+<p class="status" id="status" aria-live="polite">Loading…</p>
+<div class="figure" id="figure" aria-live="off"></div>
+<div class="heat-legend" id="heatLegend" hidden></div>
+<details class="page-key" id="pageKey" hidden><summary>Page colours</summary><div class="chips" id="pageChips"></div><button type="button" id="clearFocus">Show all pages</button></details>
+<p class="note" id="notes"></p>
+<details class="how"><summary>How to read this</summary>
+<p><b>Paragraph polygons.</b> The outer envelope of a paragraph's complete horizontal lines, joined halfway across the whitespace between them. It holds the located text and the gaps inside it, so it is not an ink contour. A missing or rotated line, or an unusually large step, splits the polygon. Click an outline or a colour chip to pick one page out; Escape returns.</p>
+<p><b>Heatmap.</b> Each cell shows the share of the group's selected pages with at least one horizontal word box in it. A page votes once however many boxes it has there. A page that could not be aligned counts in the total but adds no boxes. The bands are the same for every group, so groups can be compared, but a box is not ink, and larger cells bridge small gaps.</p>
+<p><b>Align.</b> Page positions keeps each page's layout on one anchor. All paragraph starts moves every paragraph to its own anchor, so later paragraphs line up with first ones. The anchor is the opening word's baseline, or a corner of the complete text. Everything meets at the anchor by construction: that convergence is not evidence of a shared template.</p>
+<p><b>Marks.</b> Breaks are the transcription's annotated intrusions, drawn between two located words on a horizontal line. A triangle marks a paragraph's start and a square its end, on complete lines only. Marks are not normalised by group size, so a larger group looks denser. Rings and rays are not drawn here: see Wheels in Compare.</p>
+</details>
+</main>
+<footer><p>Coordinates: © 2014 The Voynichese Project, Apache-2.0 (<a href="NOTICE.txt">attribution</a>). ZL transliteration and Path 1 ordering. Built with <a href="https://github.com/eo777/vms-spatial">vms-spatial</a>.</p></footer>
+<script src="common.js"></script><script src="js/compare_math.js"></script><script src="compare_state.js"></script><script src="js/section_math.js"></script><script src="sections.js"></script></body></html>
