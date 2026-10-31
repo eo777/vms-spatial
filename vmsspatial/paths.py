@@ -65,9 +65,14 @@ def resolve(key: str, required: bool = True):
         return None
     if entry is None:
         raise DataMissing('%s is not in %s and not in the manifest' % (key, data_dir()))
-    hint = 'vmsspatial fetch-data --group %s' % entry['group'] if entry.get('url') else 'vmsspatial fetch-data --from-workspace --group %s (set VMS_WORKSPACE)' % entry['group']
+    if entry.get('url'):
+        hint = 'run: vmsspatial fetch-data --group %s' % entry['group']
+    elif entry.get('optional'):
+        hint = 'run: vmsspatial fetch-data --from-workspace --group %s (set VMS_WORKSPACE)' % entry['group']
+    else:
+        hint = 'the repository carries this file: install from a clone with pip install -e ., or set VMS_SPATIAL_DATA to its data folder'
     kind = 'an optional file, ' if entry.get('optional') else ''
-    raise DataMissing('%s is %snot in %s (run: %s)' % (key, kind, data_dir(), hint))
+    raise DataMissing('%s is %snot in %s (%s)' % (key, kind, data_dir(), hint))
 
 
 def resource(name: str) -> Path:

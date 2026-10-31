@@ -1,4 +1,4 @@
-# data folders: stored as published, never shown as diffs (their history is not kept: releases are squashed)
+# data folders: stored as published, never shown as diffs
 data/** -diff -text linguist-generated
 viewer/data/** -diff -text linguist-generated
 viewer/img/** -diff -text linguist-generated

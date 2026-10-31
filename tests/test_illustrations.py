@@ -3,6 +3,8 @@ import pytest
 from vmsspatial.frames import FrameError
 from vmsspatial.illustrations import image_overlay,overlay_svg
 
+pytest.importorskip('PIL')                    # the images extra
+
 
 def test_overlay_keeps_local_registration_resize_and_original_boxes():
     image=np.full((100,180,3),245,dtype=np.uint8)

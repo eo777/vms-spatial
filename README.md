@@ -2,6 +2,8 @@
 
 Two-dimensional spatial analysis of the Voynich manuscript text on its recorded word rectangles, and a viewer to look at the results.
 
+**Live viewer:** https://eo777.github.io/vms-spatial/
+
 The manuscript's words have positions: the Voynichese Project recorded a rectangle for every word on every page. This project puts the text (the ZL transliteration, read in a fixed bifolium order) onto those rectangles and asks spatial questions of it: which words are in view of a given word, how diverse they are, whether the next word tends to repeat what stands above or to the left of it, how lexical diversity falls across pages and sheets. It ships
 
 - **an analysis toolset** (`vmsspatial`, Python): the manuscript and its physical structure, the page geometry, the source-pool selector and per-token measures, repetition outcomes and the statistics that compare them, layout-preserving shuffles, control texts (Markov chains, natural prose, saved generator streams) typeset into the manuscript's own lines, and the alignment review that decides which words have a usable position;
@@ -31,10 +33,13 @@ Independent poetry pages can preserve every source line without using Voynich fr
 
 For compact article figures using the actual manuscript image, `vmsspatial.illustrations.export_overlay` exports a registered crop, inspectable polygons, and a self-contained SVG from the boxes supplied by your analysis. See [Article image overlays](docs/ARTICLE_OVERLAYS.md).
 
+**Left out of the word stream.** 150 of the 39,026 ZL tokens hold an uncertain glyph (`?`). They are not in `Manuscript.load()` or the bundles, so they count in no statistic and draw no box in the viewer, and 20 short loci that hold nothing else go with them. The alignment review keeps all 150, 128 of them with a box under the sensitivity policy. Separately, 159 of the 38,484 tokens on pages with rectangles have no usable box; `coverage_by_page.csv` gives each one's reason.
+
 ## Quickstart
 
 ```
 git clone https://github.com/eo777/vms-spatial && cd vms-spatial
+python -m pip install --upgrade pip    # installing from pyproject.toml with -e needs pip 21.3 or newer
 pip install -e .[plot]                               # numpy; matplotlib for the renders
 python -m vmsspatial verify-data                     # every shipped data file against its SHA-256
 python -m vmsspatial plot f75r --out f75r.png        # a page: its word rectangles and baselines, flat state
@@ -58,11 +63,12 @@ wheels.load_wheels()['summary']                                  # 35 wheels on 
 ```
 git clone https://github.com/eo777/vms-spatial
 cd vms-spatial
+python -m pip install --upgrade pip    # installing from pyproject.toml with -e needs pip 21.3 or newer
 pip install -e .                # numpy only; matplotlib for the page renders, pytest for the tests, pip install -e .[images] for the ink measurements
 python -m vmsspatial verify-data
 ```
 
-The repository carries the data (`data/`, about 20 MB: the transcription, the physical map, the word rectangles with their alignment review, the control texts and generator streams; `viewer/data/` is the viewer's build of it), so a clone works at once. `vmsspatial verify-data` checks every file against the SHA-256 manifest (`vmsspatial/resources/data_manifest.json`); `vmsspatial fetch-data` refreshes the shipped files from their published copies (see *Optional files* for the rest). The data has no git history: releases are squashed (one commit per release) and the data folders are marked binary in `.gitattributes`, so they never render as diffs. `VMS_SPATIAL_DATA` points the toolkit at another data folder. Python 3.9 or newer; Node.js for the viewer tests and the JavaScript reference scorer.
+The repository carries the data (`data/`, about 33 MB: the transcription, the physical map, the word rectangles with their alignment review, the control texts and generator streams; `viewer/data/` is the viewer's build of it), so a clone works at once. `vmsspatial verify-data` checks every file against the SHA-256 manifest (`vmsspatial/resources/data_manifest.json`); `vmsspatial fetch-data` refreshes the shipped files from their published copies (see *Optional files* for the rest). Each release is a tagged commit, and the data folders are marked binary in `.gitattributes`, so they never render as diffs. `VMS_SPATIAL_DATA` points the toolkit at another data folder. Python 3.9 or newer; Node.js for the viewer tests and the JavaScript reference scorer.
 
 ### Optional files
 
@@ -363,7 +369,7 @@ takes those ranges. Every product is keyed by page and locus or by token id, so 
 
 ## Publishing
 
-`python publish/publish.py --dry-run` assembles the repository folder (`publish/site.json`: the toolkit tree with its data folders), refusing any file that carries a local path or exceeds GitHub's size limit; `--commit --push` releases it as a single squashed commit (force-pushed, no tags, old objects pruned), so the repository never accumulates data history; `--keep-history` makes an ordinary tagged commit instead.
+`python publish/publish.py --dry-run` assembles the repository folder (`publish/site.json`: the toolkit tree with its data folders), refusing any file that carries a local path or exceeds GitHub's size limit; `--commit --push` releases it as an ordinary tagged commit (`site.json` has `"history": "keep"`).
 
 ## Attribution and license
 

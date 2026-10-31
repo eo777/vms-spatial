@@ -4,6 +4,8 @@ import math
 
 import numpy as np
 import pytest
+
+pytest.importorskip('PIL')                    # the images extra
 from PIL import Image, ImageDraw
 
 from conftest import needs_data

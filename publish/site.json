@@ -1,6 +1,6 @@
 {
   "site_dir": "../../../vms-spatial",
-  "history": "squash",
+  "history": "keep",
   "exclude": [
     "**/__pycache__/*",
     "*.pyc",
@@ -31,5 +31,5 @@
     ".gitignore",
     ".gitattributes"
   ],
-  "note": "The repository holds the toolkit's source tree AND the data folders, so a clone works at once. Releases are squashed (one orphan commit per release, force-pushed) so the data never accumulates history, and .gitattributes marks the data folders binary so they never render as diffs. The full-resolution Beinecke scans (data/images) are not shipped; fetch-data --group images downloads them by their IIIF URLs."
+  "note": "The repository holds the toolkit's source tree AND the data folders, so a clone works at once. Each release is an ordinary commit with a tag, and .gitattributes marks the data folders binary so they never render as diffs. The full-resolution Beinecke scans (data/images) are not shipped; fetch-data --group images downloads them by their IIIF URLs."
 }

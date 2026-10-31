@@ -15,10 +15,10 @@ test('the address: defaults are left out, every key round-trips, bad values fall
   const h={a:'f33v',b:'f75r',view:'segments',text:'custom',cutoff:'2',order:'path1',scope:'bifolia',face:'outer',align:'page',coords:'recorded',scale:'body',blocka:'p2',blockb:'l3',metric:'js',color:'area',gain:'5',words:'1',drift:'1',labels:'1',rings:'0',pages:'f1r,f2r,f1r',hide:'a,f2r,a',lines:'2,3',zoom:'1.234,2,300,450.5',seg:'b:12'};
   const s=S.parse(h),back=S.serialize(s);
   assert.deepEqual(back,{...h,pages:'f1r,f2r',hide:'a,f2r',zoom:'1.23,2,300,450.5'});
-  assert.deepEqual(s.lines,[2,3]);assert.deepEqual(s.seg,{side:'b',id:12});assert.equal(s.gain,5);assert.equal(s.scale,'body');
+  assert.deepEqual(s.lines,[[2,3,0]]);assert.deepEqual(s.seg,{side:'b',id:12});assert.equal(s.gain,5);assert.equal(s.scale,'body');
   const bad=S.parse({view:'x',text:'top9',cutoff:'9',order:'y',face:'z',color:'rainbow',gain:'7',lines:'a,b',zoom:'1,2,3',seg:'c:1',blocka:'drop table',a:'f1r;x',hide:',;,f1r x'});
   assert.equal(bad.view,'overlay');assert.equal(bad.cutoff,'all');assert.equal(bad.order,'bifolia');assert.equal(bad.face,'inner');assert.equal(bad.gain,1);assert.equal(bad.color,'pages');
-  assert.equal(bad.lines,null);assert.equal(bad.zoom,null);assert.equal(bad.seg,null);assert.equal(bad.blocka,'opening');assert.equal(bad.a,'f20v');assert.deepEqual(bad.hide,[]);
+  assert.deepEqual(bad.lines,[]);assert.equal(bad.zoom,null);assert.equal(bad.seg,null);assert.equal(bad.blocka,'opening');assert.equal(bad.a,'f20v');assert.deepEqual(bad.hide,[]);
   assert.deepEqual(S.parse(S.serialize(s)),{...s,zoom:{x:1.23,y:2,w:300,h:450.5}});
   // a Top N preset carries no block or cutoff keys
   assert.deepEqual(S.serialize(S.parse({text:'3',blocka:'p2',cutoff:'1'})),{a:'f20v',b:'f21r',text:'3'});
@@ -191,8 +191,16 @@ test('the first box is scored: a pair sharing only its first word still scores',
  assert.equal(m.units_a,2);assert.equal(m.units_b,2);assert.ok(m.dice>0,'the shared first box counts toward Dice');assert.ok(m.local_segment_similarity>0,'and toward direct EVA');
 });
 test('a line comparison can name its panel, and two-number links still open',()=>{
- assert.deepEqual(S.parse({lines:'2,3'}).lines,[2,3]);assert.deepEqual(S.parse({lines:'2,3,1'}).lines,[2,3,1]);assert.deepEqual(S.parse({lines:'2,3,0'}).lines,[2,3]);
- assert.equal(S.parse({lines:'2,3,x'}).lines,null);assert.equal(S.serialize(S.parse({lines:'2,3,1'})).lines,'2,3,1');
+ assert.deepEqual(S.parse({lines:'2,3'}).lines,[[2,3,0]]);assert.deepEqual(S.parse({lines:'2,3,1'}).lines,[[2,3,1]]);assert.deepEqual(S.parse({lines:'2,3,0'}).lines,[[2,3,0]]);
+ assert.deepEqual(S.parse({lines:'2,3,x'}).lines,[]);assert.equal(S.serialize(S.parse({lines:'2,3,1'})).lines,'2,3,1');
+ // one open line per panel: several in the address, the latest last, and a panel holds only one
+ assert.deepEqual(S.parse({lines:'2,3,1;4,5'}).lines,[[2,3,1],[4,5,0]]);assert.equal(S.serialize(S.parse({lines:'2,3,1;4,5'})).lines,'2,3,1;4,5');
+ assert.deepEqual(S.parse({lines:'2,3,1;4,5,1'}).lines,[[4,5,1]]);assert.deepEqual(S.parse({lines:'2,3;x'}).lines,[]);assert.equal('lines' in S.serialize(S.parse({})),false);
+ const open=[[2,3,0],[4,5,1]];assert.deepEqual(S.lineAt(open,1),[4,5,1]);assert.equal(S.lineAt(open,2),null);
+ assert.deepEqual(S.setLine(open,0,[6,7]),[[4,5,1],[6,7,0]]);assert.deepEqual(S.setLine(open,1,null),[[2,3,0]]);
+ // the maximized panel
+ assert.equal(S.parse({max:'1'}).max,1);assert.equal(S.parse({max:'x'}).max,null);assert.equal(S.parse({}).max,null);
+ assert.equal(S.serialize(S.parse({max:'0'})).max,'0');assert.equal('max' in S.serialize(S.parse({})),false);
 });
 test('paragraph spans follow the page\'s own paragraphs and leave out labels and rings',{skip:!have},()=>{
  const opt={block:'page',cutoff:'all',coordinates:'flat',alignment:'starts',scale:'pixels'},sel=f=>M.selectUnits(compact.pages[f],words,opt);
@@ -203,6 +211,14 @@ test('paragraph spans follow the page\'s own paragraphs and leave out labels and
  const top=M.selectUnits(compact.pages.f20v,words,{...opt,block:'opening',cutoff:3}),t=S.paragraphSpans(top,3);
  assert.deepEqual(t.map(p=>[p.n,p.rows,p.total]),[[1,4,4],[2,1,7]]);             // the opening block's five lines cross into paragraph 2
  assert.deepEqual(S.paragraphSpans({},'all'),[]);
+});
+test('a page move keeps the open line by number, or the nearest number a short page has',()=>{
+ const rows=(...r)=>r.map(([index,baseline])=>({index,baseline})),a=rows([0,10],[1,40],[2,70],[3,100]),b=rows([0,12],[1,30],[2,48],[3,66],[4,84],[5,102]);
+ assert.deepEqual(S.carriedLines(a,b,0,2),[2,3]);                               // A keeps its line, B takes the partner by baseline
+ assert.deepEqual(S.carriedLines(a,b,1,2),[1,2]);                               // B keeps its line
+ assert.deepEqual(S.carriedLines(a,b,0,9),[3,5]);                               // a short page: its last line
+ assert.deepEqual(S.carriedLines(rows([0,10],[1,40],[4,130]),b,0,3),[4,5]);     // a gap in the numbers: the nearest
+ assert.equal(S.carriedLines([],b,0,1),null);assert.equal(S.carriedLines(a,[],1,1),null);
 });
 test('the label gutter clears the leftmost box at fit zoom and leaves a wide enough margin alone',{skip:!have},()=>{
  const sel=M.selectUnits(compact.pages.f20v,words,{block:'page',cutoff:'all',coordinates:'flat',alignment:'starts',scale:'pixels'}),F=S.frame([sel],'all');

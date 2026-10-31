@@ -29,6 +29,7 @@
  const PALETTE=SG.defaultPalette();
  let index,compact,orders,words,rankings=null,wheels=null,quarantine=new Set(),C=null,lines=[],lineOfToken=null,turnedShown=false;
  let state=S.parse(SG.hash()),res=S.resolveText(state),list=[],sheets=[],view=null,full=null,frameKey='',panels=[],pendingZoom=state.zoom,groupHit=null,ticket=0,domain=[0,1];
+ const kept=new Map();let moved=false,overviewScroll=0;   // per panel, the line page moves keep, which a short page can only approximate; whether render must place them; where a maximize left the page
  const last={a:null,b:null,det:null,scores:null,perLine:null,drift:null};
  // the left margin: each page's line labels, then its paragraph bar and number; narrow panels keep the bars only
  const WIDE_MARGIN={columns:[4,46],bar:26,numbers:true,px:92},NARROW_MARGIN={columns:[4,33],bar:26,numbers:false,px:72},NARROW_PANEL=500;
@@ -81,7 +82,8 @@
   fillPickers();
  }
  function save(){SG.setHash({data:SG.hash().data,...S.serialize(state)});}
- function clearTransient(){state.lines=null;state.seg=null;groupHit=null;}
+ function clearTransient(){state.lines=[];state.seg=null;groupHit=null;}
+ function clearPanels(){clearTransient();state.max=null;kept.clear();}          // the panels themselves change
  // ---- selections and panels
  function select(folio,block){
   const page=compact.pages[folio];if(!page)return null;
@@ -133,17 +135,25 @@
   tag.onclick=()=>{state=S.toggleHidden(state,key);render();};
   return tag;
  }
- function drawPanel(p,F,{det,hit}){
+ function maxButton(p,k){
+  const on=state.max===k,b=h('button','maximize',on?'⤡ Back to all':'⤢');b.type='button';
+  b.title=on?'Return to all panels':'Maximize '+(p.title||p.sels.filter(s=>s.sel).map(sideName).join(' and '));b.setAttribute('aria-label',b.title);b.setAttribute('aria-pressed',String(on));
+  b.onclick=()=>setMax(on?null:k);return b;
+ }
+ const toolbarHeight=()=>document.querySelector('.compare .toolbar').offsetHeight;
+ function setMax(k){if(k!=null)overviewScroll=scrollY;state.max=k;render();scrollTo({top:k==null?overviewScroll:figure.getBoundingClientRect().top+scrollY-toolbarHeight()-8,behavior:'instant'});}   // the toolbar is sticky: stop below it
+ function drawPanel(p,F,{det,hit,k,many}){
   const wrap=h('div','panel'),head=h('h3'),split=p.split;
   if(p.title)head.append(h('span','',p.title));
   for(const s of p.sels){if(!s.sel)continue;head.append(tagButton(s,sideName(s)+(s.panels>1?' (+'+(s.panels-1)+' more panels)':''),S.hideKey(state,s.tag)));}
-  const svg=el('svg',{viewBox:`${F.x} ${F.y} ${F.w} ${F.h}`,role:'img','aria-label':(p.title||'Overlay')+' of '+p.sels.filter(s=>s.sel).map(sideName).join(' and ')});
+  if(many)head.append(maxButton(p,k));
+  const svg=el('svg',{viewBox:`${F.x} ${F.y} ${F.w} ${F.h}`,role:'img','data-panel':k,'aria-label':(p.title||'Overlay')+' of '+p.sels.filter(s=>s.sel).map(sideName).join(' and ')});
   if(p.sels.length>2)svg.classList.add('many');if(hit)svg.classList.add('dim');if(p.sels.some(s=>s.ov))svg.classList.add('colored');
   svg.append(el('line',{class:'zero',x1:F.x,x2:F.x+F.w,y1:0,y2:0}));
   const sels=p.sels;sels.forEach((s,i)=>{s.draw=s.sel?(split?split.selections[i]:s.sel):null;});
   if(split){
    svg.append(el('rect',{class:'band',x:F.x,y:split.start,width:F.w,height:split.end-split.start}));
-   split.row_tops.forEach((y,k)=>svg.append(el('text',{class:'band-head',x:F.x+12,y:y-5,style:'--c:'+color(sels[k].k)},(k?'B ':'A ')+sels[k].sel.folio+' · line '+(split.indices[k]+1))));
+   split.row_tops.forEach((y,k)=>svg.append(el('text',{class:'band-head',x:F.x+12,'data-px':margin.px+4,y:y-5,style:'--c:'+color(sels[k].k)},(k?'B ':'A ')+sels[k].sel.folio+' · line '+(split.indices[k]+1))));
   }
   if(det&&sels.length===2&&sels[0].draw&&sels[1].draw&&!hidden(sels[0])&&!hidden(sels[1])){
    const g=el('g',{class:'shared-layer'}),A=sels[0].draw.chosen,B=sels[1].draw.chosen;
@@ -301,13 +311,13 @@
  }
  function renderTools(ps){
   tools.replaceChildren();tools.hidden=true;
-  const lp=state.lines?ps[state.lines[2]||0]:null;
-  if(lp&&lp.split){
-   const sp=lp.split,prev=h('button','','‹'),next=h('button','','›'),close=h('button','','Close');prev.type=next.type=close.type='button';
+  for(const [,,k] of [...state.lines].sort((x,y)=>x[2]-y[2])){
+   const lp=ps[k];if(!lp||!lp.split)continue;
+   const sp=lp.split,row=h('span','reading'),prev=h('button','','‹'),next=h('button','','›'),close=h('button','','Close');prev.type=next.type=close.type='button';
    prev.setAttribute('aria-label','Previous line pair');next.setAttribute('aria-label','Next line pair');
-   prev.onclick=()=>stepSplit(-1);next.onclick=()=>stepSplit(1);close.onclick=()=>{state.lines=null;render();};
+   prev.onclick=()=>stepSplit(-1,k);next.onclick=()=>stepSplit(1,k);close.onclick=()=>{state.lines=S.setLine(state.lines,k,null);render();};
    const lab=h('span');lab.append(document.createTextNode((lp.title?lp.title+': ':'')+'Reading '),h('b','','A line '+(sp.indices[0]+1)),document.createTextNode(' with '),h('b','','B line '+(sp.indices[1]+1)));
-   const pg=h('span','pager');pg.append(prev,next);tools.append(lab,pg,close);tools.hidden=false;
+   const pg=h('span','pager');pg.append(prev,next);row.append(lab,pg,close);tools.append(row);tools.hidden=false;
   }
   if(state.view==='matches'&&rankings){
    const rows=S.matchRows(rankings,state),i=S.matchIndex(rows,state),prev=h('button','','‹ Previous match'),next=h('button','','Next match ›');prev.type=next.type='button';
@@ -342,24 +352,28 @@
  async function render(){
   const my=++ticket;turnedShown=false;$('wdirLabel').hidden=true;figure.dataset.boxStyle=state.boxes;res=S.resolveText(state);fillBlocks();ctl.text.value=state.text;ctl.color.disabled=state.view==='composite'||state.view==='wheels';
   if(state.view==='wheels'){await renderWheels(my);return;}
-  const ps=buildPanels(),allSels=ps.flatMap(p=>p.sels.map(s=>s.sel).filter(Boolean));shown=ps;
+  const ps=buildPanels();shown=ps;if(moved)placeLines();
+  if(ps.length<2||!ps[state.max])state.max=null;
+  const on=state.max==null?ps:[ps[state.max]],allSels=on.flatMap(p=>p.sels.map(s=>s.sel).filter(Boolean));   // the panels drawn; the readouts stay on all of them
   let F=S.frame(allSels,res.cutoff);
-  const panelPx=Math.max(300,(figure.clientWidth||900)/Math.min(ps.length,4)),lp=state.lines?ps[state.lines[2]||0]:null;
-  if(lp&&(state.view==='overlay'||state.view==='matches')&&readable(pairAt(state.lines[2]||0))){
-   const split=M.splitLines(lp.sels[0].sel,lp.sels[1].sel,state.lines.slice(0,2),panelPx/F.w,res.cutoff);
-   if(split){const y0=Math.min(F.y,split.ymin),y1=Math.max(F.y+F.h,split.ymax);F={x:F.x,y:y0,w:F.w,h:y1-y0};lp.split=split;}else state.lines=null;
-  }else state.lines=null;
+  const panelPx=Math.max(300,(figure.clientWidth||900)/Math.min(on.length,4)),scale=panelPx/F.w,open=[];let y0=F.y,y1=F.y+F.h;
+  if(state.view==='overlay'||state.view==='matches')for(const line of state.lines){
+   const k=line[2],p=ps[k];if(!p||!readable(pairAt(k)))continue;
+   if(on.includes(p)){const split=M.splitLines(p.sels[0].sel,p.sels[1].sel,line.slice(0,2),scale,res.cutoff);if(!split)continue;y0=Math.min(y0,split.ymin);y1=Math.max(y1,split.ymax);p.split=split;}
+   open.push(line);
+  }
+  state.lines=open;F={x:F.x,y:y0,w:F.w,h:y1-y0};
   margin=panelPx<NARROW_PANEL?NARROW_MARGIN:WIDE_MARGIN;
   if(ps.some(p=>p.sels.length<=2))F=S.withGutter(F,allSels,res.cutoff,panelPx,margin.px);
-  const key=JSON.stringify([F,ps.length,state.view]);if(key!==frameKey){view=pendingZoom?S.clampView(pendingZoom,F):null;pendingZoom=null;frameKey=key;}
+  const key=JSON.stringify([F,on.length,state.view]);if(key!==frameKey){view=pendingZoom?S.clampView(pendingZoom,F):null;pendingZoom=null;frameKey=key;}
   full=F;
   const two=ps.length===1&&ps[0].sels.length===2&&ps[0].sels.every(s=>s.sel);
   const det=state.view==='segments'&&two?M.details(ps[0].sels[0].sel,ps[0].sels[1].sel):null;
   const hit=det?(groupHit&&det.connected.includes(groupHit)?{kind:'group',a:groupHit.a,b:groupHit.b,record:groupHit}:state.seg?S.partners(det,state.seg.side,state.seg.id):null):null;
   if(det&&groupHit&&!det.connected.includes(groupHit))groupHit=null;
   assignColors(ps);
-  figure.style.setProperty('--panels',String(Math.min(ps.length,4)));
-  figure.replaceChildren(...ps.map(p=>drawPanel(p,F,{det,hit})));
+  figure.style.setProperty('--panels',String(Math.min(on.length,4)));figure.classList.toggle('maximized',state.max!=null);figure.style.setProperty('--toolbar',toolbarHeight()+'px');
+  figure.replaceChildren(...on.map(p=>drawPanel(p,F,{det,hit,k:ps.indexOf(p),many:ps.length>1})));
   panels=[...figure.querySelectorAll('svg')];for(const svg of panels)SG.attachTips(svg);SG.attachTips(figure);
   applyView();renderReadout(ps,det,hit);renderTools(ps);SG.attachTips(tools);describe(ps);save();
   await renderExtra(ps,det);
@@ -396,7 +410,7 @@
    }
    svg.append(g);
   }
-  wrap.append(head,svg);figure.style.setProperty('--panels','1');figure.replaceChildren(wrap);panels=[svg];SG.attachTips(svg);SG.attachTips(figure);SG.attachTips(tools);applyView();
+  wrap.append(head,svg);figure.style.setProperty('--panels','1');figure.classList.remove('maximized');figure.replaceChildren(wrap);panels=[svg];SG.attachTips(svg);SG.attachTips(figure);SG.attachTips(tools);applyView();
   const nw=drawn.reduce((s,e)=>s+e.lay.wheels.length,0),nr=drawn.reduce((s,e)=>s+e.lay.wheels.reduce((t,w)=>t+w.rings.length,0),0),nb=drawn.reduce((s,e)=>s+e.lay.wheels.reduce((t,w)=>t+w.boxes.length,0),0);
   const spread=Math.max(...drawn.flatMap(e=>e.lay.wheels.map(w=>w.spread)));
   readout.append(h('p','note',`${drawn.length} ${drawn.length===1?'page':'pages'} · ${nw} ${nw===1?'wheel':'wheels'} · ${nr} rings · ${nb} boxes on rings${state.labels?' · '+drawn.reduce((s,e)=>s+e.lay.wheels.reduce((t,w)=>t+w.labels.length,0),0)+' nearby labels':''} · largest centre spread ${spread.toFixed(1)} px. Centring is a display transform: every wheel is moved so that its centre lies at the common origin; sizes, angles and spacing are unchanged, and the dashed circles are the fitted ring radii (recorded coordinates).`));
@@ -406,24 +420,40 @@
   status.textContent=`${drawn.map(e=>e.folio).join(', ')} · circular text centred`+(hiddenNames.length?' · '+hiddenNames.join(', ')+' hidden':'')+(state.boxes==='hidden'?' · boxes hidden':'');save();
  }
  // ---- interactions
- function gotoMatch(i){const rows=S.matchRows(rankings,state);if(!rows.length)return;const r=rows[((i%rows.length)+rows.length)%rows.length];if(pagesMode())state.b=r.b;else{state.a=r.a;state.b=r.b;}clearTransient();ctl.a.value=state.a;ctl.b.value=state.b;render();}
+ function gotoMatch(i){const rows=S.matchRows(rankings,state);if(!rows.length)return;keepLines(pagesMode()?['b']:['a','b']);const r=rows[((i%rows.length)+rows.length)%rows.length];if(pagesMode())state.b=r.b;else{state.a=r.a;state.b=r.b;}clearTransient();ctl.a.value=state.a;ctl.b.value=state.b;render();}
  function setSplit(side,line,k=0){
   const pair=pairAt(k);if(!readable(pair))return;
   const rowsA=S.lineRows(pair.a,res.cutoff),rowsB=S.lineRows(pair.b,res.cutoff);let la,lb;
   if(side===0){la=line;const row=rowsA.find(r=>r.index===line),n=row?S.nearestLine(rowsB,row.baseline):null;lb=n?n.index:null;}
   else{lb=line;const row=rowsB.find(r=>r.index===line),n=row?S.nearestLine(rowsA,row.baseline):null;la=n?n.index:null;}
   if(la==null||lb==null)return;
-  const same=state.lines&&state.lines[0]===la&&state.lines[1]===lb&&(state.lines[2]||0)===pair.panel;
-  if(state.view==='side'){state.view='overlay';syncControls();}               // the comparison needs the two pages in one frame
-  state.lines=same?null:pair.panel?[la,lb,pair.panel]:[la,lb];render();
+  const open=S.lineAt(state.lines,pair.panel),same=open&&open[0]===la&&open[1]===lb;
+  if(state.view==='side'){state.view='overlay';if(state.max!=null)state.max=pair.panel;syncControls();}               // the comparison needs the two pages in one frame
+  state.lines=S.setLine(state.lines,pair.panel,same?null:[la,lb]);render();
  }
- function stepSplit(delta){if(!state.lines)return;const pair=pairAt(state.lines[2]||0);if(!readable(pair))return;const rows=S.lineRows(pair.a,res.cutoff),i=rows.findIndex(r=>r.index===state.lines[0]),j=Math.max(0,Math.min(rows.length-1,i+delta));if(j===i||i<0)return;const row=rows[j],n=S.nearestLine(S.lineRows(pair.b,res.cutoff),row.baseline);if(!n)return;state.lines=pair.panel?[row.index,n.index,pair.panel]:[row.index,n.index];render();}
+ // the line the keyboard acts on: the maximized panel's, or the latest opened
+ function activeLine(){if(state.max!=null)return S.lineAt(state.lines,state.max)?state.max:null;const l=state.lines[state.lines.length-1];return l?l[2]:null;}
+ function stepSplit(delta,k){const open=S.lineAt(state.lines,k),pair=pairAt(k);if(!open||!readable(pair))return;const rows=S.lineRows(pair.a,res.cutoff),i=rows.findIndex(r=>r.index===open[0]),j=Math.max(0,Math.min(rows.length-1,i+delta));if(j===i||i<0)return;const row=rows[j],n=S.nearestLine(S.lineRows(pair.b,res.cutoff),row.baseline);if(!n)return;state.lines=S.setLine(state.lines,k,[row.index,n.index]);render();}
+ // a page move keeps each panel's open line: it stays on the page that stays, or on A when both move, and the other page takes its partner
+ function keepLines(sides){
+  const side=sides.length===1&&sides[0]==='a'?1:0;
+  for(const [k,c] of kept)if(c.pair&&!S.lineAt(state.lines,k))kept.delete(k);   // closed since the last move
+  for(const l of state.lines){const c=kept.get(l[2]),pair=l.join();if(!(c&&c.pair===pair&&c.side===side))kept.set(l[2],{side,line:l[side],pair});}
+  moved=kept.size>0&&(state.view==='overlay'||state.view==='matches');
+ }
+ function placeLines(){
+  state.lines=[];moved=false;
+  for(const [k,c] of kept){
+   const pair=pairAt(k),at=readable(pair)?S.carriedLines(S.lineRows(pair.a,res.cutoff),S.lineRows(pair.b,res.cutoff),c.side,c.line):null;
+   c.pair=at?[...at,k].join():null;if(at)state.lines=S.setLine(state.lines,k,at);
+  }
+ }
  figure.addEventListener('click',e=>{
   const t=e.target instanceof Element?e.target:null;if(!t)return;
   const num=t.closest('.lnum'),box=t.closest('.u');
   if(state.view==='segments'&&pagesMode()&&box&&box.dataset.id!=null){const side=box.dataset.side==='0'?'a':'b',id=Number(box.dataset.id);state.seg=state.seg&&state.seg.side===side&&state.seg.id===id?null:{side,id};groupHit=null;render();return;}
   const hit=num||box;if(!hit||hit.dataset.line==null||!lineViews.includes(state.view))return;
-  const k=panels.indexOf(hit.closest('svg')),pair=pairAt(k);
+  const k=Number(hit.closest('svg').dataset.panel),pair=pairAt(k);
   if(readable(pair))setSplit(Number(hit.dataset.side),Number(hit.dataset.line),k);
   else if(pair){const none=[pair.a,pair.b].find(s=>!s||!s.all.length);status.textContent=`${none?none.folio:'This slot'} has no located boxes in this selection, so there is no line to compare.`;}
  });
@@ -440,14 +470,16 @@
  $('zoomOut').onclick=()=>{if(full){const v=view||full;view=S.zoomAt(v,full,0.8,centre(v));applyView();}};
  addEventListener('resize',()=>applyView());
  addEventListener('keydown',e=>{if(e.target instanceof Element&&e.target.matches('input,select,textarea'))return;
-  if(e.key==='Escape'){if(state.lines){state.lines=null;render();}else if(state.seg||groupHit){state.seg=null;groupHit=null;render();}}
-  else if(state.lines&&(e.key==='ArrowLeft'||e.key==='ArrowRight')){e.preventDefault();stepSplit(e.key==='ArrowRight'?1:-1);}});
+  const k=activeLine();
+  if(e.key==='Escape'){if(k!=null){state.lines=S.setLine(state.lines,k,null);render();}else if(state.max!=null)setMax(null);else if(state.seg||groupHit){state.seg=null;groupHit=null;render();}}
+  else if(k!=null&&(e.key==='ArrowLeft'||e.key==='ArrowRight')){e.preventDefault();stepSplit(e.key==='ArrowRight'?1:-1,k);}});
  ctl.order.onchange=()=>{state.order=ctl.order.value;rebuildLists();fillPickers();render();};
  ctl.a.onchange=()=>{state.a=ctl.a.value;clearTransient();render();};ctl.b.onchange=()=>{state.b=ctl.b.value;clearTransient();render();};
  $('prevA').onclick=()=>advance(['a'],-1);$('nextA').onclick=()=>advance(['a'],1);
  $('prevB').onclick=()=>advance(['b'],-1);$('nextB').onclick=()=>advance(['b'],1);
  // one arrow press on A, B or both, in the chosen step: a page, a sheet or a paragraph
  function advance(sides,d){
+  keepLines(sides);
   if(!pagesMode()||state.step==='page'){if(sides.length===2)[state.a,state.b]=S.stepPair(currentList(),state.a,state.b,d);else state[sides[0]]=S.step(currentList(),state[sides[0]],d);}
   else if(state.step==='bifolio')for(const k of sides)state[k]=S.stepSheet(sheets,compact.pages,state[k],d);
   else{
@@ -458,22 +490,22 @@
   ctl.a.value=state.a;ctl.b.value=state.b;clearTransient();render();
  }
  $('prevPair').onclick=()=>advance(['a','b'],-1);$('nextPair').onclick=()=>advance(['a','b'],1);
- $('swap').onclick=()=>{[state.a,state.b]=[state.b,state.a];[state.blocka,state.blockb]=[state.blockb,state.blocka];ctl.a.value=state.a;ctl.b.value=state.b;if(state.lines)state.lines=[state.lines[1],state.lines[0],...state.lines.slice(2)];if(state.seg)state.seg={side:state.seg.side==='a'?'b':'a',id:state.seg.id};state.hide=state.hide.map(k=>k==='a'?'b':k==='b'?'a':k);groupHit=null;render();};
- $('views').addEventListener('click',async e=>{const b=e.target instanceof Element?e.target.closest('button[data-view]'):null;if(!b||b.dataset.view===state.view)return;const keepSplit=['overlay','matches'].includes(b.dataset.view)&&['overlay','matches'].includes(state.view);state.view=b.dataset.view;if(!keepSplit)state.lines=null;state.seg=null;groupHit=null;syncControls();if(state.view==='matches')await loadRankings();render();});
- ctl.text.onchange=()=>{state=S.setText(state,ctl.text.value);state.lines=null;render();};
- ctl.blockA.onchange=()=>{state=S.customize(state,{blocka:ctl.blockA.value});state.lines=null;render();};
- ctl.blockB.onchange=()=>{state=S.customize(state,{blockb:ctl.blockB.value});state.lines=null;render();};
+ $('swap').onclick=()=>{[state.a,state.b]=[state.b,state.a];[state.blocka,state.blockb]=[state.blockb,state.blocka];ctl.a.value=state.a;ctl.b.value=state.b;state.lines=state.lines.map(([x,y,k])=>[y,x,k]);if(state.view==='side'&&state.max!=null)state.max^=1;if(state.seg)state.seg={side:state.seg.side==='a'?'b':'a',id:state.seg.id};state.hide=state.hide.map(k=>k==='a'?'b':k==='b'?'a':k);groupHit=null;render();};
+ $('views').addEventListener('click',async e=>{const b=e.target instanceof Element?e.target.closest('button[data-view]'):null;if(!b||b.dataset.view===state.view)return;const keepSplit=['overlay','matches'].includes(b.dataset.view)&&['overlay','matches'].includes(state.view);state.view=b.dataset.view;if(!keepSplit){state.lines=[];state.max=null;}state.seg=null;groupHit=null;syncControls();if(state.view==='matches')await loadRankings();render();});
+ ctl.text.onchange=()=>{state=S.setText(state,ctl.text.value);state.lines=[];render();};
+ ctl.blockA.onchange=()=>{state=S.customize(state,{blocka:ctl.blockA.value});state.lines=[];render();};
+ ctl.blockB.onchange=()=>{state=S.customize(state,{blockb:ctl.blockB.value});state.lines=[];render();};
  ctl.cutoff.onchange=()=>{state=S.customize(state,{cutoff:ctl.cutoff.value});render();};
  ctl.words.onchange=()=>{state.words=ctl.words.checked;render();};ctl.drift.onchange=()=>{state.drift=ctl.drift.checked;render();};
  for(const k of ['align','coords','scale','metric','color','wdir','boxes'])ctl[k].onchange=()=>{state[k]=ctl[k].value;render();};
- ctl.step.onchange=()=>{const was=state.step;state.step=ctl.step.value;if(was==='paragraph'&&state.step!=='paragraph'){state=S.setText(state,'page');state.lines=null;}syncControls();render();};   // leaving paragraph steps returns to whole pages
+ ctl.step.onchange=()=>{const was=state.step;state.step=ctl.step.value;if(was==='paragraph'&&state.step!=='paragraph'){state=S.setText(state,'page');state.lines=[];}syncControls();render();};   // leaving paragraph steps returns to whole pages
  ctl.gain.onchange=()=>{state.gain=Number(ctl.gain.value);render();};
- ctl.face.onchange=()=>{state.face=ctl.face.value;clearTransient();render();};
+ ctl.face.onchange=()=>{state.face=ctl.face.value;clearPanels();render();};
  ctl.scope.onchange=()=>{
   const to=ctl.scope.value;
   if(to==='bifolia'){const na=compact.pages[state.a]&&compact.pages[state.a].node,nb=compact.pages[state.b]&&compact.pages[state.b].node;state.scope=to;state.a=na||sheets[0].id;state.b=nb&&nb!==state.a?nb:S.step(sheets.map(s=>s.id),state.a,1);}
   else{const fa=slotFolios(state.a)[0],fb=slotFolios(state.b)[0];state.scope=to;state.a=fa||list[0];state.b=fb||list[1];}
-  clearTransient();syncControls();render();
+  clearPanels();syncControls();render();
  };
  $('export').onclick=()=>{
   const det=last.det||(last.a&&last.b&&pagesMode()?M.details(last.a,last.b):null),rec=S.exportRecord(state,compact,last.a,last.b,last.scores,det,last.perLine,last.drift);

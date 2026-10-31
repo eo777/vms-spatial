@@ -80,7 +80,7 @@ def collect(cfg) -> dict:
 
 
 def gitattributes(cfg) -> bytes:
-    lines = ['# data folders: stored as published, never shown as diffs (their history is not kept: releases are squashed)']
+    lines = ['# data folders: stored as published, never shown as diffs']
     lines += ['%s -diff -text linguist-generated' % pat for pat in cfg.get('no_diff', [])]
     lines += ['*.json.gz binary', '*.gz binary']
     return ('\n'.join(lines) + '\n').encode()

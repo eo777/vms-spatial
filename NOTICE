@@ -1,4 +1,4 @@
-vms-spatial reads data files that are not part of this repository (see
+vms-spatial carries data files from other sources (see
 vmsspatial/resources/data_manifest.json for every file, its SHA-256 and where
 it comes from). Their terms:
 
@@ -25,7 +25,7 @@ and Gabriel Landini (ZL3b, 2025-05-13), published at voynich.nu.
 
 Natural-language comparison texts (data/controls/texts): OCR transcriptions of
 early printed herbals and medical texts and training splits of a reference
-corpus, assembled for the research workspace; they are provided for the
+corpus, assembled for this project's research; they are provided for the
 layout controls only.
 
 Page scans (measured by vmsspatial.images and vmsspatial.ink, never stored

@@ -7,7 +7,7 @@ in one call. The pitfalls these rules answer are PITFALLS 16 to 22.
 
 ## Defaults, and why
 
-- `Manuscript.load()` = every page and every locus (227 pages, 5,365 lines, 38,876 tokens) by bifolium, each line
+- `Manuscript.load()` = every page and every locus with a fully read word (227 pages, 5,365 lines, 38,876 tokens) by bifolium, each line
   with its locus type: the toolkit describes the recorded manuscript, not a study's subset. `order='folio'` is the true
   page sequence. The study subset is explicit: `Manuscript.load(pages='paragraph', order='path1')` (`manuscript.STUDY`).
 - `load_bundle()` = the flat warp state: a vertical position in the recorded frame carries the photograph's warp (a

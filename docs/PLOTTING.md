@@ -1,7 +1,7 @@
 # Printing pages with matplotlib
 
 `vmsspatial.plot` draws a page, a comparison, a wheel, the centred wheels of a page and a bifolium face, for when
-the web atlas is not at hand. It needs matplotlib (`pip install vms-spatial[plot]`), uses the Agg backend (no
+the web atlas is not at hand. It needs matplotlib (`pip install -e .[plot]` from a clone), uses the Agg backend (no
 display needed), returns the Axes and leaves saving to the caller. Every title names the frame and the warp state
 of what is drawn and the data version; nothing drawn on a page image is in the flat state.
 

@@ -30,7 +30,7 @@
  function stateNote(){
   const note=document.getElementById('stateNote');if(!note)return;
   const entry=index.bundles.find(b=>b.key===bundleKey)||{},flat=pageDisplay.coordinates()==='flat';
-  note.textContent=(entry.warp!=='flat'?'Boxes and measures are in recorded coordinates.':flat?'Boxes are drawn in the flat state, with each page\'s photographic warp removed; the spatial measures are computed there too. A page image returns its boxes to recorded coordinates.':'Boxes are drawn in recorded coordinates (as on the photographs); the spatial measures are computed in the flat state, with each page\'s photographic warp removed.')+(entry.pages==='all'?' Every page and locus the Voynichese Project recorded is included.':entry.pages==='paragraph'?' Paragraph text of the 207 study pages only.':'');
+  note.textContent=(entry.warp!=='flat'?'Boxes and measures are in recorded coordinates.':flat?'Boxes are drawn in the flat state, with each page\'s photographic warp removed; the spatial measures are computed there too. A page image returns its boxes to recorded coordinates.':'Boxes are drawn in recorded coordinates (as on the photographs); the spatial measures are computed in the flat state, with each page\'s photographic warp removed.')+(entry.pages==='all'?' Every page is included, with every locus that has a fully read word.':entry.pages==='paragraph'?' Paragraph text of the 207 study pages only.':'');
  }
  try{
   const config=await fetch('config.json').then(r=>r.ok?r.json():{}).catch(()=>({}));

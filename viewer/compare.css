@@ -24,11 +24,13 @@
 .compare .status.error-text{color:var(--neg);font-weight:600}
 .compare .view-tools{display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;font-size:12.5px;margin:0 0 8px;color:var(--ink2)}
 .compare .view-tools[hidden]{display:none}
+.compare .view-tools .reading{display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap}
 .compare .view-tools b{color:var(--ink);font-weight:600}
 .compare .view-tools label{display:flex;align-items:center;gap:5px}
 .compare .view-tools input{accent-color:var(--ink2);margin:0}
 .compare .figure{display:grid;gap:12px;grid-template-columns:repeat(var(--panels,1),minmax(0,1fr))}
 .compare .panel{min-width:0}
+.compare .figure .panel+.panel{margin-top:0}
 .compare .panel h3{font-size:12.5px;margin:0 0 5px;color:var(--ink2);font-weight:600;display:flex;gap:6px 12px;flex-wrap:wrap;align-items:center}
 .compare .panel h3 .tag{display:inline-flex;align-items:center;gap:5px;cursor:pointer;user-select:none;border:0;background:none;padding:2px 4px;border-radius:4px;font:inherit;color:var(--ink2)}
 .compare .panel h3 .tag:hover{background:color-mix(in srgb,var(--ink) 6%,transparent);color:var(--ink)}
@@ -37,6 +39,11 @@
 .compare .panel h3 .tag.none{cursor:default;color:var(--muted)}
 .compare .panel svg{display:block;width:100%;height:auto;max-height:78vh;background:var(--surface);border:1px solid var(--line2);border-radius:6px;cursor:grab;touch-action:none}
 .compare .panel svg.dragging{cursor:grabbing}
+.compare .panel h3 .maximize{margin-left:auto;font:14px var(--sans);line-height:1;padding:3px 7px;border:1px solid var(--line2);border-radius:4px;background:var(--surface);color:var(--ink);cursor:pointer}
+.compare .panel h3 .maximize:hover{border-color:var(--ink)}
+/* a maximized panel takes the full width and drops the height limit, or a portrait page would not grow; its head stays in view */
+.compare .figure.maximized .panel svg{max-height:none}
+.compare .figure.maximized .panel h3{position:sticky;top:var(--toolbar,0px);z-index:2;background:var(--surface);padding:4px 0}
 .compare .panel svg text{user-select:none}
 .compare .swatch{display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--c);vertical-align:-1px}
 .compare .swatch.dashed{background:none;border:2px dashed var(--c);box-sizing:border-box}

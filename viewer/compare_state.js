@@ -13,10 +13,14 @@ const ALIGNS=['starts','page'],COORDS=['flat','recorded'],SCALES=['pixels','body
 const SLOTS={inner:['Av','Br'],outer:['Bv','Ar'],both:['Av','Br','Bv','Ar']};
 const MIN_ZOOM=0.25,MAX_ZOOM=40,MAX_PAGES=12;
 const DEFAULTS={a:'f20v',b:'f21r',view:'overlay',text:'page',cutoff:'all',order:'bifolia',scope:'pages',face:'inner',align:'starts',coords:'flat',scale:'pixels',
-  blocka:'opening',blockb:'opening',metric:'both',gain:1,color:'pages',boxes:'fill',step:'page',words:false,wdir:'ring',drift:false,rings:true,labels:false,pages:[],hide:[],lines:null,zoom:null,seg:null};
+  blocka:'opening',blockb:'opening',metric:'both',gain:1,color:'pages',boxes:'fill',step:'page',words:false,wdir:'ring',drift:false,rings:true,labels:false,pages:[],hide:[],lines:[],max:null,zoom:null,seg:null};
 const pick=(value,allowed,fallback)=>allowed.includes(value)?value:fallback;
 const folio=v=>typeof v==='string'&&/^[A-Za-z0-9:_.-]{1,24}$/.test(v)?v:null;
 const BLOCK=/^(opening|page|p\d+|l\d+)$/;
+/* lineAt(lines, panel) -> the pair open in that panel, or null. lines holds one [a, b, panel] per panel, the latest last */
+const lineAt=(lines,panel)=>lines.find(l=>l[2]===panel)||null;
+/* setLine(lines, panel, pair) -> lines with that panel's pair replaced, or closed when pair is null */
+const setLine=(lines,panel,pair)=>[...lines.filter(l=>l[2]!==panel),...(pair?[[pair[0],pair[1],panel]]:[])];
 // ---- the address
 function parse(h={}){
   const s={...DEFAULTS,pages:[],hide:[]};
@@ -33,7 +37,8 @@ function parse(h={}){
   s.words=h.words==='1';s.drift=h.drift==='1';s.labels=h.labels==='1';s.rings=h.rings!=='0';
   s.pages=typeof h.pages==='string'?[...new Set(h.pages.split(',').map(folio).filter(Boolean))].slice(0,MAX_PAGES):[];
   s.hide=typeof h.hide==='string'?[...new Set(h.hide.split(',').filter(x=>x==='a'||x==='b'||folio(x)))]:[];
-  if(typeof h.lines==='string'){const m=/^(\d+),(\d+)(?:,(\d+))?$/.exec(h.lines);s.lines=m?(Number(m[3])?[Number(m[1]),Number(m[2]),Number(m[3])]:[Number(m[1]),Number(m[2])]):null;}
+  if(typeof h.lines==='string'){const ms=h.lines.split(';').map(x=>/^(\d+),(\d+)(?:,(\d+))?$/.exec(x));s.lines=ms.every(Boolean)?ms.reduce((all,m)=>setLine(all,Number(m[3]||0),[Number(m[1]),Number(m[2])]),[]):[];}
+  s.max=/^\d+$/.test(h.max||'')?Number(h.max):null;
   if(typeof h.zoom==='string'){const v=h.zoom.split(',').map(Number);s.zoom=v.length===4&&v.every(Number.isFinite)&&v[2]>0&&v[3]>0?{x:v[0],y:v[1],w:v[2],h:v[3]}:null;}
   if(typeof h.seg==='string'){const m=/^([ab]):(\d+)$/.exec(h.seg);s.seg=m?{side:m[1],id:Number(m[2])}:null;}
   return s;
@@ -46,7 +51,8 @@ function serialize(s){
   if(s.words)o.words='1';if(s.drift)o.drift='1';if(s.labels)o.labels='1';if(!s.rings)o.rings='0';
   if(s.pages&&s.pages.length)o.pages=s.pages.join(',');
   if(s.hide&&s.hide.length)o.hide=s.hide.join(',');
-  if(s.lines)o.lines=s.lines.join(',');
+  if(s.lines&&s.lines.length)o.lines=s.lines.map(l=>(l[2]?l:l.slice(0,2)).join(',')).join(';');
+  if(s.max!=null)o.max=String(s.max);
   if(s.zoom)o.zoom=[s.zoom.x,s.zoom.y,s.zoom.w,s.zoom.h].map(n=>Math.round(n*100)/100).join(',');
   if(s.seg)o.seg=s.seg.side+':'+s.seg.id;
   return o;
@@ -158,6 +164,13 @@ function paragraphSpans(sel,cutoff){
   return out;
 }
 function nearestLine(rows,y){let best=null;for(const r of rows){const d=Math.abs(r.baseline-y);if(!best||d<best.d)best={d,row:r};}return best?best.row:null;}
+/* carriedLines(rowsA, rowsB, side, line) -> [a, b]: the pair to read after a page move. Page `side` (0 A, 1 B) keeps the
+   line's number, or the nearest number it has; the other page takes the partner a click would give. null when a page has no lines */
+function carriedLines(rowsA,rowsB,side,line){
+  const own=side?rowsB:rowsA,other=side?rowsA:rowsB;if(!own.length||!other.length)return null;
+  const row=own.reduce((best,r)=>Math.abs(r.index-line)<Math.abs(best.index-line)?r:best),partner=nearestLine(other,row.baseline);
+  return side?[partner.index,row.index]:[row.index,partner.index];
+}
 // ---- segments
 /* partners(details, side, id) -> {kind: 'direct'|'nearby', a: [ids], b: [ids], record} for a clicked unit, or null */
 function partners(det,side,id){
@@ -232,6 +245,6 @@ function exportRecord(s,meta,a,b,scores,det,perLine,drift){
     note:'Translation-only overlay scores describe resemblance, not copying (docs/COMPARE.md).'};
 }
 const api={VIEWS,CUTOFFS,TEXTS,ORDERS,SCOPES,FACES,ALIGNS,COORDS,SCALES,METRICS,GAINS,COLORS,COLOR_LABELS,WORD_DIRS,BOXES,STEPS,SLOTS,DEFAULTS,MIN_ZOOM,MAX_ZOOM,MAX_PAGES,parse,serialize,resolveText,setText,customize,hideKey,isHidden,toggleHidden,
-  pageList,sheetList,step,stepPair,stepSheet,paragraphKeys,stepParagraph,slotPages,wheelPages,visible,frame,withGutter,clampView,zoomAt,pan,zoomScale,isFit,lineRows,paragraphSpans,nearestLine,partners,overlapValues,colorDomain,colorIndex,matchRows,matchIndex,wheelLayout,exportRecord};
+  pageList,sheetList,step,stepPair,stepSheet,paragraphKeys,stepParagraph,slotPages,wheelPages,visible,frame,withGutter,clampView,zoomAt,pan,zoomScale,isFit,lineRows,paragraphSpans,nearestLine,carriedLines,lineAt,setLine,partners,overlapValues,colorDomain,colorIndex,matchRows,matchIndex,wheelLayout,exportRecord};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.COMPARE_STATE=api;
 })(typeof window!=='undefined'?window:globalThis);
