@@ -221,6 +221,11 @@ test('a page move keeps the open line by number, or the nearest number a short p
  assert.deepEqual(S.carriedLines(rows([0,10],[1,40],[4,130]),b,0,3),[4,5]);     // a gap in the numbers: the nearest
  assert.equal(S.carriedLines([],b,0,1),null);assert.equal(S.carriedLines(a,[],1,1),null);
 });
+test('a zoom carried to another page keeps its scale and stays inside the new frame',()=>{
+ const a={x:0,y:0,w:600,h:800},b={x:-50,y:-20,w:700,h:500},v=S.zoomAt(a,a,3,{x:500,y:700}),k=S.clampView(v,b);
+ assert.ok(Math.abs(k.w-v.w)<1e-9);assert.ok(Math.abs(k.h-k.w*b.h/b.w)<1e-9);assert.equal(S.isFit(k,b),false);
+ assert.ok(k.x>=b.x&&k.y>=b.y&&k.x+k.w<=b.x+b.w+1e-9&&k.y+k.h<=b.y+b.h+1e-9);
+});
 test('Expand all lines shows every line of both pages once, each beside its partner',{skip:!have},()=>{
  const opt={block:'page',cutoff:'all',coordinates:'flat',alignment:'starts',scale:'pixels'},sel=f=>M.selectUnits(compact.pages[f],words,opt);
  const a=sel('f20v'),b=sel('f21r'),rows=[a,b].map(s=>S.lineRows(s,'all')),pairs=S.linePairs(rows[0],rows[1]);

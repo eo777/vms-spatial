@@ -351,6 +351,8 @@
   status.textContent=parts.join(' · ');
  }
  // ---- render
+ // a new layout starts at Fit; a change of pages keeps the zoom: the same scale at the same place, held inside the new frame
+ function frameView(key,F){if(key!==frameKey){view=pendingZoom?S.clampView(pendingZoom,F):null;pendingZoom=null;frameKey=key;}else if(view)view=S.clampView(view,F);full=F;}
  async function render(){
   const my=++ticket;turnedShown=false;$('wdirLabel').hidden=true;figure.dataset.boxStyle=state.boxes;res=S.resolveText(state);fillBlocks();ctl.text.value=state.text;ctl.color.disabled=state.view==='composite'||state.view==='wheels';
   if(state.view==='wheels'){await renderWheels(my);return;}
@@ -370,8 +372,7 @@
   state.lines=open;}F={x:F.x,y:y0,w:F.w,h:y1-y0};
   margin=panelPx<NARROW_PANEL?NARROW_MARGIN:WIDE_MARGIN;
   if(ps.some(p=>p.sels.length<=2))F=S.withGutter(F,allSels,res.cutoff,panelPx,margin.px);
-  const key=JSON.stringify([F,on.length,state.view]);if(key!==frameKey){view=pendingZoom?S.clampView(pendingZoom,F):null;pendingZoom=null;frameKey=key;}
-  full=F;
+  frameView(JSON.stringify([on.length,state.view,stacked(),state.scale,state.align]),F);
   const two=ps.length===1&&ps[0].sels.length===2&&ps[0].sels.every(s=>s.sel);
   const det=state.view==='segments'&&two?M.details(ps[0].sels[0].sel,ps[0].sels[1].sel):null;
   const hit=det?(groupHit&&det.connected.includes(groupHit)?{kind:'group',a:groupHit.a,b:groupHit.b,record:groupHit}:state.seg?S.partners(det,state.seg.side,state.seg.id):null):null;
@@ -399,7 +400,7 @@
   const drawn=entries.filter(e=>e.lay.wheels.length);
   if(!drawn.length){figure.replaceChildren(h('div','empty',`${folios.join(', ')||'this page'} ${folios.length>1?'have':'has'} no circular text with a fitted wheel.`));status.textContent=`${folios.join(', ')} · no wheel`;full=null;zoomLevel.textContent='';save();return;}
   const R=Math.max(...drawn.map(e=>e.lay.radius))*1.05+15,F={x:-R,y:-R,w:2*R,h:2*R};
-  const key=JSON.stringify([F,'wheels',folios]);if(key!==frameKey){view=pendingZoom?S.clampView(pendingZoom,F):null;pendingZoom=null;frameKey=key;}full=F;
+  frameView('wheels',F);
   const wrap=h('div','panel'),head=h('h3'),svg=el('svg',{viewBox:`${F.x} ${F.y} ${F.w} ${F.h}`,role:'img','aria-label':'Centred wheels of '+folios.join(', ')});
   for(const e of entries){const n=e.lay.wheels.length;head.append(tagButton(e,e.folio+(n?(n>1?' · '+n+' wheels':''):' · no wheel'),e.folio,{none:!n}));}
   svg.append(el('line',{class:'cross',x1:-R,x2:R,y1:0,y2:0}),el('line',{class:'cross',x1:0,x2:0,y1:-R,y2:R}));
