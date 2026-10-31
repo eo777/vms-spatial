@@ -15,12 +15,13 @@ const HEATMAPS={
  amber:{label:'Amber',colors:['#fffaf0','#fff1d6','#ffe7b8','#ffdda0','#f6d18b','#ecc579','#dfb86a','#d2ab5c','#c49e4f','#b69242']}
 };
 const pick=(value,allowed,fallback)=>allowed.includes(value)?value:fallback;
+const FOLIO=/^[A-Za-z0-9._-]{1,24}$/;
 const median=a=>{const s=a.slice().sort((x,y)=>x-y),i=Math.floor(s.length/2);return s.length?s.length%2?s[i]:(s[i-1]+s[i])/2:0;};
 // ---- the address
 /* parse(hash) -> the page's state, every value checked; serialize(state) -> the hash, defaults left out */
 function parse(h={}){
  const s={by:pick(h.by,BY,'section'),group:typeof h.group==='string'?h.group:'',align:pick(h.align,ALIGNS,'page'),anchor:pick(h.anchor,ANCHORS,'opening'),coords:pick(h.coords,COORDS,'flat'),scale:pick(h.scale,SCALES,'pixels'),
-  color:pick(h.color,COLORS,'page'),cell:pick(h.cell,CELLS,'20'),palette:pick(h.palette,Object.keys(HEATMAPS),'blues'),focus:typeof h.focus==='string'?h.focus:'',op:{...OPACITY_DEFAULTS}};
+  color:pick(h.color,COLORS,'page'),cell:pick(h.cell,CELLS,'20'),palette:pick(h.palette,Object.keys(HEATMAPS),'blues'),focus:typeof h.focus==='string'?h.focus:'',op:{...OPACITY_DEFAULTS},edits:decodeEdits(h.edits)};
  s.layers=typeof h.layers==='string'?LAYERS.filter(k=>h.layers.split(',').includes(k)):['heatmap','polygons'];
  if(typeof h.op==='string')h.op.split(',').forEach((v,i)=>{const n=Number(v),k=OPACITY[i]&&OPACITY[i][0];if(k&&v!==''&&Number.isFinite(n)&&n>=0&&n<=100)s.op[k]=n;});
  return s;
@@ -30,7 +31,22 @@ function serialize(s){
  for(const [k,d] of [['by','section'],['group',''],['align','page'],['anchor','opening'],['coords','flat'],['scale','pixels'],['color','page'],['cell','20'],['palette','blues'],['focus','']])if(s[k]!==d)o[k]=s[k];
  if(s.layers.join()!=='heatmap,polygons')o.layers=s.layers.join()||'none';
  if(OPACITY.some(([k])=>s.op[k]!==OPACITY_DEFAULTS[k]))o.op=OPACITY.map(([k])=>s.op[k]).join(',');
+ const edits=encodeEdits(s.edits||{});if(edits)o.edits=edits;
  return o;
+}
+/* The pages added to and removed from each group, in the address: 'section/Herbal A:+f67r1,f68r1:-f8v|golf/1a:-f20v' */
+function encodeEdits(edits){
+ return Object.keys(edits).sort().map(k=>{const e=edits[k],parts=[k];if(e.add&&e.add.length)parts.push('+'+e.add.join(','));if(e.remove&&e.remove.length)parts.push('-'+e.remove.join(','));return parts.length>1?parts.join(':'):null;}).filter(Boolean).join('|');
+}
+function decodeEdits(text){
+ const out={};if(typeof text!=='string')return out;
+ for(const item of text.split('|')){
+  const [key,...parts]=item.split(':');if(!key||!parts.length)continue;
+  const edit={add:[],remove:[]};
+  for(const p of parts)edit[p[0]==='+'?'add':'remove'].push(...p.slice(1).split(',').filter(f=>FOLIO.test(f)));
+  if(edit.add.length||edit.remove.length)out[key]=edit;
+ }
+ return out;
 }
 // ---- groups
 /* groups(pages, list, by) -> [{name, pages}], the pages in list order: sections by page count, or Golf groups in their order */
@@ -39,6 +55,25 @@ function groups(pages,list,by='section'){
  for(const f of list){const p=pages[f];if(!p)continue;const name=(by==='golf'?p.group:p.section)||'—';if(!map.has(name))map.set(name,[]);map.get(name).push(f);}
  const rank=n=>{const i=GOLF_ORDER.indexOf(n);return i<0?GOLF_ORDER.length:i;};
  return [...map].map(([name,folios])=>({name,pages:folios})).sort((a,b)=>by==='golf'?rank(a.name)-rank(b.name)||a.name.localeCompare(b.name):b.pages.length-a.pages.length||a.name.localeCompare(b.name));
+}
+const editKey=(by,name)=>by+'/'+name;
+/* customize(group, list, edit) -> the group with its pages added and removed: {name, original, universe, pages, added, removed}. pages runs
+   in list order. universe is the group's own pages and then the rest of the manuscript: colours follow it, so they hold as pages come and go. */
+function customize(group,list,edit={}){
+ const base=new Set(group.pages),known=new Set(list),add=new Set((edit.add||[]).filter(f=>known.has(f)&&!base.has(f))),remove=new Set((edit.remove||[]).filter(f=>base.has(f)));
+ return {name:group.name,original:group.pages,universe:[...group.pages,...list.filter(f=>!base.has(f))],pages:list.filter(f=>(base.has(f)&&!remove.has(f))||add.has(f)),added:list.filter(f=>add.has(f)),removed:group.pages.filter(f=>remove.has(f))};
+}
+/* included(custom, list, folios, include) -> the {add, remove} that puts those pages in or takes them out of a customized group */
+function included(custom,list,folios,include){
+ const selected=new Set(custom.pages),base=new Set(custom.original);
+ for(const f of folios)if(include)selected.add(f);else selected.delete(f);
+ return {add:list.filter(f=>selected.has(f)&&!base.has(f)),remove:custom.original.filter(f=>!selected.has(f))};
+}
+/* cleanEdits(pages, list, edits) -> only the edits that change a group that exists, with only pages that exist */
+function cleanEdits(pages,list,edits){
+ const out={};
+ for(const by of BY)for(const g of groups(pages,list,by)){const key=editKey(by,g.name);if(!edits[key])continue;const c=customize(g,list,edits[key]);if(c.added.length||c.removed.length)out[key]={add:c.added,remove:c.removed};}
+ return out;
 }
 /* lineTokens(lines) -> Map 'folio|locus' -> the tokens of that line, from the bundle's lines */
 function lineTokens(lines){const out=new Map();for(const L of lines)out.set(L.page+'|'+L.locus,L.end-L.start);return out;}
@@ -163,12 +198,10 @@ function bounds(entries){
  return x1>x0?{x0,y0,x1,y1}:null;
 }
 const hue=i=>'hsl('+((i*137.507764)%360).toFixed(2)+' 65% 56%)';
-/* colorIndex(mode, entries) -> Map folio -> a stable colour index within this group: by page, or shared across a bifolium, Golf group or section */
-function colorIndex(mode,entries){
- const key=e=>mode==='bifolium'?e.node:mode==='group'?e.group:mode==='section'?e.section:e.folio,seen=new Map(),out=new Map();
- for(const e of entries){const k=key(e);if(!seen.has(k))seen.set(k,seen.size);out.set(e.folio,seen.get(k));}
- return out;
-}
-const api={GOLF_ORDER,BY,ALIGNS,ANCHORS,COORDS,SCALES,COLORS,CELLS,LAYERS,OPACITY,OPACITY_DEFAULTS,HEATMAPS,parse,serialize,groups,lineTokens,paragraphPolygons,extract,occupancy,band,ramp,bounds,hue,colorIndex};
+/* colorKey(mode, folio, page) -> what shares a colour: the page, or its bifolium, Golf group or section */
+const colorKey=(mode,folio,page)=>mode==='bifolium'?page.node:mode==='group'?page.group:mode==='section'?page.section:folio;
+/* colorIndex(mode, folios, pages) -> Map colour key -> index, in the order of folios (a group's universe, so that colours hold through edits) */
+function colorIndex(mode,folios,pages){const seen=new Map();for(const f of folios){const k=colorKey(mode,f,pages[f]);if(!seen.has(k))seen.set(k,seen.size);}return seen;}
+const api={GOLF_ORDER,BY,ALIGNS,ANCHORS,COORDS,SCALES,COLORS,CELLS,LAYERS,OPACITY,OPACITY_DEFAULTS,HEATMAPS,parse,serialize,encodeEdits,decodeEdits,groups,editKey,customize,included,cleanEdits,lineTokens,paragraphPolygons,extract,occupancy,band,ramp,bounds,hue,colorKey,colorIndex};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.VMS_SECTIONS=api;
 })(typeof window!=='undefined'?window:globalThis);

@@ -28,11 +28,33 @@
 .sections .breaks{opacity:var(--o-breaks,.7);stroke-width:2.4}
 .sections .starts{opacity:var(--o-starts,.7)}
 .sections .ends{opacity:var(--o-ends,.7)}
-.sections .figure.focused .pg:not(.on){opacity:.07}
+/* a picked-out colour: the rest and the heatmap step back, its own marks step forward. A layer at zero stays hidden */
+.sections .figure.focused .pg:not(.on){opacity:.06}
+.sections .figure.focused .heat{opacity:calc(var(--o-heatmap,1)*.3)}
+.sections .figure.focused .pg.on .poly{stroke-opacity:min(1,calc(var(--o-outline,.5)*3));stroke-width:2.6}
+.sections .figure.focused .pg.on .boxes{opacity:min(1,calc(var(--o-boxes,.15)*3))}
+.sections .figure.focused .pg.on .mark{opacity:1}
 .sections .heat-legend{display:flex;flex-wrap:wrap;gap:0;align-items:stretch;font-size:11px;margin:8px 0}
 .sections .heat-legend .legend-title{flex-basis:100%;color:var(--ink2);margin-bottom:4px;font-size:12px}
 .sections .swatch-cell{flex:1 1 56px;text-align:center;padding:3px 0;color:var(--ink);border-top:10px solid var(--swatch);opacity:max(var(--o-heatmap,1),.35)}
-.sections .chips{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0;max-height:150px;overflow:auto}
-.sections .chip{font:12px var(--sans);padding:2px 7px;border:1px solid var(--line2);border-left:5px solid var(--c);border-radius:4px;background:var(--surface);color:var(--ink);cursor:pointer}
-.sections .chip.on{border-color:var(--ink);border-left-color:var(--c);font-weight:600}
-.sections .chip:disabled{opacity:.45;cursor:default}
+.sections .chips{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0 2px;max-height:96px;overflow:auto}
+.sections .chip-wrap{display:inline-flex}
+.sections .chip{font:12px var(--sans);padding:2px 7px;border:1px solid var(--line2);border-left:6px solid var(--c);border-radius:4px 0 0 4px;background:var(--surface);color:var(--ink);cursor:pointer}
+.sections .chip.on{border-color:var(--ink);border-left-color:var(--c);font-weight:600;background:var(--line)}
+.sections .chip-x{font:12px var(--sans);padding:2px 6px;border:1px solid var(--line2);border-left:0;border-radius:0 4px 4px 0;background:var(--surface);color:var(--muted);cursor:pointer}
+.sections .chip-x:hover{color:var(--ink);border-color:var(--ink)}
+.sections .toolbar .page-key,.sections .toolbar .editor,.sections .toolbar .focus-bar{flex-basis:100%;margin:0}
+.sections .toolbar [hidden]{display:none}
+.sections .focus-bar{display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:var(--ink2)}
+.sections .focus-bar b{color:var(--ink)}
+.sections .editor{font-size:12.5px;color:var(--ink2);border-top:1px solid var(--line2);padding-top:8px}
+.sections .editor-row{display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap}
+.sections .editor-row input[type=search]{flex:1 1 200px;min-width:150px;font:inherit;padding:5px 8px;border:1px solid var(--line2);border-radius:4px;background:var(--surface);color:var(--ink)}
+.sections .editor .note{margin:6px 0;font-size:12px}
+.sections .member-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:3px 12px;max-height:20vh;overflow:auto}
+.sections .member{display:flex;gap:6px;align-items:flex-start;padding-left:5px;border-left:4px solid var(--c,transparent);cursor:pointer}
+.sections .member input{margin:2px 0 0;accent-color:var(--ink2)}
+.sections .member b{color:var(--ink);font-weight:600}
+.sections .member small{display:block;color:var(--muted);font-size:11px;line-height:1.3}
+.sections .panel .page-key{margin:6px 0 0}
+.sections .panel-edit{font:12px var(--sans);padding:2px 7px;margin-left:8px}

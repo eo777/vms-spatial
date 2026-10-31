@@ -17,7 +17,8 @@ in `viewer/test/section_math.test.js`, and it reads the same compare data as the
 | Opacity sliders | `op`, seven percentages in the order of the sliders | one 0 to 100% slider per layer, with paragraph fill and outlines separate. A slider changes no geometry and redraws nothing |
 | Heatmap cell, Heatmap colours | `cell` = 10, 40, 80 (20 is the default), `palette` = gray, amber | the grid size in display units, and three ten-band colour scales. On a dark page the scale reverses, so more pages is always brighter |
 | Coordinates, Scale | `coords` = recorded, `scale` = body_height | flat or recorded coordinates; source pixels, or each page scaled to a common median word height |
-| An outline or a Page colours chip; Escape | `focus` = a folio | picks one page out and dims the rest. The heatmap does not change |
+| Page colours, at the top; an outline or mark; Escape | `focus` = a colour's key: a folio, bifolium, Golf group or section | picks that colour out, so Colour by Bifolium picks out a whole bifolium. The other pages and the heatmap step back. A layer at 0% stays hidden, and the heatmap's counts do not change |
+| Edit pages; the × beside a colour; Remove from view | `edits`, for example `section/Herbal A:+f67r1:-f8v` | adds pages or whole bifolia to a group and removes them, each group with its own edits. Search covers the whole manuscript by page, bifolium, section or Golf group. Undo goes back through this session's changes, and Reset group restores the group. The heatmap and every layer follow the edited group, its total included, and colours stay as they were |
 | Wheel, drag, Fit, + − | none | zoom and pan, shared by the panels and kept across groups |
 
 ## What each layer means
@@ -49,4 +50,4 @@ Only complete horizontal lines are drawn: a missing endpoint is counted, never r
 ## Origin
 
 The method comes from the Section layout view of the 2026 bifolium drift study. This page runs it on the toolkit's corrected
-data. It leaves out that view's gap areas and gap matching, page-by-page membership editing, JSON export and wheel panels.
+data. It leaves out that view's gap areas and gap matching, JSON export and wheel panels.

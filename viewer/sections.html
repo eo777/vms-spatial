@@ -15,6 +15,13 @@
 <label>Anchor <select id="anchor"><option value="opening">Opening word</option><option value="top-left">Text top-left</option><option value="bottom-left">Text bottom-left</option></select></label>
 <label>Colour by <select id="color"><option value="page">Page</option><option value="bifolium">Bifolium</option><option value="group">Golf group</option><option value="section">Section</option></select></label>
 <span class="pager zoom"><button type="button" id="zoomFit" style="width:auto;padding:5px 9px">Fit</button><button type="button" id="zoomIn" aria-label="Zoom in">+</button><button type="button" id="zoomOut" aria-label="Zoom out">−</button></span><span id="zoomLevel" class="zoom-level"></span>
+<button type="button" id="editButton" aria-expanded="false" aria-controls="editor">Edit pages</button>
+<div class="focus-bar" id="focusBar" hidden><span id="focusLabel"></span><button type="button" id="removeFocus">Remove from view</button><button type="button" id="clearFocus">Show all</button></div>
+<details class="page-key" id="pageKey" hidden><summary id="pageKeySummary">Page colours</summary><div class="chips" id="pageChips"></div></details>
+<div class="editor" id="editor" hidden>
+<div class="editor-row"><label id="editGroupLabel" hidden>Edit group <select id="editGroup"></select></label><label>Select <select id="editUnit"><option value="pages">Pages</option><option value="bifolia">Bifolia</option></select></label><label>List <select id="editScope"><option value="group">Group + additions</option><option value="all">Entire manuscript</option></select></label><input type="search" id="editSearch" placeholder="Search the whole manuscript" aria-label="Search pages or bifolia"><button type="button" id="editUndo">Undo</button><button type="button" id="editReset">Reset group</button><button type="button" id="editClose">Close</button></div>
+<p class="note" id="editNote"></p><div class="member-list" id="memberList"></div>
+</div>
 </div>
 <div class="layer-row" id="layers" role="group" aria-label="Layers"></div>
 <details class="opacity-panel" open><summary>Opacity</summary>
@@ -32,10 +39,10 @@
 <p class="status" id="status" aria-live="polite">Loading…</p>
 <div class="figure" id="figure" aria-live="off"></div>
 <div class="heat-legend" id="heatLegend" hidden></div>
-<details class="page-key" id="pageKey" hidden><summary>Page colours</summary><div class="chips" id="pageChips"></div><button type="button" id="clearFocus">Show all pages</button></details>
 <p class="note" id="notes"></p>
 <details class="how"><summary>How to read this</summary>
-<p><b>Paragraph polygons.</b> The outer envelope of a paragraph's complete horizontal lines, joined halfway across the whitespace between them. It holds the located text and the gaps inside it, so it is not an ink contour. A missing or rotated line, or an unusually large step, splits the polygon. Click an outline or a colour chip to pick one page out; Escape returns.</p>
+<p><b>Paragraph polygons.</b> The outer envelope of a paragraph's complete horizontal lines, joined halfway across the whitespace between them. It holds the located text and the gaps inside it, so it is not an ink contour. A missing or rotated line, or an unusually large step, splits the polygon. Click a colour under Page colours, or an outline, to pick it out: with Colour by Bifolium a colour is a whole bifolium. Escape returns.</p>
+<p><b>Edit pages.</b> Check a page or bifolium to add it to the group, uncheck it to remove it, or use the × beside a colour. Search covers the whole manuscript. The heatmap and every layer follow the edited group, colours stay as they were, and the changes are saved in the link.</p>
 <p><b>Heatmap.</b> Each cell shows the share of the group's selected pages with at least one horizontal word box in it. A page votes once however many boxes it has there. A page that could not be aligned counts in the total but adds no boxes. The bands are the same for every group, so groups can be compared, but a box is not ink, and larger cells bridge small gaps.</p>
 <p><b>Align.</b> Page positions keeps each page's layout on one anchor. All paragraph starts moves every paragraph to its own anchor, so later paragraphs line up with first ones. The anchor is the opening word's baseline, or a corner of the complete text. Everything meets at the anchor by construction: that convergence is not evidence of a shared template.</p>
 <p><b>Marks.</b> Breaks are the transcription's annotated intrusions, drawn between two located words on a horizontal line. A triangle marks a paragraph's start and a square its end, on complete lines only. Marks are not normalised by group size, so a larger group looks denser. Rings and rays are not drawn here: see Wheels in Compare.</p>

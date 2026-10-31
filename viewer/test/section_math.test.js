@@ -9,7 +9,7 @@ const run=(f,o={})=>X.extract(f,pages[f],words,tokens,{align:'page',anchor:'open
 const near=(a,b,eps=1e-6)=>assert.ok(Math.abs(a-b)<=eps,`${a} vs ${b}`);
 
 test('the address round-trips, and bad values fall back',()=>{
- const h={by:'golf',group:'1a',align:'starts',anchor:'bottom-left',coords:'recorded',scale:'body_height',color:'bifolium',cell:'40',palette:'amber',focus:'f20v',layers:'boxes,ends',op:'10,20,30,40,50,60,70'};
+ const h={by:'golf',group:'1a',align:'starts',anchor:'bottom-left',coords:'recorded',scale:'body_height',color:'bifolium',cell:'40',palette:'amber',focus:'f20v',layers:'boxes,ends',op:'10,20,30,40,50,60,70',edits:'golf/1a:-f20v|section/Herbal A:+f67r1,f68r1:-f8v'};
  assert.deepEqual(X.serialize(X.parse(h)),h);
  assert.deepEqual(X.serialize(X.parse({})),{});
  const bad=X.parse({by:'x',align:'y',anchor:'z',cell:'7',palette:'q',layers:'heatmap,drop',op:'200,-1,abc'});
@@ -85,14 +85,29 @@ test('the heatmap gives each page one vote, agreeing with a direct intersection 
  assert.equal(two.denominator,2);assert.deepEqual(two.unavailable,['b']);assert.equal(two.cells.length,1);assert.equal(two.cells[0].count,1);assert.equal(two.cells[0].percent,50);
  assert.throws(()=>X.occupancy([],0));
 });
+test('pages can be added to and removed from a group, and colours hold',{skip:!have},()=>{
+ const g=X.groups(pages,list,'section').find(x=>x.name==='Bio'),other=list.find(f=>!g.pages.includes(f)),gone=g.pages[2];
+ const same=X.customize(g,list,{});assert.deepEqual(same.pages,g.pages);assert.deepEqual(same.added,[]);assert.equal(same.universe.length,list.length);
+ const edit=X.included(same,list,[other],true),c=X.customize(g,list,edit);assert.deepEqual(edit,{add:[other],remove:[]});assert.equal(c.pages.length,g.pages.length+1);assert.deepEqual(c.added,[other]);
+ assert.deepEqual(c.pages,list.filter(f=>c.pages.includes(f)),'pages stay in manuscript order');
+ const less=X.included(c,list,[gone],false),d=X.customize(g,list,less);assert.deepEqual(less,{add:[other],remove:[gone]});assert.ok(!d.pages.includes(gone));assert.deepEqual(d.removed,[gone]);
+ assert.deepEqual(X.included(d,list,[other],false),{add:[],remove:[gone]},'taking an addition out leaves only the removal');
+ assert.deepEqual(X.included(X.customize(g,list,{remove:[gone]}),list,[gone],true),{add:[],remove:[]},'putting a page back clears the edit');
+ assert.deepEqual([...X.colorIndex('page',same.universe,pages)],[...X.colorIndex('page',d.universe,pages)],'colours do not move');
+ assert.deepEqual(X.customize(g,list,{add:['nope',g.pages[0]],remove:['nope',other]}).pages,g.pages,'unknown pages and no-ops are ignored');
+ const key=X.editKey('section','Bio'),clean=X.cleanEdits(pages,list,{[key]:{add:[other,'nope'],remove:[]},'section/Nowhere':{add:[other],remove:[]},'golf/1a':{add:[],remove:['nope']}});
+ assert.deepEqual(clean,{[key]:{add:[other],remove:[]}});
+ assert.deepEqual(X.decodeEdits(X.encodeEdits(clean)),clean);assert.deepEqual(X.decodeEdits('section/Bio:+bad page!'),{});assert.deepEqual(X.decodeEdits(undefined),{});
+ const occ=X.occupancy(d.pages.map(f=>run(f)),40);assert.equal(occ.denominator,d.pages.length,'the heatmap follows the edited group');
+});
 test('the heatmap\'s bands and ramps',()=>{
  assert.equal(X.band(.5),0);assert.equal(X.band(10),0);assert.equal(X.band(10.01),1);assert.equal(X.band(100),9);
  for(const k of Object.keys(X.HEATMAPS)){assert.equal(X.ramp(k,false).length,10);assert.deepEqual(X.ramp(k,true),X.HEATMAPS[k].colors.slice().reverse());}
 });
 test('colours are shared across a bifolium or group, and the data\'s totals hold',{skip:!have},()=>{
- const entries=['f1r','f1v','f8r'].map(f=>run(f));
- const byBif=X.colorIndex('bifolium',entries);assert.equal(byBif.get('f1r'),byBif.get('f8r'));
- assert.equal(new Set(X.colorIndex('page',entries).values()).size,3);
+ const folios=['f1r','f1v','f8r'];
+ assert.equal(X.colorIndex('bifolium',folios,pages).size,1);assert.equal(X.colorIndex('page',folios,pages).size,3);
+ assert.equal(X.colorKey('bifolium','f1r',pages.f1r),pages.f1r.node);assert.equal(X.colorKey('page','f1r',pages.f1r),'f1r');
  let paragraphs=0,available=0,aligned=0,polys=0;
  for(const f of list){const e=run(f),s=run(f,{align:'starts'});paragraphs+=e.stats.paragraphs;if(e.available)available++;aligned+=s.paragraphs.filter(p=>p.available).length;polys+=s.paragraphs.reduce((n,p)=>n+p.polygons.length,0);}
  console.log(JSON.stringify({pages:list.length,available,paragraphs,aligned,polys}));
