@@ -84,12 +84,14 @@ function sheetList(pages,list){
   return [...sheets.values()].sort((x,y)=>x.first-y.first);
 }
 const step=(list,current,delta)=>{if(!list.length)return current;const i=list.indexOf(current),n=list.length;return list[((i<0?0:i+delta)%n+n)%n];};
-/* stepSheet(sheets, pages, folio, delta) -> the page in the same slot of the sheet delta sheets along, or that sheet's
-   first page when it has no such slot, wrapping at the ends */
-function stepSheet(sheets,pages,folio,delta){
+/* stepSheet(sheets, pages, folio, delta, slot) -> the page in the slot of the sheet delta sheets along, wrapping at the ends. slot is the
+   page's own, or the slot a step through a damaged sheet is holding. A sheet that lacks the leaf (f12, f74 and others are lost) gives the
+   same side of its other leaf, so that A and B on one face do not land on one page, then its first page. */
+const OTHER_LEAF={Ar:'Br',Br:'Ar',Av:'Bv',Bv:'Av'};
+function stepSheet(sheets,pages,folio,delta,slot){
   if(!sheets.length)return folio;
-  const p=pages[folio],i=sheets.findIndex(s=>p&&s.id===p.node),n=sheets.length,next=sheets[((i<0?0:i+delta)%n+n)%n];
-  return (p&&next.slots[p.slot]&&next.slots[p.slot][0])||Object.values(next.slots).flat()[0]||folio;
+  const p=pages[folio],i=sheets.findIndex(s=>p&&s.id===p.node),n=sheets.length,next=sheets[((i<0?0:i+delta)%n+n)%n],want=slot||(p&&p.slot),has=k=>next.slots[k]&&next.slots[k][0];
+  return has(want)||has(OTHER_LEAF[want])||Object.values(next.slots).flat()[0]||folio;
 }
 /* paragraphKeys(page) -> its canonical paragraphs in order: p1, p2, ... */
 const paragraphKeys=page=>page&&page.blocks?page.blocks.map(b=>b[0]).filter(k=>/^p\d+$/.test(k)):[];

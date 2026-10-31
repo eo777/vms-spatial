@@ -484,10 +484,11 @@
  $('prevA').onclick=()=>advance(['a'],-1);$('nextA').onclick=()=>advance(['a'],1);
  $('prevB').onclick=()=>advance(['b'],-1);$('nextB').onclick=()=>advance(['b'],1);
  // one arrow press on A, B or both, in the chosen step: a page, a sheet or a paragraph
+ const held={a:{},b:{}};                      // the slot each side keeps through a sheet that lacks it: a page there may be in another slot
  function advance(sides,d){
   keepLines(sides);
   if(!pagesMode()||state.step==='page'){if(sides.length===2)[state.a,state.b]=S.stepPair(currentList(),state.a,state.b,d);else state[sides[0]]=S.step(currentList(),state[sides[0]],d);}
-  else if(state.step==='bifolio')for(const k of sides)state[k]=S.stepSheet(sheets,compact.pages,state[k],d);
+  else if(state.step==='bifolio')for(const k of sides){const slot=held[k].folio===state[k]?held[k].slot:compact.pages[state[k]].slot;state[k]=S.stepSheet(sheets,compact.pages,state[k],d,slot);held[k]={folio:state[k],slot};}
   else{
    const r=S.resolveText(state),blocks={blocka:r.blocka,blockb:r.blockb};
    for(const k of sides){const key=k==='a'?'blocka':'blockb',to=S.stepParagraph(compact.pages,list,state[k],blocks[key],d);state[k]=to.folio;blocks[key]=to.block;}

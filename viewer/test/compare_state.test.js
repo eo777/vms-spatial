@@ -226,6 +226,22 @@ test('a zoom carried to another page keeps its scale and stays inside the new fr
  assert.ok(Math.abs(k.w-v.w)<1e-9);assert.ok(Math.abs(k.h-k.w*b.h/b.w)<1e-9);assert.equal(S.isFit(k,b),false);
  assert.ok(k.x>=b.x&&k.y>=b.y&&k.x+k.w<=b.x+b.w+1e-9&&k.y+k.h<=b.y+b.h+1e-9);
 });
+test('Bifolio steps keep A and B on their own slots through sheets with lost leaves',{skip:!have},()=>{
+ const pages=compact.pages,list=S.pageList(orders,'bifolia',pages),sheets=S.sheetList(pages,list);
+ const walk=(a,b,n,d)=>{const held={a:{},b:{}},seen=[],go=(k,f)=>{const slot=held[k].folio===f?held[k].slot:pages[f].slot,to=S.stepSheet(sheets,pages,f,d,slot);held[k]={folio:to,slot};return to;};for(let i=0;i<n;i++){a=go('a',a);b=go('b',b);seen.push([a,b]);}return seen;};
+ for(const [a,b] of [['f1v','f8r'],['f8v','f1r'],['f20v','f21r'],['f24v','f17r'],['f1r','f1v']]){
+  for(const d of [1,-1]){
+   const round=walk(a,b,sheets.length,d);
+   for(const [x,y] of round)assert.notEqual(x,y,`${a}/${b} step ${d}: both sides on ${x}`);
+   for(const [x,y] of round)assert.equal(pages[x].node,pages[y].node,`${x} and ${y} stay on one sheet`);
+   assert.deepEqual(round[round.length-1],[a,b],'a full round comes home');
+  }
+ }
+ const w=walk('f1v','f8r',16,1).map(p=>p.join('/'));
+ assert.deepEqual(w.slice(5,10),['f11v/f14r','f13v/f13r','f17v/f24r','f18v/f23r','f19v/f22r'],'past the lost f12 the inner faces return');
+ assert.equal(S.stepSheet(sheets,pages,'f11v',1),'f13v','the same side of the other leaf');
+ assert.equal(S.stepSheet(sheets,pages,'f72r1',1),'f73r');assert.equal(S.stepSheet(sheets,pages,'f72v1',1),'f73v');
+});
 test('Expand all lines shows every line of both pages once, each beside its partner',{skip:!have},()=>{
  const opt={block:'page',cutoff:'all',coordinates:'flat',alignment:'starts',scale:'pixels'},sel=f=>M.selectUnits(compact.pages[f],words,opt);
  const a=sel('f20v'),b=sel('f21r'),rows=[a,b].map(s=>S.lineRows(s,'all')),pairs=S.linePairs(rows[0],rows[1]);
