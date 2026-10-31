@@ -8,7 +8,7 @@
  const ctl={by:$('by'),group:$('group'),align:$('align'),anchor:$('anchor'),color:$('color'),coords:$('coords'),scale:$('scale'),cell:$('cell'),palette:$('palette')};
  const LAYER_LABELS={heatmap:'Heatmap',polygons:'Paragraph polygons',boxes:'Word boxes',breaks:'Breaks',starts:'Paragraph starts',ends:'Paragraph ends'};
  let state=X.parse(SG.hash()),pages,words,tokens,list,view=null,full=null,drawn=[],editTarget='';
- const cache=new Map(),undo=new Map();
+ const cache=new Map(),undo=new Map(),SLACK=.85;    // the view may be dragged this far past the frame: pages can leave the margin, and a part always stays in sight
  const config=await fetch('config.json').then(r=>r.ok?r.json():{}).catch(()=>({}));
  SG.setBase(SG.hash().data||config.dataBase||'data/');
  try{
@@ -152,7 +152,7 @@
   const shown=state.group==='all'?all:all.filter(g=>g.name===state.group),many=shown.length>1;
   if(state.focus&&!shown.some(g=>g.pages.some(f=>keyOf(f)===state.focus)))state.focus='';
   const box=X.bounds(shown.flatMap(g=>g.pages.map(entry)))||{x0:0,y0:0,x1:100,y1:100},pad=24,F={x:box.x0-pad,y:box.y0-pad,w:box.x1-box.x0+2*pad,h:box.y1-box.y0+2*pad};
-  view=view?Z.clampView(view,F):null;full=F;
+  view=view?Z.clampView(view,F,SLACK):null;full=F;
   drawn=shown.map(g=>drawGroup(g,F,many));
   figure.style.setProperty('--panels',String(many?3:1));figure.classList.toggle('grid',many);figure.classList.toggle('focused',!!state.focus);
   figure.replaceChildren(...drawn.map(d=>d.wrap));for(const d of drawn)SG.attachTips(d.wrap);
@@ -185,14 +185,14 @@
  // zoom and pan, shared by the panels
  const toUser=(svg,e)=>{const m=svg.getScreenCTM();if(!m)return {x:0,y:0};const p=new DOMPoint(e.clientX,e.clientY).matrixTransform(m.inverse());return {x:p.x,y:p.y};};
  const centre=v=>({x:v.x+v.w/2,y:v.y+v.h/2});
- figure.addEventListener('wheel',e=>{const svg=e.target instanceof Element?e.target.closest('svg'):null;if(!svg||!full)return;e.preventDefault();view=Z.zoomAt(view||full,full,e.deltaY<0?1.25:.8,toUser(svg,e));applyView();},{passive:false});
+ figure.addEventListener('wheel',e=>{const svg=e.target instanceof Element?e.target.closest('svg'):null;if(!svg||!full)return;e.preventDefault();view=Z.zoomAt(view||full,full,e.deltaY<0?1.25:.8,toUser(svg,e),SLACK);applyView();},{passive:false});
  let drag=null,dragged=false;
  figure.addEventListener('pointerdown',e=>{const svg=e.target instanceof Element?e.target.closest('svg'):null;dragged=false;if(!svg||e.button!==0||!full)return;const m=svg.getScreenCTM();drag={x:e.clientX,y:e.clientY,view:view||full,s:m?m.a:1,id:e.pointerId};});
- addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(!dragged&&Math.hypot(dx,dy)<4)return;dragged=true;view=Z.pan(drag.view,full,dx,dy,drag.s);applyView();});
+ addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(!dragged&&Math.hypot(dx,dy)<4)return;dragged=true;view=Z.pan(drag.view,full,dx,dy,drag.s,SLACK);applyView();});
  const endDrag=e=>{if(drag&&e.pointerId===drag.id)drag=null;};addEventListener('pointerup',endDrag);addEventListener('pointercancel',endDrag);
  $('zoomFit').onclick=()=>{view=null;applyView();};
- $('zoomIn').onclick=()=>{if(full){const v=view||full;view=Z.zoomAt(v,full,1.25,centre(v));applyView();}};
- $('zoomOut').onclick=()=>{if(full){const v=view||full;view=Z.zoomAt(v,full,.8,centre(v));applyView();}};
+ $('zoomIn').onclick=()=>{if(full){const v=view||full;view=Z.zoomAt(v,full,1.25,centre(v),SLACK);applyView();}};
+ $('zoomOut').onclick=()=>{if(full){const v=view||full;view=Z.zoomAt(v,full,.8,centre(v),SLACK);applyView();}};
  // the heatmap's colours follow the theme
  new MutationObserver(()=>render()).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
  if(!state.group)state.group=X.groups(pages,list,state.by)[0].name;

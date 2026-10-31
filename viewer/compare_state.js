@@ -131,14 +131,14 @@ function withGutter(F,selections,cutoff,widthPx,gutterPx){
 }
 /* zoom views: {x, y, w, h} in the frame's units; the scale is full.w / view.w, kept between MIN_ZOOM and MAX_ZOOM;
    a magnified view stays inside the full frame, a reduced view keeps the whole frame inside itself */
-function clampView(v,full){
+function clampView(v,full,slack=0){
   const scale=Math.min(MAX_ZOOM,Math.max(MIN_ZOOM,full.w/v.w)),w=full.w/scale,h=w*full.h/full.w;
   const range=(a,fa,wa)=>wa<=fa?[a,a+fa-wa]:[a+fa-wa,a];
   const [x0,x1]=range(full.x,full.w,w),[y0,y1]=range(full.y,full.h,h);
-  return {x:Math.min(Math.max(v.x,x0),x1),y:Math.min(Math.max(v.y,y0),y1),w,h};
+  return {x:Math.min(Math.max(v.x,x0-slack*w),x1+slack*w),y:Math.min(Math.max(v.y,y0-slack*h),y1+slack*h),w,h};   // slack: the share of the view that may lie past the frame
 }
-function zoomAt(view,full,factor,point){const w=view.w/factor,h=view.h/factor,fx=(point.x-view.x)/view.w,fy=(point.y-view.y)/view.h;return clampView({x:point.x-fx*w,y:point.y-fy*h,w,h},full);}
-function pan(view,full,dxPx,dyPx,pxPerUnit){const k=Math.max(pxPerUnit,1e-9);return clampView({x:view.x-dxPx/k,y:view.y-dyPx/k,w:view.w,h:view.h},full);}
+function zoomAt(view,full,factor,point,slack=0){const w=view.w/factor,h=view.h/factor,fx=(point.x-view.x)/view.w,fy=(point.y-view.y)/view.h;return clampView({x:point.x-fx*w,y:point.y-fy*h,w,h},full,slack);}
+function pan(view,full,dxPx,dyPx,pxPerUnit,slack=0){const k=Math.max(pxPerUnit,1e-9);return clampView({x:view.x-dxPx/k,y:view.y-dyPx/k,w:view.w,h:view.h},full,slack);}
 const zoomScale=(view,full)=>full.w/view.w;
 const isFit=(view,full,eps=1e-6)=>!view||(Math.abs(view.x-full.x)<eps&&Math.abs(view.y-full.y)<eps&&Math.abs(view.w-full.w)<eps&&Math.abs(view.h-full.h)<eps);
 /* lineRows(sel, cutoff) -> [{index, units, baseline (median), x0, x1, text, chosen}] per displayed line of a selection */

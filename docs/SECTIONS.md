@@ -19,7 +19,7 @@ in `viewer/test/section_math.test.js`, and it reads the same compare data as the
 | Coordinates, Scale | `coords` = recorded, `scale` = body_height | flat or recorded coordinates; source pixels, or each page scaled to a common median word height |
 | Page colours, at the top; an outline or mark; Escape | `focus` = a colour's key: a folio, bifolium, Golf group or section | picks that colour out, so Colour by Bifolium picks out a whole bifolium. The other pages and the heatmap step back. A layer at 0% stays hidden, and the heatmap's counts do not change |
 | Edit pages; the × beside a colour; Remove from view | `edits`, for example `section/Herbal A:+f67r1:-f8v` | adds pages or whole bifolia to a group and removes them, each group with its own edits. Search covers the whole manuscript by page, bifolium, section or Golf group. Undo goes back through this session's changes, and Reset group restores the group. The heatmap and every layer follow the edited group, its total included, and colours stay as they were |
-| Wheel, drag, Fit, + − | none | zoom and pan, shared by the panels and kept across groups |
+| Wheel, drag, Fit, + − | none | zoom and pan, shared by the panels and kept across groups. Drag works at any zoom and past the edge of the frame, with at least 15% of the view left on it, so pages can be moved off the left margin. Fit returns |
 
 ## What each layer means
 

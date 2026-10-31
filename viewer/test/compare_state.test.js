@@ -226,6 +226,16 @@ test('a zoom carried to another page keeps its scale and stays inside the new fr
  assert.ok(Math.abs(k.w-v.w)<1e-9);assert.ok(Math.abs(k.h-k.w*b.h/b.w)<1e-9);assert.equal(S.isFit(k,b),false);
  assert.ok(k.x>=b.x&&k.y>=b.y&&k.x+k.w<=b.x+b.w+1e-9&&k.y+k.h<=b.y+b.h+1e-9);
 });
+test('slack lets a view leave the frame, but only so far, and changes nothing without it',()=>{
+ const full={x:0,y:0,w:600,h:800};
+ assert.deepEqual(S.pan(full,full,100,50,1),full,'no slack: at fit the view cannot move');
+ const free=S.pan(full,full,100,50,1,.85);assert.equal(free.x,-100);assert.equal(free.y,-50);assert.equal(free.w,600);assert.equal(S.isFit(free,full),false);
+ const far=S.pan(full,full,1e6,1e6,1,.85);assert.ok(Math.abs(far.x+.85*600)<1e-9);assert.ok(Math.abs(far.y+.85*800)<1e-9);
+ assert.ok(far.x+far.w>full.x+.1*full.w,'part of the frame stays in view');
+ const back=S.pan(full,full,-1e6,-1e6,1,.85);assert.ok(back.x<full.x+full.w&&back.y<full.y+full.h,'in the other direction too');
+ const z=S.zoomAt(free,full,2,{x:0,y:0},.85);assert.ok(z.x<0,'zooming does not snap a dragged view back');assert.equal(z.w,300);
+ assert.equal(S.clampView({x:-100,y:0,w:600,h:800},full).x,0);assert.equal(S.clampView({x:-100,y:0,w:600,h:800},full,.85).x,-100);
+});
 test('Bifolio steps keep A and B on their own slots through sheets with lost leaves',{skip:!have},()=>{
  const pages=compact.pages,list=S.pageList(orders,'bifolia',pages),sheets=S.sheetList(pages,list);
  const walk=(a,b,n,d)=>{const held={a:{},b:{}},seen=[],go=(k,f)=>{const slot=held[k].folio===f?held[k].slot:pages[f].slot,to=S.stepSheet(sheets,pages,f,d,slot);held[k]={folio:to,slot};return to;};for(let i=0;i<n;i++){a=go('a',a);b=go('b',b);seen.push([a,b]);}return seen;};
