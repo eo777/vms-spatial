@@ -64,6 +64,22 @@ test('all paragraph starts put each paragraph\'s first word on the origin',{skip
  }
  assert.ok(usable>=5);
 });
+test('the default anchor puts the opening line at height 0 and the paragraph text\'s left edge at 0',{skip:!have},()=>{
+ assert.equal(X.parse({}).anchor,'edge');assert.equal('anchor' in X.serialize(X.parse({})),false);assert.equal(X.serialize(X.parse({anchor:'opening'})).anchor,'opening');
+ const left=e=>Math.min(...e.boxes.filter(b=>b.paragraph).map(b=>b.rect[0]));
+ const f=X.extract('f84v',pages.f84v,words,tokens,{}),g=run('f84v');                // no options: the default is this anchor
+ near(left(f),0);assert.ok(left(g)<-500,'on its opening word f84v sits 500 px left of its own margin');
+ assert.ok(f.boxes.filter(b=>b.line===0).some(b=>Math.abs(b.baseline)<1e-6),'the height is the opening word\'s baseline');
+ const sizes=(e)=>e.boxes.map(b=>[b.rect[2]-b.rect[0],b.rect[3]-b.rect[1]]);sizes(f).forEach((s,i)=>{near(s[0],sizes(g)[i][0]);near(s[1],sizes(g)[i][1]);});
+ f.boxes.forEach((b,i)=>{near(b.rect[0]-g.boxes[i].rect[0],f.boxes[0].rect[0]-g.boxes[0].rect[0]);near(b.rect[1],g.boxes[i].rect[1]);});     // one translation, in x alone
+ for(const name of ['f36v','f67r2','f83r','f112v'])near(left(X.extract(name,pages[name],words,tokens,{anchor:'edge'})),0);
+ let same=0;for(const p of list){const a=run(p),b=run(p,{anchor:'edge'});assert.equal(b.available,a.available,p);if(b.available){const l=left(b);if(b.boxes.some(x=>x.paragraph))near(l,0);same++;}}
+ assert.ok(same>=220,String(same));
+ const s=X.extract('f84v',pages.f84v,words,tokens,{align:'starts',anchor:'edge'});
+ for(const p of s.paragraphs.filter(q=>q.available)){const bs=s.boxes.filter(b=>b.paragraph===p.key);near(Math.min(...bs.map(b=>b.rect[0])),0);assert.ok(bs.filter(b=>b.line===p.lines[0]).some(b=>Math.abs(b.baseline)<1e-6),p.key);}
+ let opening=0,edge=0;for(const p of list){opening+=run(p,{align:'starts'}).paragraphs.filter(q=>q.available).length;edge+=run(p,{align:'starts',anchor:'edge'}).paragraphs.filter(q=>q.available).length;}
+ assert.equal(edge,opening,'the same paragraphs align under both');
+});
 test('a corner anchor lands the page\'s complete text on that corner, and a missing endpoint is not replaced',{skip:!have},()=>{
  const top=run('f112v',{anchor:'top-left'}),bottom=run('f112v',{anchor:'bottom-left'});
  assert.equal(top.available,true);assert.equal(bottom.available,true);

@@ -11,7 +11,7 @@ in `viewer/test/section_math.test.js`, and it reads the same compare data as the
 |---|---|---|
 | Group by, Group, ‹ › | `by` = golf (section is the default), `group` | a section or Golf group, or All groups as panels on one shared frame. Pages run in manuscript order |
 | Align | `align` = starts (page is the default) | Page positions keeps each page's layout on one anchor. All paragraph starts moves every paragraph to its own anchor |
-| Anchor | `anchor` = top-left, bottom-left (opening is the default) | the opening word's baseline, or a corner of the complete horizontal text |
+| Anchor | `anchor` = opening, top-left, bottom-left (edge is the default) | Opening line, left edge takes its height from the opening word's baseline and its x from the leftmost box of the paragraph text. Opening word uses that word for both. The corners use a corner of the complete horizontal text, and need the first or last line to be complete and horizontal |
 | Colour by | `color` = bifolium, group, section (page is the default) | one colour per page, or shared across a bifolium, Golf group or section. Geometry does not change |
 | Heatmap, Paragraph polygons, Word boxes, Breaks, Paragraph starts, Paragraph ends | `layers`, comma separated, `none` for no layers | which layers are drawn |
 | Opacity sliders | `op`, seven percentages in the order of the sliders | one 0 to 100% slider per layer, with paragraph fill and outlines separate. A slider changes no geometry and redraws nothing |
@@ -38,6 +38,14 @@ spaces are not breaks.
 
 **Paragraph starts and ends.** The first and last line of a paragraph, with a triangle at the start and a square at the end.
 Only complete horizontal lines are drawn: a missing endpoint is counted, never replaced by a later line.
+
+## Why the default anchor
+
+An opening word is usually at the left margin, but not always. The first paragraph of f84v is two short lines at the top right, above
+a drawing, so on its opening word that page sits about 500 px left of the rest of Bio, though its boxes are correct. Taking x from the text's left edge
+instead brings the spread of left margins within Bio from about 115 px to 18, and within Stars B from 34 to 12, keeps the same pages, and moves each
+page by one translation. The leftmost box is used rather than the median line start, because on f36v and f67r2 most lines wrap a drawing and
+the median falls some 300 px inside the margin. One stray box can still shift a page: 8 of 206 pages have a leftmost box over 60 px from the median line start.
 
 ## Reading it carefully
 

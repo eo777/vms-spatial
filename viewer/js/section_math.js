@@ -5,7 +5,7 @@
 'use strict';
 const M=(typeof module!=='undefined'&&module.exports)?require('./compare_math.js'):root.VMS_COMPARE;
 const GOLF_ORDER=['1a','1b','1.5a','2a','5a','6','3b','3a','3c','4c','4a','—'];
-const BY=['section','golf'],ALIGNS=['page','starts'],ANCHORS=['opening','top-left','bottom-left'],COORDS=['flat','recorded'],SCALES=['pixels','body_height'];
+const BY=['section','golf'],ALIGNS=['page','starts'],ANCHORS=['edge','opening','top-left','bottom-left'],COORDS=['flat','recorded'],SCALES=['pixels','body_height'];
 const COLORS=['page','bifolium','group','section'],CELLS=['10','20','40','80'],LAYERS=['heatmap','polygons','boxes','breaks','starts','ends'];
 const OPACITY=[['heatmap','Heatmap'],['fill','Paragraph fill'],['outline','Paragraph outlines'],['boxes','Word boxes'],['breaks','Breaks'],['starts','Paragraph starts'],['ends','Paragraph ends']];
 const OPACITY_DEFAULTS={heatmap:100,fill:0,outline:50,boxes:15,breaks:70,starts:70,ends:70};
@@ -20,7 +20,7 @@ const median=a=>{const s=a.slice().sort((x,y)=>x-y),i=Math.floor(s.length/2);ret
 // ---- the address
 /* parse(hash) -> the page's state, every value checked; serialize(state) -> the hash, defaults left out */
 function parse(h={}){
- const s={by:pick(h.by,BY,'section'),group:typeof h.group==='string'?h.group:'',align:pick(h.align,ALIGNS,'page'),anchor:pick(h.anchor,ANCHORS,'opening'),coords:pick(h.coords,COORDS,'flat'),scale:pick(h.scale,SCALES,'pixels'),
+ const s={by:pick(h.by,BY,'section'),group:typeof h.group==='string'?h.group:'',align:pick(h.align,ALIGNS,'page'),anchor:pick(h.anchor,ANCHORS,'edge'),coords:pick(h.coords,COORDS,'flat'),scale:pick(h.scale,SCALES,'pixels'),
   color:pick(h.color,COLORS,'page'),cell:pick(h.cell,CELLS,'20'),palette:pick(h.palette,Object.keys(HEATMAPS),'blues'),focus:typeof h.focus==='string'?h.focus:'',op:{...OPACITY_DEFAULTS},edits:decodeEdits(h.edits)};
  s.layers=typeof h.layers==='string'?LAYERS.filter(k=>h.layers.split(',').includes(k)):['heatmap','polygons'];
  if(typeof h.op==='string')h.op.split(',').forEach((v,i)=>{const n=Number(v),k=OPACITY[i]&&OPACITY[i][0];if(k&&v!==''&&Number.isFinite(n)&&n>=0&&n<=100)s.op[k]=n;});
@@ -28,7 +28,7 @@ function parse(h={}){
 }
 function serialize(s){
  const o={};
- for(const [k,d] of [['by','section'],['group',''],['align','page'],['anchor','opening'],['coords','flat'],['scale','pixels'],['color','page'],['cell','20'],['palette','blues'],['focus','']])if(s[k]!==d)o[k]=s[k];
+ for(const [k,d] of [['by','section'],['group',''],['align','page'],['anchor','edge'],['coords','flat'],['scale','pixels'],['color','page'],['cell','20'],['palette','blues'],['focus','']])if(s[k]!==d)o[k]=s[k];
  if(s.layers.join()!=='heatmap,polygons')o.layers=s.layers.join()||'none';
  if(OPACITY.some(([k])=>s.op[k]!==OPACITY_DEFAULTS[k]))o.op=OPACITY.map(([k])=>s.op[k]).join(',');
  const edits=encodeEdits(s.edits||{});if(edits)o.edits=edits;
@@ -96,29 +96,35 @@ function paragraphPolygons(rows,pitch){
 /* extract(folio, page, words, tokens, {align, anchor, coordinates, scale}) -> {folio, available, boxes, features, paragraphs, stats}.
    align 'page' keeps the page's layout on one anchor; 'starts' moves each paragraph to its own. The anchor is the opening word's
    baseline or a corner of the complete horizontal text. A paragraph or page whose anchor line is not complete and horizontal is
-   left out and counted, never given a later line's anchor. Only horizontal lines are drawn. */
+   left out and counted, never given a later line's anchor. Only horizontal lines are drawn.
+   The default anchor, 'edge', takes its height from the opening word's baseline and its x from the leftmost box of the paragraph text:
+   an opening word is usually at the margin, but not on f84v, whose first paragraph is at the top right. Not the median line start,
+   which on f36v and f67r2 falls some 300 px inside the margin, where most lines wrap a drawing. */
 function extract(folio,page,words,tokens,options={}){
- const coordinates=options.coordinates==='recorded'?'recorded':'flat',aligned=options.align==='starts',anchorMode=ANCHORS.includes(options.anchor)?options.anchor:'opening',scale=options.scale==='body_height'?'body_height':'pixels';
+ const coordinates=options.coordinates==='recorded'?'recorded':'flat',aligned=options.align==='starts',anchorMode=ANCHORS.includes(options.anchor)?options.anchor:'edge',scale=options.scale==='body_height'?'body_height':'pixels';
  const sel=M.selectUnits(page,words,{block:'page',cutoff:'all',coordinates,alignment:'page',scale}),factor=scale==='body_height'?M.BODY_HEIGHT_PX/(page.H||30):1;
  const byLine=new Map();for(const u of sel.all){if(!byLine.has(u.line_abs))byLine.set(u.line_abs,[]);byLine.get(u.line_abs).push(u);}
  for(const us of byLine.values())us.sort((a,b)=>a.first-b.first);
  const horizontal=li=>page.lines[li][3]==='horizontal',complete=li=>{const us=byLine.get(li)||[];return us.length>0&&us.reduce((n,u)=>n+u.token_count,0)===tokens.get(folio+'|'+page.lines[li][0]);};
  let moved=[0,0];
  const point=u=>{const raw=coordinates==='recorded'?u.base:u.flat_base;return [(raw[0]-sel.origin[0])*factor-moved[0],(raw[1]-sel.origin[1])*factor-moved[1]];};
+ const leftEdge=lines=>Math.min(...lines.filter(horizontal).flatMap(li=>(byLine.get(li)||[]).map(u=>u.rect[0])));
  const anchorOf=(lines,mode)=>{
   const end=mode==='bottom-left'?lines[lines.length-1]:lines[0];
   if(end==null||!horizontal(end)||!complete(end))return null;
-  if(mode==='opening')return {point:point(byLine.get(end)[0]),line:end};
+  if(mode==='opening'||mode==='edge'){const p=point(byLine.get(end)[0]);return {point:mode==='edge'?[leftEdge(lines),p[1]]:p,line:end};}
   const boxes=lines.filter(li=>horizontal(li)&&complete(li)).flatMap(li=>byLine.get(li)).map(u=>u.rect);
   return {point:[Math.min(...boxes.map(r=>r[0])),mode==='bottom-left'?Math.max(...boxes.map(r=>r[3])):Math.min(...boxes.map(r=>r[1]))],line:end};
  };
- const whole=page.blocks.find(b=>b[0]==='page')[1],opening=page.blocks[0][1][0],corner=anchorMode==='opening'?null:anchorOf(whole,anchorMode);
- if(corner){moved=corner.point;for(const u of sel.all){u.rect=u.rect.map((v,j)=>v-moved[j%2]);u.baseline-=moved[1];}}
- const first=sel.all.find(u=>u.anchor),pageAvailable=anchorMode==='opening'?!!(sel.available&&first&&first.line_abs===opening):!!corner;
+ const moveAll=by=>{moved=by;for(const u of sel.all){u.rect=u.rect.map((v,j)=>v-by[j%2]);u.baseline-=by[1];}};
+ const whole=page.blocks.find(b=>b[0]==='page')[1],opening=page.blocks[0][1][0],keys=page.blocks.filter(b=>/^p\d+$/.test(b[0])),byCorner=anchorMode==='top-left'||anchorMode==='bottom-left',corner=byCorner?anchorOf(whole,anchorMode):null;
+ if(corner)moveAll(corner.point);
+ const first=sel.all.find(u=>u.anchor),opened=!!(sel.available&&first&&first.line_abs===opening),pageAvailable=byCorner?!!corner:opened;
+ if(anchorMode==='edge'&&opened){const edge=leftEdge(keys.flatMap(b=>b[1]));if(Number.isFinite(edge))moveAll([edge,0]);}
  const stats={paragraphs:0,omittedParagraphs:0,omittedRows:0,missingStarts:0,missingEnds:0,breaks:0,unlocatedBreaks:0};
  const out={folio,section:page.section,group:page.group,node:page.node,available:pageAvailable,boxes:[],features:[],paragraphs:[],stats};
  if(!pageAvailable&&!aligned)return out;
- const keys=page.blocks.filter(b=>/^p\d+$/.test(b[0])),paragraphOf=new Map();
+ const paragraphOf=new Map();
  for(const [key,lines] of keys){stats.paragraphs++;for(const li of lines)paragraphOf.set(li,key);}
  page.lines.forEach((L,li)=>{
   if(!horizontal(li))return;
