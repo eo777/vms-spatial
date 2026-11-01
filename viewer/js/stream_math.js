@@ -23,7 +23,8 @@ function decodeOverlaps(text){
  return out;
 }
 const decodeList=text=>typeof text==='string'?[...new Set(text.split(',').filter(Boolean))]:[];
-/* fromWorkspace(hash) -> the same view from a link or saved boundary set of the comparison workspace this page came from */
+/* fromWorkspace(hash) -> the view of a link or saved boundary set of the comparison workspace this page came from. Its order, joins and overlaps carry over.
+   Its rigid turn does not: that turn leans every margin, so such a link opens on the recorded tilt, and Rigid turn stays a choice on the page */
 const WORKSPACE_KEYS={seqGroup:'group',seqRoute:'route',seqIndex:'at',seqMode:'trail',seqJoin:'join',seqCovered:'covered',seqCoveredOpacity:'strength',seqSeam:'seam',seqOpacity:'fade',seqEdges:'margins',seqPages:'pages',scale:'scale',zoom:'zoom'};
 function fromWorkspace(h){
  const json=text=>{try{return JSON.parse(text);}catch(e){return null;}},out={};
@@ -33,7 +34,7 @@ function fromWorkspace(h){
  out.columns=h.seqColumns==='singulion'?'singulion':'faces';
  out.anchor=h.seqAnchor||'opening';
  out.coords=['recorded','study_recorded'].includes(h.coordinates)?'recorded':'flat';
- out.tilt=String(h.seqRestore)==='0'?'none':'turn';    // the workspace turned pages rigidly: its links open as they looked there
+ out.tilt=String(h.seqRestore)==='0'?'none':'restore';
  if(h.eva!=null)out.words=String(h.eva)==='0'?'0':'1';
  if(h.seqCovered==null&&h.seqHideCovered!=null)out.covered=String(h.seqHideCovered)==='0'?'full':'hidden';
  const overlaps=json(h.seqOverlaps),custom=json(h.seqCustomOrder);
@@ -41,13 +42,15 @@ function fromWorkspace(h){
  if(Array.isArray(custom))out.custom=custom.join(',');
  return out;
 }
-/* parse(hash) -> the page's state, every value checked; serialize(state) -> the hash, defaults left out */
+/* parse(hash) -> the page's state, every value checked; serialize(state) -> the hash, defaults left out. oldLink marks a workspace link that turned its pages,
+   so that the page can say why it does not look the same; it is not part of the address */
 function parse(h={}){
- if(Object.keys(h).some(k=>k.startsWith('seq')))h=fromWorkspace(h);
+ const workspace=Object.keys(h).some(k=>k.startsWith('seq')),oldLink=workspace&&String(h.seqRestore)!=='0';
+ if(workspace)h=fromWorkspace(h);
  const number=(v,lo,hi,fallback)=>{const n=Number(v);return v!=null&&v!==''&&Number.isFinite(n)?Math.max(lo,Math.min(hi,n)):fallback;};
  return {by:pick(h.by,BY),group:typeof h.group==='string'&&h.group?h.group:'all',order:pick(h.order,ORDERS),route:pick(h.route,ROUTES),view:pick(h.view,VIEWS),columns:pick(h.columns,COLUMNS),join:pick(h.join,JOINS),
   covered:pick(h.covered,COVERED),strength:number(h.strength,0,1,.3),seam:typeof h.seam==='string'?h.seam:'',anchor:pick(h.anchor,ANCHORS),coords:pick(h.coords,COORDS),scale:pick(h.scale,SCALES),trail:pick(h.trail,TRAILS),
-  fade:number(h.fade,.02,1,.2),zoom:pick(h.zoom,ZOOMS),tilt:pick(h.tilt,TILTS),words:h.words!=='0',margins:h.margins!=='0',at:Math.max(0,parseInt(h.at,10)||0),overlaps:decodeOverlaps(h.overlaps),custom:decodeList(h.custom),pages:decodeList(h.pages)};
+  fade:number(h.fade,.02,1,.2),zoom:pick(h.zoom,ZOOMS),tilt:pick(h.tilt,TILTS),words:h.words!=='0',margins:h.margins!=='0',at:Math.max(0,parseInt(h.at,10)||0),overlaps:decodeOverlaps(h.overlaps),custom:decodeList(h.custom),pages:decodeList(h.pages),oldLink};
 }
 function serialize(s){
  const o={};
@@ -166,7 +169,8 @@ function register(folio,page,words,tokens,{coords='flat',scale='body_height',anc
 /* orient(page, selection, coords, tilt) -> the selection's words as polygons, and its margin points, with the page's recorded median line angle put back
    (page.drift, the same lines in both states). Recorded coordinates already hold it, so nothing moves there.
    'restore', the default, undoes the tilt the way flattening removed it: flattening moves y only, so this is y + kx, and every x stays where it was
-   recorded. Lines take their recorded angle, the margin stays the recorded margin, and only the local warp stays out.
+   recorded. It is one adjustment for the whole page: the page's median line angle comes back, each line keeps its flat shape and so not its own recorded
+   angle, and the rest of the warp stays out.
    'turn' turns the page rigidly by the same angle. Word sizes and distances hold, but a rotation moves x as well, which flattening never did: each
    drawn margin leans by the page's own turn on top of its true slope (docs/STREAM.md). Kept for comparison with the study that used it. 'none' adds nothing. */
 function orient(page,selection,coords='flat',tilt='restore'){

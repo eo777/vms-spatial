@@ -30,36 +30,40 @@ it reads the same compare data as the Compare page.
 | Export JSON, under Settings | none | every page's angles, transform, margin rows before and after the tilt, plot position, and every boundary |
 | A list of pages | `pages` = f1r,f2r | shows those pages. The chain shows their whole bifolia |
 
-Links and boundary files from the comparison workspace of the 2026 bifolium drift study open here too. They open on the
-rigid turn they were made with, so that they look as they did.
+Links and boundary files from the comparison workspace of the 2026 bifolium drift study open here too, with their order, joins and
+overlaps. That workspace turned its pages rigidly, which leans every margin, so they open on the recorded tilt instead and the page
+says so. Rigid turn under Tilt shows how one looked there. An address that names `tilt=turn` keeps it, with a warning at the top of the page.
 
 ## Tilt
 
 A flat page has lost its overall tilt along with its warp. The side labels and page headers give each page's **recorded tilt**:
 the median signed first-to-last baseline angle of its qualifying lines (at least 4 located boxes spanning at least 3 median
-word widths, `compare.page_drift`), positive falling to the right.
+word widths, `compare.page_drift`), positive falling to the right. It is the slope of the text lines, not of the left margin.
 
 Flattening moves words **up and down only**: every x is the x that was recorded. So there are two different ways to put a
 tilt back, and they do not give the same page.
 
-- **Recorded, true margins** (the default) undoes the tilt the way flattening removed it: y + kx, with
-  k = tan(recorded) − tan(current). Lines return to their recorded angle, every x stays as recorded, and only the local warp
-  stays out.
+- **Recorded tilt, x unchanged** (the default) undoes the tilt the way flattening removed it: y + kx, with
+  k = tan(recorded) − tan(current). This is one adjustment for the whole page: the page's median line angle comes back and every x
+  stays as recorded. Each line keeps its flat shape, so it does not get back its own recorded angle: over 3,773 lines on 202 pages it
+  stays a median of 0.37° from that angle, 90% within 1.26°. The rest of the warp stays out.
 - **Rigid turn** rotates the page by recorded minus current angle. Word sizes and distances hold exactly, but a rotation moves
-  x as well, which flattening never did. So each drawn margin leans by the page's own turn, on top of its true slope.
+  x as well, which flattening never did. So each drawn margin leans by the page's own turn, on top of its slope.
 
 Measured on the 183 pages with at least 6 margin rows and an angle, as slopes of the drawn margin, in degrees:
 
 | Against the margin in recorded coordinates | Median difference | 90% within |
 |---|---:|---:|
 | Flat, nothing restored | 0.016 | 0.10 |
-| Recorded, true margins | 0.012 | 0.10 |
+| Recorded tilt, x unchanged | 0.012 | 0.10 |
 | Rigid turn | 1.10 | 2.60 |
 | Rigid turn, after taking the page's turn off | 0.015 | 0.11 |
 
-The last row is the cause: under a rigid turn, drawn margin = true margin − turn. f30v's margin is 5.48° and draws at 9.67°.
-Between neighbouring bifolia in Path 1, the median difference of the bifolium's median margin slope is 0.95° on the true margins,
-0.97° with the default, and 1.86° with the rigid turn. **Compare margins only under the default, or in recorded coordinates.**
+The last row is the cause: under a rigid turn, drawn margin = recorded margin − turn. f30v's margin is 5.48° and draws at 9.67°.
+The left rail of f8v's first paragraph is 4.15° in recorded coordinates, 4.09° with the default and 7.29° with the rigid turn.
+Between neighbouring bifolia in Path 1, the median difference of the bifolium's median margin slope is 0.95° on the recorded margins,
+0.97° with the default, and 1.86° with the rigid turn. **Compare margins only under the default, or in recorded coordinates**, which
+already hold the tilt: Tilt is switched off there, because no setting moves anything.
 
 ## Reading it carefully
 
@@ -71,6 +75,8 @@ Between neighbouring bifolia in Path 1, the median difference of the bifolium's 
   glyph-corrected boxes elsewhere (`baseline`, `auto`: 193 and 34 pages). Anchored on glyph-corrected boxes alone, page angles differ
   by a median of 0.13° and at most 1.28° (f45r, −0.18° against +1.10°), and 6 of 202 pages change sign. Say which baseline a number used
   (`docs/PITFALLS.md` 16), and treat a pattern that lives within that spread as unsettled.
+- **A margin here is the edge of the text, not of the parchment.** Its angles are from the vertical of the coordinate frame, and the opening
+  baseline sets each page's vertical origin. Nothing here measures from the page edge, the top margin, the binding or the curve of the vellum.
 - **A margin is not always a margin.** The margin trace follows the left end of complete body rows. Where the text wraps a drawing,
   as on f101v, f46v or f36v, it wanders hundreds of pixels sideways, and a slope fitted to it is not a page edge.
 - **Pages with no angle keep their flat tilt.** The note under the figure names them, and the pages with no box on their opening
@@ -79,6 +85,6 @@ Between neighbouring bifolia in Path 1, the median difference of the bifolium's 
 ## Origin
 
 The method comes from the Page stream of the 2026 bifolium drift study. This page runs it on the toolkit's corrected data,
-so f49v, which that view could not place, is drawn here. It differs in four other ways. The default tilt keeps the true margin, as
+so f49v, which that view could not place, is drawn here. It differs in four other ways. The default tilt keeps the recorded margin, as
 above. Tilt reads the toolkit's baselines, not glyph anchors alone. No group is held back. The study's frozen coordinate modes and
 saved stability orders are left out, along with its line reader in the overlay.

@@ -19,9 +19,10 @@ test('the address round-trips, and bad values fall back',()=>{
 test('a link from the comparison workspace opens the same view',()=>{
  const link='a=f47r&b=f56r&view=sequence&unit=pages&columns=both&order=folio&coordinates=current&scale=body_height&zoom=0.75&eva=1&seqGroup=all&seqOrder=path1&seqRoute=all&seqIndex=100&seqMode=all&seqAnchor=source&seqOpacity=0.2&seqEdges=1&seqDisplay=four&seqColumns=singulion&seqJoin=touch&seqHideCovered=1&seqCovered=hidden&seqCoveredOpacity=0.3&seqSeam=D%3A27-30%3EA%3A1-8&seqRestore=1&seqOverlaps=%7B%22A%3A1-8%3EF%3A42-47%22%3A0%2C%22D%3A27-30%3EA%3A1-8%22%3A0.575%2C%22A%3A2-7%3ED%3A25-32%22%3A0.274%7D';
  const s=T.parse(Object.fromEntries(new URLSearchParams(link)));
- assert.equal(s.view,'chain');assert.equal(s.order,'path1');assert.equal(s.columns,'singulion');assert.equal(s.group,'all');assert.equal(s.anchor,'source');assert.equal(s.coords,'flat');assert.equal(s.scale,'body_height');assert.equal(s.zoom,'0.75');assert.equal(s.covered,'hidden');assert.equal(s.seam,'D:27-30>A:1-8');assert.equal(s.at,100);assert.equal(s.tilt,'turn','its pages were turned rigidly there, so it opens that way');assert.equal(s.words,true);
+ assert.equal(s.view,'chain');assert.equal(s.order,'path1');assert.equal(s.columns,'singulion');assert.equal(s.group,'all');assert.equal(s.anchor,'source');assert.equal(s.coords,'flat');assert.equal(s.scale,'body_height');assert.equal(s.zoom,'0.75');assert.equal(s.covered,'hidden');assert.equal(s.seam,'D:27-30>A:1-8');assert.equal(s.at,100);assert.equal(s.tilt,'restore','no link opens on the rigid turn, which leans every margin');assert.equal(s.oldLink,true,'and the page can say so');assert.equal(s.words,true);
  assert.deepEqual(s.overlaps,{'A:1-8>F:42-47':0,'D:27-30>A:1-8':.575,'A:2-7>D:25-32':.274});
- assert.equal(T.parse({seqDisplay:'four',seqRestore:'0'}).tilt,'none');assert.equal(T.parse({}).tilt,'restore');
+ assert.equal(T.parse({seqDisplay:'four',seqRestore:'0'}).tilt,'none');assert.equal(T.parse({seqDisplay:'four',seqRestore:'0'}).oldLink,false,'nothing was turned there');assert.equal(T.parse({}).tilt,'restore');assert.equal(T.parse({}).oldLink,false);
+ assert.equal(T.parse({tilt:'turn'}).tilt,'turn','a turn chosen on this page stays a choice');
  assert.equal(T.parse({seqDisplay:'overlay',seqHideCovered:'0'}).covered,'full');
  assert.equal(T.parse({seqDisplay:'four',coordinates:'recorded',seqEdges:'0'}).coords,'recorded');
  assert.equal(T.parse({seqDisplay:'four',seqCustomOrder:'["B:9-16","A:1-8"]'}).custom.length,2);
@@ -65,7 +66,7 @@ test('a saved boundary set keeps its values, and only known settings',()=>{
  assert.throws(()=>T.normalizePreset({...preset,params:{...preset.params,overlaps:'A>B=1.5'}}));assert.throws(()=>T.normalizePreset({...preset,params:{}}));assert.throws(()=>T.normalizePreset({...preset,schema:2}));assert.throws(()=>T.normalizePreset({...preset,params:{...preset.params,custom:'A,A'}}));
  const round=T.normalizePreset({schema:1,name:'x',params:T.presetParams(T.parse({overlaps:'A>B=0.25',order:'path1'}))});assert.deepEqual(T.parse(round.params).overlaps,{'A>B':.25});assert.equal(T.parse(round.params).order,'path1');
  const study=T.normalizePreset({schema:1,name:'Golf 1a',params:{view:'sequence',seqGroup:'1a',seqOrder:'path1',seqDisplay:'four',seqJoin:'touch',seqCovered:'outline',seqCoveredOpacity:.3,seqOverlaps:'{"A:1-8>F:42-47":0.333}',seqCustomOrder:'["F:42-47","A:1-8"]',coordinates:'recorded',scale:'body_height'}});
- assert.equal(study.params.group,'1a');assert.equal(study.params.view,'chain');assert.equal(study.params.overlaps,'A:1-8>F:42-47=0.333');assert.equal(study.params.coords,'recorded');
+ assert.equal(study.params.tilt,'restore');assert.equal(study.params.group,'1a');assert.equal(study.params.view,'chain');assert.equal(study.params.overlaps,'A:1-8>F:42-47=0.333');assert.equal(study.params.coords,'recorded');
  assert.throws(()=>T.normalizePreset({schema:1,name:'x',params:{seqGroup:'1a',seqOrder:'path1',seqOverlaps:'{"A>B":1.5}'}}));
  assert.throws(()=>T.normalizePreset({schema:1,name:'x',params:{seqGroup:'1a',seqOrder:'path1',seqCustomOrder:'not json'}}));
 });
@@ -115,7 +116,13 @@ test('a restored page shows its recorded angle; a page with no angle stays as it
  assert.ok(missing.length<=3,`pages with no opening box: ${missing.join(', ')}`);
  const b=T.bounds(all.map(([,s])=>s));assert.ok(Object.values(b).every(Number.isFinite));
 });
-test('restoring tilt keeps the true margin; a rigid turn leans it by the page\'s own turn',{skip:!have},()=>{
+test('f8v\'s first paragraph: the left rail in each display, against the frame\'s vertical',{skip:!have},()=>{
+ const slope=pts=>{const n=pts.length,mx=pts.reduce((a,p)=>a+p[0],0)/n,my=pts.reduce((a,p)=>a+p[1],0)/n;let xy=0,yy=0;for(const [x,y] of pts){xy+=(x-mx)*(y-my);yy+=(y-my)**2;}return Math.atan2(xy,yy)*180/Math.PI;};
+ const page=pages.f8v,first=new Set(page.blocks.find(b=>b[0]==='p1')[1]),rail=(coords,tilt)=>slope(T.orient(page,T.register('f8v',page,words,tokens,{coords,anchor:'source'}),coords,tilt).marginRows.filter(r=>first.has(r.line)).map(r=>r.point));
+ near(rail('recorded','none'),4.15,.01);near(rail('flat','restore'),4.09,.01);near(rail('flat','turn'),7.29,.01);
+ near(rail('recorded','restore'),rail('recorded','none'),1e-9);near(rail('recorded','turn'),rail('recorded','none'),1e-9);
+});
+test('restoring tilt keeps the recorded margin; a rigid turn leans it by the page\'s own turn',{skip:!have},()=>{
  const slope=pts=>{const n=pts.length,mx=pts.reduce((a,p)=>a+p[0],0)/n,my=pts.reduce((a,p)=>a+p[1],0)/n;let xy=0,yy=0;for(const [x,y] of pts){xy+=(x-mx)*(y-my);yy+=(y-my)**2;}return Math.atan2(xy,yy)*180/Math.PI;};
  const view=(f,coords,tilt)=>T.orient(pages[f],T.register(f,pages[f],words,tokens,{coords,anchor:'source'}),coords,tilt),gaps={back:[],turn:[],lean:[]};
  for(const f of Object.keys(pages)){

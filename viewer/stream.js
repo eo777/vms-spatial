@@ -5,6 +5,7 @@
  const h=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n;};
  const host=$('pageStream'),pane=$('streamPane'),overlayWrap=$('overlayWrap'),overlay=$('overlay'),strip=$('strip'),status=$('status'),notes=$('notes'),focus=$('focus'),position=$('position'),slider=$('slider'),jumpTo=$('jump');
  const ctl={by:$('by'),order:$('order'),view:$('view'),columns:$('columns'),join:$('join'),covered:$('covered'),route:$('route'),trail:$('trail'),anchor:$('anchor'),tilt:$('tilt'),coords:$('coords'),scale:$('scale'),zoom:$('zoom')};
+ const TILT_NOTES={turn:'Rigid turn: each drawn margin leans by its page\'s own turn, on top of its slope. To compare margins, use Recorded tilt or Recorded coordinates.',oldLink:'This link comes from the comparison workspace, which turned its pages rigidly and so leaned every margin. It opens on the recorded tilt, so it will not look quite as it did there.'};
  const STORE='vms-boundary-presets-v1',LAST=STORE+'-selected',GUTTER=98,SLOT_NAMES={Ar:'A recto',Av:'A verso',Br:'B recto',Bv:'B verso'},DASHES=[[],[7,4],[2,3],[8,3,2,3]],COVERED_NAMES={faint:'faint text',outline:'box outlines',margin:'margin trace',hidden:'hidden',full:'full overlay'};
  let state=T.parse(SG.hash()),pages,words,tokens,orders,compact,list,bundleKey='',plan={nodes:[],baseNodes:[],pages:[],missing:[],custom:false};
  let selectedAtLoad=[...state.pages],pendingJump=state.view!=='overlay'&&state.at>0,requested=null,signature='',autoSeam='';
@@ -236,6 +237,9 @@
   for(const k of Object.keys(ctl))ctl[k].value=state[k];
   $('words').checked=state.words;$('margins').checked=state.margins;$('fade').value=state.fade;
   $('columnsLabel').hidden=$('joinLabel').hidden=$('jumpLabel').hidden=!chain;$('routeLabel').hidden=chain;$('trailLabel').hidden=$('fadeLabel').hidden=flowing;$('tiltLabel').hidden=!flowing;
+  ctl.tilt.disabled=state.coords==='recorded';    // recorded coordinates already hold the tilt: no setting moves anything there
+  const flatTurn=flowing&&state.coords==='flat',note=flatTurn&&state.tilt==='turn'?TILT_NOTES.turn:flatTurn&&state.tilt==='restore'&&state.oldLink?TILT_NOTES.oldLink:'';
+  $('tiltNote').textContent=note;$('tiltNote').hidden=!note;
   $('overlapPanel').hidden=$('coveredLabel').hidden=!joined;$('prevPage').hidden=$('nextPage').hidden=slider.hidden=strip.hidden=chain;
   overlayWrap.hidden=flowing;host.hidden=!flowing;focus.hidden=flowing;
   $('first').textContent=chain?'First bifolium':flowing?'Start of stream':'Show all';
@@ -311,7 +315,7 @@
    const records=plan.pages.map(p=>recordOf(p.folio));overlay.width=overlay.height=1;build(records,width);
    const absent=records.filter(r=>!r.selection.available).map(r=>r.folio),unturned=state.tilt!=='none'?records.filter(r=>r.selection.available&&!r.angle.restored).map(r=>r.folio):[];
    notes.dataset.base=(chain?`${plan.nodes.length} bifolia, ${state.columns==='singulion'?'singulion Ar Av Br Bv':'outer Bv Ar, inner Av Br'}. ${{touch:'Rows meet with no added gap, four pages locked together. ',half:'Each row overlaps half of the last: a display choice. ',frames:'Separate fixed frames. '}[state.join]}`:`${plan.pages.length} pages top to bottom, colours by bifolium, one horizontal scale. `)
-    +({restore:'Recorded tilt restored, margins as recorded. ',turn:'Recorded tilt restored by a rigid turn, which also leans each margin by the page\'s turn. ',none:'No tilt restored. '}[state.tilt])+({opening:'Opening words at x = 0. ',source:'Source x kept; heights from the opening baselines. ',margin:'Median body margins at x = 0. '}[state.anchor])
+    +(state.coords==='recorded'?'Recorded coordinates already hold each page\'s tilt. ':{restore:'Each page\'s recorded tilt restored by moving words up or down only, so every x stays as recorded. ',turn:'Recorded tilt restored by a rigid turn, which also leans each margin by the page\'s turn. ',none:'No tilt restored. '}[state.tilt])+({opening:'Opening words at x = 0. ',source:'Source x kept; heights from the opening baselines. ',margin:'Median body margins at x = 0. '}[state.anchor])
     +(absent.length?`No box on the opening line: ${absent.join(', ')}. `:'')+(unturned.length?`No angle, so no tilt restored: ${unturned.join(', ')}. `:'')+(chain&&state.pages.length?'All mapped pages of each selected bifolium are shown. ':'')+(chain&&plan.pages.some(p=>p.panels>1)?'Foldout panels stack within their slot. ':'');
    notes.textContent=notes.dataset.base;syncOverlaps();
   }else{clearStream();delete notes.dataset.base;paintOverlay(width);}
