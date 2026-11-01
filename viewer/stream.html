@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>vms-spatial · Page stream</title>
-<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="compare.css"><link rel="stylesheet" href="stream.css">
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="compare.css"><link rel="stylesheet" href="stream.css?v=1a-folds">
 <script src="site_nav.js" defer></script>
 </head><body class="compare-page"><nav class="site-nav"></nav>
 <header class="masthead"><div class="eyebrow">VOYNICH MANUSCRIPT · RECORDED WORD POSITIONS</div>
@@ -9,7 +9,7 @@
 <main class="compare stream">
 <div class="toolbar" id="toolbar">
 <label>Group <select id="group" aria-label="Group"></select></label>
-<label>Order <select id="order"><option value="bifolia">Manuscript by bifolium</option><option value="path1">Path 1 (proposed)</option><option value="herbal_a_1a">Herbal A · 1a candidate</option></select></label>
+<label>Order <select id="order"><option value="bifolia">Manuscript by bifolium</option><option value="path1">Path 1 (proposed)</option><option value="herbal_a_1a">1a · original single joins</option><option value="herbal_a_1a_folds">1a · separate folds</option></select></label>
 <label>Arrangement <select id="view"><option value="chain">Bifolium chain</option><option value="stream">Continuous column</option><option value="overlay">Superimposed overlay</option></select></label>
 <label id="columnsLabel">Columns <select id="columns"><option value="singulion">Singulion · Ar Av Br Bv</option><option value="faces">Physical faces · Bv Ar | Av Br</option></select></label>
 <label id="joinLabel">Joins <select id="join"><option value="touch">Continuous</option><option value="half">50% overlap</option><option value="frames">Separate frames</option></select></label>
@@ -29,11 +29,14 @@
 <strong id="position" aria-live="polite"></strong>
 </div>
 <details class="drawer" id="overlapPanel"><summary id="overlapSummary">Adjust overlaps</summary><div class="drawer-body">
+<label class="check"><input type="checkbox" id="separateFolds"> Separate Ar / Av+Br / Bv folds</label>
 <label>Boundary <select id="seam" aria-label="Overlap boundary"></select></label>
+<label id="foldPartLabel" hidden>Fold <select id="foldPart"><option value="Ar">Ar</option><option value="inner">Av + Br (together)</option><option value="Bv">Bv</option></select></label>
 <label>Overlap <input type="range" id="overlap" min="0" max="95" step="0.1" aria-label="Boundary overlap"><input type="number" id="overlapNumber" min="0" max="95" step="0.1" aria-label="Boundary overlap percent"> %</label>
 <button type="button" id="resetSeam">Reset boundary</button><button type="button" id="resetSeams">Reset shown</button>
 <label id="strengthLabel">Covered-area strength <input type="range" id="strength" min="0" max="1" step="0.05" aria-label="Covered area opacity"><output id="strengthValue"></output></label>
-<p class="drawer-note">Drag a ↕ label in the plot, or use the arrow keys on it: 1%, or 5% with Shift. That bifolium and everything after it move. An overlap belongs to this pair of neighbours.</p>
+<p class="drawer-note">Drag a ↕ label, or use its arrow keys: 1%, or 5% with Shift. Shared joins move all four pages; separate folds move only the chosen column group and its successors. Switching folds off restores the shared joins.</p>
+<p class="drawer-note" id="foldFit"></p>
 </div></details>
 <details class="drawer" id="reorderPanel"><summary id="reorderSummary">Reorder bifolia</summary><div class="drawer-body">
 <p class="drawer-note">Drag a row or use ↑ ↓. All of a bifolium's pages move together. Alt + ↑ ↓ on the grip moves it from the keyboard.</p>
@@ -66,6 +69,8 @@
 <details class="how"><summary>How to read this</summary>
 <p><b>Arrangements.</b> Bifolium chain stacks every bifolium of the sequence, one row a sheet, four pages to a row. Continuous column runs the complete pages top to bottom. Superimposed overlay lays the pages over each other in one fixed frame, and you step through them. No arrangement mirrors a page: all the text stays upright. Ar is A recto (outer), Av A verso (inner), Br B recto (inner), Bv B verso (outer). These are positions on the sheet, which are not always facing pages in the bound book.</p>
 <p><b>Joins.</b> A continuous chain crops the empty space outside each bifolium's combined text and starts each row where the last one ends. The four pages of a row stay locked together, so a shorter page keeps the blank space beside a longer one, and only whole rows move. Drag a ↕ label to overlap a bifolium onto the one before, from 0 to 95% of that one's text height. This is an arrangement for looking at, not a measurement of how the sheets lay: it uses the text's extent, not the edge of the paper.</p>
+<p><b>Separate folds (optional).</b> Under Adjust overlaps, turn on Separate Ar / Av+Br / Bv folds to move those three column groups independently. Av and Br always move together. Their column handles and the Fold menu edit only that group. Switching off returns to the saved shared joins; both sets of values survive links and boundary files.</p>
+<p><b>1a presets.</b> Both ten-bifolium configurations run A:1-8 through D:28-29. Original single joins loads the saved shared overlaps, with separate folds off. Separate folds loads the same order with the saved three-fold fits on. In recorded coordinates at body-height scale, these use the study's original opening anchors, body heights and sheet extents so that the saved cuts retain their meaning. All 40 pages are visible, including f49v, which was not scored; the two inner joins touching it use Br alone. The displayed angles use the current baseline data, not the historical fit's angle input. These are candidate placements; edited overlaps are not rescored.</p>
 <p><b>Covered area.</b> Where a row overlaps the one before, the older text below the fold can stay as faint text, box outlines or the margin trace alone, disappear, or stay at full strength. This changes only what is drawn. The fold, the angles and the geometry stay as they are.</p>
 <p><b>Tilt.</b> Tilt is the slope of the text lines, not of the left margin. Flat coordinates take out each page's warp, and with it the page's overall tilt. Flattening moves words up and down only, so Recorded tilt, x unchanged puts the tilt back the same way, with one adjustment for the whole page: the page's median line angle comes back and every x stays where it was recorded. Each line keeps its flat shape, so it does not get back its own recorded angle, and the rest of the warp stays out. Rigid turn rotates the page by the same angle instead. A rotation moves x as well, which flattening never did, so each drawn margin leans by the page's own turn on top of its slope: compare margins only under the first setting, or in recorded coordinates, which already hold the tilt and need none restored. Links from the comparison workspace used the rigid turn, and now open on the recorded tilt. The side labels give each page's recorded tilt: positive falls to the right. The angle is the median over lines with at least 4 located boxes spanning at least 3 median word widths, so a page with no such line shows none and keeps its flat tilt. This restores an orientation for inspection, not a physical page edge.</p>
 <p><b>Align.</b> Source x keeps each page's horizontal position from its source image. Opening word puts the first word of each page at x = 0. Median body margin puts the median left edge of the page's body rows at x = 0. Each is one horizontal translation of the page. The height always comes from the opening baseline, because the source images share no vertical origin. Body height scales each page, in both directions alike, to a common median word height.</p>
@@ -75,4 +80,4 @@
 </details>
 </main>
 <footer><p>Coordinates: © 2014 The Voynichese Project, Apache-2.0 (<a href="NOTICE.txt">attribution</a>). ZL transliteration and Path 1 ordering. Built with <a href="https://github.com/eo777/vms-spatial">vms-spatial</a>.</p></footer>
-<script src="common.js"></script><script src="js/compare_math.js"></script><script src="compare_state.js"></script><script src="js/section_math.js"></script><script src="js/stream_math.js?v=1a-candidate"></script><script src="stream.js?v=1a-candidate"></script></body></html>
+<script src="common.js"></script><script src="js/compare_math.js"></script><script src="compare_state.js"></script><script src="js/section_math.js"></script><script src="js/stream_1a_preset.js?v=1a-folds"></script><script src="js/stream_math.js?v=1a-folds"></script><script src="stream.js?v=1a-folds"></script></body></html>

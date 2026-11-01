@@ -1,15 +1,19 @@
 /* The Page stream on the toolkit's compact pages (compare/pages.json.gz): which bifolia and pages run in which order, how a page is
    registered and turned, and where the rows of a chain sit. A page gets one translation, one optional uniform scale and one optional
-   rigid turn; a row moves as a whole sheet. Nothing is fitted to a neighbour. No DOM. Node tests: viewer/test/stream_math.test.js. */
+   rigid turn; shared joins move a whole sheet, optional separate folds move Ar / Av+Br / Bv. Saved fits are loaded, never recomputed here.
+   No DOM. Node tests: viewer/test/stream_math.test.js. */
 (function(root){
 'use strict';
 const M=(typeof module!=='undefined'&&module.exports)?require('./compare_math.js'):root.VMS_COMPARE;
+const STUDY=(typeof module!=='undefined'&&module.exports)?require('./stream_1a_preset.js'):root.VMS_STREAM_1A;
 const SLOTS=['Ar','Av','Br','Bv'],CYCLE={Ar:'Bv',Av:'Av',Br:'Ar',Bv:'Br'},MAX_OVERLAP=.95,PRESET_SCHEMA=1;
-// The copying-window study's seven-sheet candidate, not the full Golf 1a group.
-const HERBAL_A_ORDER='herbal_a_1a',HERBAL_A_NODES=Object.freeze(['D:27-30','F:42-47','G:49-56','A:2-7','D:25-32','C:20-21','E:35-38']);
-const orderDefaults=order=>order===HERBAL_A_ORDER?{coords:'recorded',tilt:'none'}:{};
+const HERBAL_A_ORDER='herbal_a_1a',HERBAL_A_FOLDS='herbal_a_1a_folds',HERBAL_A_NODES=Object.freeze([...STUDY.order]);
+const isHerbal=order=>[HERBAL_A_ORDER,HERBAL_A_FOLDS].includes(order);
+const FOLD_GROUPS=['Ar','inner','Bv'],foldGroup=slot=>['Av','Br'].includes(slot)?'inner':slot;
+const studyFrame=state=>isHerbal(state.order)&&state.coords==='recorded'&&state.scale==='body_height';
+const orderDefaults=order=>isHerbal(order)?{coords:'recorded',tilt:'none',foldMode:order===HERBAL_A_FOLDS?'separate':'shared',overlaps:encodeOverlaps(Object.fromEntries(Object.entries(STUDY.edges).map(([k,e])=>[k,e.shared]))),folds:encodeFolds(Object.fromEntries(Object.entries(STUDY.edges).map(([k,e])=>[k,Object.fromEntries(FOLD_GROUPS.map(g=>[g,e.groups[g].value]))])))}:{};
 // the first value of each list is the default
-const BY=['golf','section'],ORDERS=['bifolia','path1',HERBAL_A_ORDER],VIEWS=['chain','stream','overlay'],COLUMNS=['singulion','faces'],JOINS=['touch','half','frames'],COVERED=['faint','outline','margin','hidden','full'];
+const BY=['golf','section'],ORDERS=['bifolia','path1',HERBAL_A_ORDER,HERBAL_A_FOLDS],VIEWS=['chain','stream','overlay'],COLUMNS=['singulion','faces'],JOINS=['touch','half','frames'],COVERED=['faint','outline','margin','hidden','full'];
 const ANCHORS=['source','opening','margin'],COORDS=['flat','recorded'],SCALES=['body_height','pixels'],TILTS=['restore','turn','none'],TRAILS=['all','pair','single'],ZOOMS=['1','0.5','0.75','1.5','2','3'];
 const ROUTES=['all',...SLOTS.map(s=>'slot:'+s),...SLOTS.map(s=>'cycle:'+s)];
 const pick=(value,allowed)=>allowed.includes(value)?value:allowed[0];
@@ -26,6 +30,15 @@ function decodeOverlaps(text){
  return out;
 }
 const decodeList=text=>typeof text==='string'?[...new Set(text.split(',').filter(Boolean))]:[];
+function encodeFolds(folds){return Object.keys(folds).sort().flatMap(k=>FOLD_GROUPS.filter(g=>Number.isFinite(folds[k][g])).map(g=>k+'@'+g+'='+folds[k][g])).join('|');}
+function decodeFolds(text){
+ const out={};if(typeof text!=='string')return out;
+ for(const item of text.split('|')){
+  const at=item.lastIndexOf('@'),eq=item.lastIndexOf('='),key=item.slice(0,at),group=item.slice(at+1,eq),value=decodeOverlaps(key+item.slice(eq))[key];
+  if(at>0&&eq>at&&FOLD_GROUPS.includes(group)&&Number.isFinite(value))(out[key]||(out[key]={}))[group]=value;
+ }
+ return out;
+}
 /* fromWorkspace(hash) -> the view of a link or saved boundary set of the comparison workspace this page came from. Its order, joins and overlaps carry over.
    Its rigid turn does not: that turn leans every margin, so such a link opens on the recorded tilt, and Rigid turn stays a choice on the page */
 const WORKSPACE_KEYS={seqGroup:'group',seqRoute:'route',seqIndex:'at',seqMode:'trail',seqJoin:'join',seqCovered:'covered',seqCoveredOpacity:'strength',seqSeam:'seam',seqOpacity:'fade',seqEdges:'margins',seqPages:'pages',scale:'scale',zoom:'zoom'};
@@ -54,13 +67,15 @@ function parse(h={}){
  const number=(v,lo,hi,fallback)=>{const n=Number(v);return v!=null&&v!==''&&Number.isFinite(n)?Math.max(lo,Math.min(hi,n)):fallback;};
  return {by:pick(h.by,BY),group:typeof h.group==='string'&&h.group?h.group:'all',order:pick(h.order,ORDERS),route:pick(h.route,ROUTES),view:pick(h.view,VIEWS),columns:pick(h.columns,COLUMNS),join:pick(h.join,JOINS),
   covered:pick(h.covered,COVERED),strength:number(h.strength,0,1,.3),seam:typeof h.seam==='string'?h.seam:'',anchor:pick(h.anchor,ANCHORS),coords:pick(h.coords,COORDS),scale:pick(h.scale,SCALES),trail:pick(h.trail,TRAILS),
-  fade:number(h.fade,.02,1,.2),zoom:pick(h.zoom,ZOOMS),tilt:pick(h.tilt,TILTS),words:h.words!=='0',margins:h.margins!=='0',at:Math.max(0,parseInt(h.at,10)||0),overlaps:decodeOverlaps(h.overlaps),custom:decodeList(h.custom),pages:decodeList(h.pages),oldLink};
+  fade:number(h.fade,.02,1,.2),zoom:pick(h.zoom,ZOOMS),tilt:pick(h.tilt,TILTS),words:h.words!=='0',margins:h.margins!=='0',at:Math.max(0,parseInt(h.at,10)||0),overlaps:decodeOverlaps(h.overlaps),foldMode:pick(h.foldMode,['shared','separate']),foldPart:pick(h.foldPart,FOLD_GROUPS),folds:decodeFolds(h.folds),custom:decodeList(h.custom),pages:decodeList(h.pages),oldLink};
 }
 function serialize(s){
  const o={},defaults=orderDefaults(s.order);
  for(const [k,d] of [['by',BY[0]],['group','all'],['order',ORDERS[0]],['route',ROUTES[0]],['view',VIEWS[0]],['columns',COLUMNS[0]],['join',JOINS[0]],['covered',COVERED[0]],['strength',.3],['seam',''],['anchor',ANCHORS[0]],['coords',COORDS[0]],['scale',SCALES[0]],['trail',TRAILS[0]],['fade',.2],['zoom',ZOOMS[0]],['tilt',TILTS[0]],['at',0]])if(s[k]!==(defaults[k]??d))o[k]=String(s[k]);
  for(const k of ['words','margins'])if(!s[k])o[k]='0';
- const overlaps=encodeOverlaps(s.overlaps);if(overlaps)o.overlaps=overlaps;
+ for(const [k,d] of [['foldMode','shared'],['foldPart',FOLD_GROUPS[0]]])if(s[k]!==(defaults[k]??d))o[k]=s[k];
+ const overlaps=encodeOverlaps(s.overlaps);if(overlaps!==(defaults.overlaps||''))o.overlaps=overlaps||'none';
+ const folds=encodeFolds(s.folds);if(folds!==(defaults.folds||''))o.folds=folds||'none';
  if(s.custom.length)o.custom=s.custom.join(',');
  if(s.pages.length)o.pages=s.pages.join(',');
  return o;
@@ -69,12 +84,13 @@ function serialize(s){
 function clean(state,pages,list){
  const nodes=new Set(list.map(f=>pages[f].node));
  state.overlaps=Object.fromEntries(Object.entries(state.overlaps).filter(([k])=>k.split('>').every(n=>nodes.has(n))));
+ state.folds=Object.fromEntries(Object.entries(state.folds).filter(([k])=>k.split('>').every(n=>nodes.has(n))));
  state.pages=state.pages.filter(f=>pages[f]);
  if(!state.custom.every(n=>nodes.has(n)))state.custom=[];
  return state;
 }
 // ---- saved boundary sets
-const PRESET_KEYS=['by','group','order','route','view','columns','join','covered','strength','seam','anchor','coords','scale','trail','fade','zoom','at','tilt','words','margins','overlaps','custom','pages'];
+const PRESET_KEYS=['by','group','order','route','view','columns','join','covered','strength','seam','anchor','coords','scale','trail','fade','zoom','at','tilt','words','margins','overlaps','foldMode','foldPart','folds','custom','pages'];
 /* normalizePreset(input) -> {schema, name, params}: only known settings, checked, or an Error saying what is wrong. A set saved in the workspace is translated */
 function normalizePreset(input){
  if(!input||input.schema!==PRESET_SCHEMA||typeof input.name!=='string'||!input.name.trim()||!input.params||typeof input.params!=='object'||Array.isArray(input.params))throw Error('Choose a boundary set JSON file.');
@@ -90,12 +106,16 @@ function normalizePreset(input){
  }
  if(!params.group||!params.order)throw Error('This set does not name a group and an order.');
  if(params.overlaps!=null){
-  const items=params.overlaps.split('|').filter(Boolean),out=decodeOverlaps(params.overlaps);
+  const items=params.overlaps==='none'?[]:params.overlaps.split('|').filter(Boolean),out=decodeOverlaps(params.overlaps);
   if(items.length!==Object.keys(out).length||items.some(item=>{const v=Number(item.slice(item.lastIndexOf('=')+1));return v<0||v>MAX_OVERLAP;}))throw Error('Invalid saved boundary percentages.');
  }
  if(params.custom!=null){
   const items=params.custom.split(',');
   if(items.length>500||items.some(n=>!n||n.length>100)||new Set(items).size!==items.length)throw Error('Invalid saved bifolium order.');
+ }
+ if(params.folds!=null){
+  const items=params.folds==='none'?[]:params.folds.split('|').filter(Boolean),parsed=decodeFolds(params.folds);
+  if(items.length!==Object.values(parsed).reduce((n,g)=>n+Object.keys(g).length,0)||items.some(item=>{const v=Number(item.slice(item.lastIndexOf('=')+1));return v<0||v>MAX_OVERLAP;}))throw Error('Invalid saved separate folds.');
  }
  return {schema:PRESET_SCHEMA,name:input.name.trim().slice(0,100),params};
 }
@@ -103,12 +123,15 @@ function normalizePreset(input){
 const presetParams=s=>({group:s.group,order:s.order,...serialize(s)});
 // ---- the order
 function orderPages(orders,order,pages){
- if(order===HERBAL_A_ORDER)return HERBAL_A_NODES.flatMap(node=>Object.keys(pages).filter(f=>pages[f].node===node).sort((a,b)=>SLOTS.indexOf(pages[a].slot)-SLOTS.indexOf(pages[b].slot)||a.localeCompare(b,undefined,{numeric:true})));
+ if(isHerbal(order))return HERBAL_A_NODES.flatMap(node=>Object.keys(pages).filter(f=>pages[f].node===node).sort((a,b)=>SLOTS.indexOf(pages[a].slot)-SLOTS.indexOf(pages[b].slot)||a.localeCompare(b,undefined,{numeric:true})));
  const source=orders[order]||orders.bifolia;return (source?source.pages:Object.keys(pages)).filter(f=>pages[f]);
 }
 function selectOrder(state,order){
  const next={...state,order:pick(order,ORDERS),custom:[],at:0};
- if(next.order===HERBAL_A_ORDER)Object.assign(next,orderDefaults(next.order),{by:'golf',group:'all',pages:[],route:'all',view:'chain',columns:'singulion',anchor:'source',scale:'body_height',join:'touch',overlaps:{},seam:'',oldLink:false});
+ if(isHerbal(next.order)){
+  const defaults=orderDefaults(next.order);
+  Object.assign(next,defaults,{by:'golf',group:'all',pages:[],route:'all',view:'chain',columns:'singulion',anchor:'source',scale:'body_height',join:'touch',overlaps:decodeOverlaps(defaults.overlaps),folds:decodeFolds(defaults.folds),foldPart:'Ar',seam:'',oldLink:false});
+ }else next.foldMode='shared';
  return next;
 }
 function reorderNodes(base,custom=[]){return Array.isArray(custom)&&custom.length===base.length&&new Set(custom).size===base.length&&custom.every(n=>base.includes(n))?[...custom]:[...base];}
@@ -146,7 +169,18 @@ const seamKey=(before,after)=>before+'>'+after;
 /* stackSheets(sheets, {join, overlaps, hideCovered}) -> {rows, height}. A row starts where the last one ends, less its overlap, a share of the
    preceding row's text height: the pair's own value, or the join's default. A pair's value is never carried to a different pair. foldY is the
    top of the next row; hideCovered cuts a row there, even where it runs on past a shorter sheet in front of it. */
-function stackSheets(sheets,{join='touch',overlaps={},hideCovered=false}={}){
+function stackSheets(sheets,{join='touch',overlaps={},hideCovered=false,foldMode='shared',folds={}}={}){
+ if(foldMode==='separate'){
+  const lanes=Object.fromEntries(FOLD_GROUPS.map(group=>{
+   const values={...overlaps};for(const [key,parts] of Object.entries(folds))if(Number.isFinite(parts[group]))values[key]=parts[group];
+   return [group,stackSheets(sheets,{join,overlaps:values,hideCovered})];
+  }));
+  const rows=sheets.map((sheet,i)=>{
+   const parts=Object.fromEntries(FOLD_GROUPS.map(g=>[g,lanes[g].rows[i]])),top=Math.min(...Object.values(parts).map(p=>p.top));
+   return {...parts.Ar,top,manual:Object.values(parts).some(p=>p.manual),lanes:parts};
+  });
+  return {rows,height:Math.max(0,...Object.values(lanes).map(l=>l.height))};
+ }
  const rows=sheets.map((sheet,index)=>({node:sheet.node,index,height:Math.max(0,Number(sheet.height)||0)}));
  rows.forEach((row,i)=>{
   const previous=rows[i-1],key=previous?seamKey(previous.node,row.node):null,value=key&&Object.hasOwn(overlaps,key)?overlaps[key]:null,manual=typeof value==='number'&&Number.isFinite(value);
@@ -172,8 +206,10 @@ function marginRows(folio,page,units,tokens){
 /* register(folio, page, words, tokens, {coords, scale, anchor}) -> a whole-page selection in the page's own frame, its opening baseline at y = 0.
    anchor 'opening' puts the opening word at x = 0, 'source' keeps the page's source x, and 'margin' puts the median body margin at x = 0.
    available is false when the page's opening line has no box, because then there is nothing to hang the page on. */
-function register(folio,page,words,tokens,{coords='flat',scale='body_height',anchor='source'}={}){
- const sel=M.selectUnits(page,words,{block:'page',cutoff:'all',coordinates:coords,alignment:'page',scale}),factor=scale==='body_height'?M.BODY_HEIGHT_PX/(page.H||30):1;
+function register(folio,page,words,tokens,{coords='flat',scale='body_height',anchor='source',reference=null}={}){
+ const ref=coords==='recorded'&&scale==='body_height'?reference:null,p=ref?{...page,H:ref.H}:page;
+ const sel=M.selectUnits(p,words,{block:'page',cutoff:'all',coordinates:coords,alignment:'page',scale}),factor=scale==='body_height'?M.BODY_HEIGHT_PX/(p.H||30):1;
+ if(ref){const dy=(sel.origin[1]-ref.origin[1])*factor;sel.all=sel.all.map(u=>({...u,rect:u.rect.map((v,j)=>j%2?v+dy:v),baseline:u.baseline+dy}));sel.origin=[sel.origin[0],ref.origin[1]];}
  const opening=page.blocks[0][1][0],before=marginRows(folio,page,sel.all,tokens);
  const shift=anchor==='source'?-sel.origin[0]*factor:anchor==='margin'&&before.length?M.median(before.map(r=>r.x)):0;
  const all=sel.all.map(u=>({...u,rect:u.rect.map((v,j)=>j%2?v:v-shift)}));
@@ -203,6 +239,6 @@ function bounds(selections){
  const low=j=>boxes.reduce((a,r)=>Math.min(a,r[j]),Infinity),high=j=>boxes.reduce((a,r)=>Math.max(a,r[j]),-Infinity);
  return {xmin:Math.min(0,low(0))-110,xmax:high(2)+70,ymin:Math.min(0,low(1))-65,ymax:high(3)+65};
 }
-const api={SLOTS,CYCLE,MAX_OVERLAP,PRESET_SCHEMA,PRESET_KEYS,BY,ORDERS,VIEWS,COLUMNS,JOINS,COVERED,ANCHORS,COORDS,SCALES,TILTS,TRAILS,ZOOMS,ROUTES,HERBAL_A_ORDER,HERBAL_A_NODES,orderPages,selectOrder,parse,serialize,clean,fromWorkspace,encodeOverlaps,decodeOverlaps,normalizePreset,presetParams,reorderNodes,moveNode,sequence,visible,nextBifolium,seamKey,stackSheets,marginRows,register,orient,bounds};
+const api={SLOTS,CYCLE,MAX_OVERLAP,PRESET_SCHEMA,PRESET_KEYS,BY,ORDERS,VIEWS,COLUMNS,JOINS,COVERED,ANCHORS,COORDS,SCALES,TILTS,TRAILS,ZOOMS,ROUTES,STUDY,HERBAL_A_ORDER,HERBAL_A_FOLDS,HERBAL_A_NODES,FOLD_GROUPS,foldGroup,isHerbal,studyFrame,encodeFolds,decodeFolds,orderPages,selectOrder,parse,serialize,clean,fromWorkspace,encodeOverlaps,decodeOverlaps,normalizePreset,presetParams,reorderNodes,moveNode,sequence,visible,nextBifolium,seamKey,stackSheets,marginRows,register,orient,bounds};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.VMS_STREAM=api;
 })(typeof window!=='undefined'?window:globalThis);

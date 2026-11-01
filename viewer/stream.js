@@ -31,9 +31,9 @@
  // ---- a page's placement, kept while the geometry settings hold
  const placed=new Map();let placedKey='';
  function recordOf(folio){
-  const key=[state.coords,state.scale,state.anchor,state.tilt].join('|');
+  const key=[state.coords,state.scale,state.anchor,state.tilt,T.studyFrame(state)].join('|');
   if(key!==placedKey){placed.clear();placedKey=key;}
-  if(!placed.has(folio))placed.set(folio,T.orient(pages[folio],T.register(folio,pages[folio],words,tokens,state),state.coords,state.tilt));
+  if(!placed.has(folio))placed.set(folio,T.orient(pages[folio],T.register(folio,pages[folio],words,tokens,{...state,reference:T.studyFrame(state)?T.STUDY.pages[folio]:null}),state.coords,state.tilt));
   return placed.get(folio);
  }
  // ---- the pages: canvases are painted near the view and released away from it, so a whole manuscript needs no giant bitmap
@@ -75,51 +75,65 @@
  function refreshPaint(){if(paintRequest!==null)return;paintRequest=requestAnimationFrame(()=>{paintRequest=null;for(const part of parts)if(part.active&&part.canvas&&part.painted!==stamp(part))paint(part);});}
  function positionRows(){
   if(!stack)return;
-  const hidden=state.covered==='hidden',layout=T.stackSheets(sheets,{join:state.join,overlaps:state.overlaps,hideCovered:hidden});
+  const hidden=state.covered==='hidden',separate=state.foldMode==='separate',layout=T.stackSheets(sheets,{join:state.join,overlaps:state.overlaps,hideCovered:hidden,foldMode:state.foldMode,folds:state.folds});
   for(const placement of layout.rows){
    const row=sheets[placement.index];row.placement=placement;row.element.style.top=placement.top+'px';
-   row.plot.style.clipPath=hidden?`inset(0 0 ${Math.max(0,row.height-placement.visibleHeight)}px 0)`:'';
+   row.plot.style.clipPath=hidden&&!separate?`inset(0 0 ${Math.max(0,row.height-placement.visibleHeight)}px 0)`:'';
    row.element.classList.toggle('manual-seam',placement.manual);
-   if(row.handle){row.handle.title=`Drag up or down to adjust ${row.node}: ${(placement.overlap*100).toFixed(1)}% overlap. Arrow keys 1%, with Shift 5%. Moves this bifolium and the ones after it.`;row.handle.setAttribute('aria-label','Adjust overlap before '+row.node);}
-   const fold=placement.foldY===null?row.height:placement.foldY-placement.top;
-   for(const part of row.parts)Object.assign(part.frame,{plotTop:placement.top+part.rowOffset,coveredFrom:Math.max(0,Math.min(part.frame.h,fold-part.rowOffset))});
+   if(row.handle){row.handle.disabled=separate;row.handle.title=separate?'Use a column fold handle to move Ar, Av+Br or Bv.':`Drag up or down to adjust ${row.node}: ${(placement.overlap*100).toFixed(1)}% overlap. Arrow keys 1%, with Shift 5%. Moves this bifolium and the ones after it.`;row.handle.setAttribute('aria-label','Adjust overlap before '+row.node);}
+   for(const [slot,col] of row.columns){
+    const lane=separate?placement.lanes[T.foldGroup(slot)]:placement;
+    col.style.transform=separate?`translateY(${lane.top-placement.top}px)`:'';
+    col.style.clipPath=hidden&&separate?`inset(0 0 ${Math.max(0,row.height-lane.visibleHeight)}px 0)`:'';
+    const handle=col.querySelector('.column-seam');if(handle){handle.title=`${T.foldGroup(slot)==='inner'?'Av + Br':slot}: ${(lane.overlap*100).toFixed(1)}% overlap before ${row.node}. Drag or use arrow keys.`;handle.setAttribute('aria-pressed',String(state.seam===lane.key&&state.foldPart===T.foldGroup(slot)));}
+   }
+   for(const part of row.parts){
+    const lane=separate?placement.lanes[T.foldGroup(plan.pages[part.index].slot)]:placement,fold=lane.foldY===null?row.height:lane.foldY-lane.top;
+    Object.assign(part.frame,{plotTop:lane.top+part.rowOffset,coveredFrom:Math.max(0,Math.min(part.frame.h,fold-part.rowOffset))});
+   }
   }
   stack.style.height=layout.height+'px';refreshPaint();
  }
  function adjustOverlap(seam,value,commit=true){
   if(!sheets.some(r=>r.placement&&r.placement.key===seam))return;
-  if(value===null)delete state.overlaps[seam];else state.overlaps[seam]=Math.round(Math.max(0,Math.min(T.MAX_OVERLAP,Number(value)||0))*1000)/1000;
+  const v=value===null?null:Math.round(Math.max(0,Math.min(T.MAX_OVERLAP,Number(value)||0))*1000)/1000;
+  if(state.foldMode==='separate'){
+   if(v===null){if(state.folds[seam]){delete state.folds[seam][state.foldPart];if(!Object.keys(state.folds[seam]).length)delete state.folds[seam];}}
+   else (state.folds[seam]||(state.folds[seam]={}))[state.foldPart]=v;
+  }else if(v===null)delete state.overlaps[seam];else state.overlaps[seam]=v;
   state.seam=seam;autoSeam='';positionRows();syncOverlaps();if(commit)save();
  }
- function bindSeam(handle,row){
+ function bindSeam(handle,row,group=null){
   let drag=null;
-  const selectSeam=()=>{state.seam=row.placement.key;autoSeam='';syncOverlaps();};
+  const lane=()=>group&&row.placement.lanes?row.placement.lanes[group]:row.placement;
+  const selectSeam=()=>{state.seam=row.placement.key;if(group)state.foldPart=group;autoSeam='';syncOverlaps();};
   handle.onclick=selectSeam;
   handle.onpointerdown=e=>{
-   if(e.button!==0)return;e.preventDefault();selectSeam();handle.focus({preventScroll:true});
-   drag={id:e.pointerId,y:e.clientY,value:row.placement.overlap,height:sheets[row.placement.index-1].height,original:row.placement.manual?row.placement.overlap:null,moved:false};handle.setPointerCapture(e.pointerId);handle.classList.add('dragging');
+   if(e.button!==0||handle.disabled)return;e.preventDefault();selectSeam();handle.focus({preventScroll:true});
+   const saved=group?state.folds[row.placement.key]?.[group]:state.overlaps[row.placement.key];
+   drag={id:e.pointerId,y:e.clientY,value:lane().overlap,height:sheets[row.placement.index-1].height,original:saved??null,moved:false};handle.setPointerCapture(e.pointerId);handle.classList.add('dragging');
   };
   handle.onpointermove=e=>{if(drag&&e.pointerId===drag.id){drag.moved=drag.moved||Math.abs(e.clientY-drag.y)>1;if(drag.moved)adjustOverlap(row.placement.key,drag.value-(e.clientY-drag.y)/Math.max(1,drag.height),false);}};
   const finish=(e,cancel)=>{
    if(!drag||e.pointerId!==drag.id)return;
    const {original,moved}=drag;drag=null;handle.classList.remove('dragging');if(handle.hasPointerCapture(e.pointerId))handle.releasePointerCapture(e.pointerId);
-   adjustOverlap(row.placement.key,cancel||!moved?original:row.placement.overlap,true);
+   adjustOverlap(row.placement.key,cancel||!moved?original:lane().overlap,true);
   };
   handle.onpointerup=e=>finish(e,false);handle.onpointercancel=e=>finish(e,true);
   handle.onkeydown=e=>{
    if(e.key==='Escape'&&drag){e.preventDefault();finish({pointerId:drag.id},true);return;}
    if(!['ArrowUp','ArrowDown','Home','End'].includes(e.key))return;e.preventDefault();selectSeam();
-   adjustOverlap(row.placement.key,e.key==='Home'?0:e.key==='End'?T.MAX_OVERLAP:row.placement.overlap+(e.key==='ArrowUp'?1:-1)*(e.shiftKey?.05:.01));
+   adjustOverlap(row.placement.key,e.key==='Home'?0:e.key==='End'?T.MAX_OVERLAP:lane().overlap+(e.key==='ArrowUp'?1:-1)*(e.shiftKey?.05:.01));
   };
  }
  function build(records,width){
-  const key=JSON.stringify([records.map(r=>r.folio),plan.baseNodes,state.view,state.columns,state.join,state.coords,state.scale,state.anchor,state.tilt,state.words,state.margins,width,state.zoom,dark()]);
+  const key=JSON.stringify([records.map(r=>r.folio),plan.baseNodes,state.view,state.columns,state.join,state.coords,state.scale,state.anchor,state.tilt,state.words,state.margins,state.foldMode,T.studyFrame(state),width,state.zoom,dark()]);
   if(key===drawnKey){positionRows();return;}
   clearStream();drawnKey=key;shown=records;
   const chain=state.view==='chain',joined=chain&&state.join!=='frames',valid=records.filter(r=>r.selection.available),singulion=state.columns==='singulion',zoom=Number(state.zoom);
   const xmin=Math.min(0,...valid.map(r=>r.bounds.xmin))-35,xmax=Math.max(600,...valid.map(r=>r.bounds.xmax))+35,ymin=Math.min(0,...valid.map(r=>r.bounds.ymin)),ymax=Math.max(80,...valid.map(r=>r.bounds.ymax));
   const rowWidth=Math.max(360,Math.max(320,width)*zoom),gutter=joined?GUTTER:0,w=chain?(rowWidth-gutter-26)/4:Math.max(320,width)*zoom,padX=chain?10:24,s=(w-2*padX)/(xmax-xmin);
-  host.style.setProperty('--stream-width',w+'px');host.style.setProperty('--row-width',rowWidth+'px');host.style.setProperty('--gutter',gutter+'px');host.classList.toggle('joined',joined);
+  host.style.setProperty('--stream-width',w+'px');host.style.setProperty('--row-width',rowWidth+'px');host.style.setProperty('--gutter',gutter+'px');host.classList.toggle('joined',joined);host.classList.toggle('split-folds',joined&&state.foldMode==='separate');
   const byNode=new Map();let parent=host;
   if(joined){
    const heads=h('div','chain-heads');for(const slot of singulion?T.SLOTS:['Bv','Ar','Av','Br'])heads.append(h('strong','',`${slot} · ${['Ar','Bv'].includes(slot)?'outer':'inner'}`));
@@ -150,6 +164,10 @@
    sheet.append(h('div','stream-boundary end',`BIFOLIUM ${p.node} · END`));
    const extents=members.filter(m=>m.r.selection.available).map(m=>m.r.bounds);
    const row={node:p.node,element:sheet,columns,index,handle,plot,parts:[],ymin:extents.length?Math.min(...extents.map(b=>b.ymin)):ymin,ymax:extents.length?Math.max(...extents.map(b=>b.ymax)):ymax};
+   const ref=T.studyFrame(state)&&T.STUDY.sheets[p.node];if(ref){row.ymin=ref.ymin*VMS_COMPARE.BODY_HEIGHT_PX;row.ymax=ref.ymax*VMS_COMPARE.BODY_HEIGHT_PX;}
+   if(joined&&state.foldMode==='separate'&&sheets.length)for(const [slot,col] of columns){
+    const b=h('button','column-seam','↕ '+p.node+' · '+(T.foldGroup(slot)==='inner'?'Av+Br':slot));b.type='button';b.setAttribute('aria-label',`Adjust ${slot} fold before ${p.node}`);col.prepend(b);bindSeam(b,row,T.foldGroup(slot));
+   }
    byNode.set(p.node,row);sheets.push(row);parent.append(sheet);if(handle)bindSeam(handle,row);
   });
   observer=new IntersectionObserver(entries=>{for(const e of entries){const part=parts[Number(e.target.dataset.index)];if(!part||!part.canvas)continue;part.active=e.isIntersecting;if(part.active)paint(part);else{part.canvas.width=1;part.canvas.height=1;part.painted=null;}}},{rootMargin:'1200px 0px'});
@@ -214,17 +232,21 @@
  const seamKeys=()=>plan.nodes.slice(1).map((node,i)=>T.seamKey(plan.nodes[i],node));
  function fillGroups(){
   const groups=X.groups(pages,list,state.by),name=n=>n==='—'?'Unassigned':n;
-  $('group').replaceChildren(...(selectedAtLoad.length?[new Option(`Selected pages (${selectedAtLoad.length})`,'selected')]:[]),new Option(state.order===T.HERBAL_A_ORDER?'All seven candidate bifolia':'Whole manuscript','all'),...groups.map(g=>new Option(`${name(g.name)} (${g.pages.length})`,g.name)));
+  $('group').replaceChildren(...(selectedAtLoad.length?[new Option(`Selected pages (${selectedAtLoad.length})`,'selected')]:[]),new Option(T.isHerbal(state.order)?'All ten candidate bifolia':'Whole manuscript','all'),...groups.map(g=>new Option(`${name(g.name)} (${g.pages.length})`,g.name)));
   if(state.group!=='all'&&!groups.some(g=>g.name===state.group))state.group='all';
   $('group').value=state.pages.length?'selected':state.group;
  }
  function syncOverlaps(){
-  const keys=seamKeys(),key=state.seam,edited=keys.filter(k=>Object.hasOwn(state.overlaps,k)).length,value=Object.hasOwn(state.overlaps,key)?state.overlaps[key]:state.join==='half'?.5:0,percent=String(Math.round(value*1000)/10);
+  const keys=seamKeys(),key=state.seam,separate=state.foldMode==='separate',edited=keys.filter(k=>separate?Object.keys(state.folds[k]||{}).length:Object.hasOwn(state.overlaps,k)).length,shared=state.overlaps[key]??(state.join==='half'?.5:0),value=separate?(state.folds[key]?.[state.foldPart]??shared):shared,percent=String(Math.round(value*1000)/10);
+  $('separateFolds').checked=separate;$('foldPartLabel').hidden=!separate;$('foldPart').value=state.foldPart;
   $('seam').value=key;$('overlap').value=percent;$('overlapNumber').value=percent;$('strength').value=state.strength;$('strengthValue').value=Math.round(state.strength*100)+'%';$('strength').disabled=['hidden','full'].includes(state.covered);
   $('overlap').disabled=$('overlapNumber').disabled=$('resetSeam').disabled=!keys.includes(key);$('resetSeams').disabled=!edited;
-  $('overlapSummary').textContent='Adjust overlaps'+(edited?` · ${edited} edited`:'');
+  $('overlapSummary').textContent='Adjust overlaps'+(separate?' · separate folds':'')+(edited?` · ${edited} set`:'');
   for(const row of sheets)if(row.handle)row.handle.setAttribute('aria-pressed',String(row.placement&&row.placement.key===key));
-  if(notes.dataset.base)notes.textContent=notes.dataset.base+(state.view==='chain'&&state.join!=='frames'?`${edited} set by hand. Covered area: ${COVERED_NAMES[state.covered]}.`:'');
+  if(notes.dataset.base)notes.textContent=notes.dataset.base+(state.view==='chain'&&state.join!=='frames'?`${edited} configured joins. Covered area: ${COVERED_NAMES[state.covered]}.`:'');
+  const fit=T.isHerbal(state.order)&&T.STUDY.edges[key],g=fit?.groups?.[state.foldPart];
+  const unchanged=fit&&(separate?T.FOLD_GROUPS.every(p=>Math.abs((state.folds[key]?.[p]??shared)-fit.groups[p].value)<1e-10):Math.abs(shared-fit.shared)<1e-10);
+  $('foldFit').textContent=fit?`${unchanged?'Saved':'Reference'} ${separate?'three-fold':'single-join'} mismatch ${(separate?fit.score:fit.shared_score).toFixed(3)} (lower is better). ${unchanged?'':'This edited placement is not rescored. '}${separate&&g?`Chosen ${state.foldPart==='inner'?'Av+Br':state.foldPart} interval ${(g.interval[0]*100).toFixed(1)}–${(g.interval[1]*100).toFixed(1)}%; other near fits may exist. `:''}${fit.missing_slots.length?'f49v was unscored; the inner fold uses Br only. ':''}${!T.studyFrame(state)?'Current coordinate settings differ from the saved study registration. ':''}Ranges are score tolerances, not confidence intervals.`:'';
  }
  function fillSeams(){
   const keys=seamKeys(),active=plan.pages[state.at]&&plan.pages[state.at].node;
@@ -236,6 +258,7 @@
   const flowing=state.view!=='overlay',chain=state.view==='chain',joined=chain&&state.join!=='frames';
   for(const k of Object.keys(ctl))ctl[k].value=state[k];
   $('words').checked=state.words;$('margins').checked=state.margins;$('fade').value=state.fade;
+  $('separateFolds').checked=state.foldMode==='separate';$('foldPartLabel').hidden=state.foldMode!=='separate';$('foldPart').value=state.foldPart;
   $('columnsLabel').hidden=$('joinLabel').hidden=$('jumpLabel').hidden=!chain;$('routeLabel').hidden=chain;$('trailLabel').hidden=$('fadeLabel').hidden=flowing;$('tiltLabel').hidden=!flowing;
   ctl.tilt.disabled=state.coords==='recorded';    // recorded coordinates already hold the tilt: no setting moves anything there
   const flatTurn=flowing&&state.coords==='flat',note=flatTurn&&state.tilt==='turn'?TILT_NOTES.turn:flatTurn&&state.tilt==='restore'&&state.oldLink?TILT_NOTES.oldLink:'';
@@ -290,7 +313,7 @@
  }
  // ---- drawing
  function heading(){
-  const name=state.pages.length?'Selected pages':state.order===T.HERBAL_A_ORDER?'Herbal A · 1a candidate':state.group==='all'?'Whole manuscript':state.group==='—'?'Unassigned':state.group;
+  const name=state.pages.length?'Selected pages':T.isHerbal(state.order)?'Herbal A · 1a candidate':state.group==='all'?'Whole manuscript':state.group==='—'?'Unassigned':state.group;
   return `${name} · ${{chain:'bifolium chain',stream:'continuous column',overlay:'superimposed overlay'}[state.view]}`;
  }
  function draw(){
@@ -317,7 +340,8 @@
    notes.dataset.base=(chain?`${plan.nodes.length} bifolia, ${state.columns==='singulion'?'singulion Ar Av Br Bv':'outer Bv Ar, inner Av Br'}. ${{touch:'Rows meet with no added gap, four pages locked together. ',half:'Each row overlaps half of the last: a display choice. ',frames:'Separate fixed frames. '}[state.join]}`:`${plan.pages.length} pages top to bottom, colours by bifolium, one horizontal scale. `)
     +(state.coords==='recorded'?'Recorded coordinates already hold each page\'s tilt. ':{restore:'Each page\'s recorded tilt restored by moving words up or down only, so every x stays as recorded. ',turn:'Recorded tilt restored by a rigid turn, which also leans each margin by the page\'s turn. ',none:'No tilt restored. '}[state.tilt])+({opening:'Opening words at x = 0. ',source:'Source x kept; heights from the opening baselines. ',margin:'Median body margins at x = 0. '}[state.anchor])
     +(absent.length?`No box on the opening line: ${absent.join(', ')}. `:'')+(unturned.length?`No angle, so no tilt restored: ${unturned.join(', ')}. `:'')+(chain&&state.pages.length?'All mapped pages of each selected bifolium are shown. ':'')+(chain&&plan.pages.some(p=>p.panels>1)?'Foldout panels stack within their slot. ':'');
-   if(state.order===T.HERBAL_A_ORDER)notes.dataset.base+='Copying-study candidate order; fold estimates are not loaded. ';
+   if(state.foldMode==='separate'&&chain)notes.dataset.base=notes.dataset.base.replace('four pages locked together.','Ar, Av+Br and Bv advance separately; inner pages stay together.');
+   if(T.isHerbal(state.order))notes.dataset.base+=T.studyFrame(state)?'Ten-sheet study configuration: saved opening anchors, body heights and sheet extents; current recorded boxes. f49v is visible but was not scored. ':'Ten-sheet candidate; current registration differs from the saved fit. ';
    notes.textContent=notes.dataset.base;syncOverlaps();
   }else{clearStream();delete notes.dataset.base;paintOverlay(width);}
   save();
@@ -327,7 +351,9 @@
  const render=()=>queued||(queued=SG.busy('Drawing the pages…',()=>{queued=null;draw();}));
  // ---- the controls
  const here=()=>{state.at=currentIndex();pendingJump=true;};
- ctl.order.onchange=()=>{state=T.selectOrder(state,ctl.order.value);if(state.order===T.HERBAL_A_ORDER)selectedAtLoad=[];requested=null;render();};
+ ctl.order.onchange=()=>{state=T.selectOrder(state,ctl.order.value);if(T.isHerbal(state.order))selectedAtLoad=[];requested=null;render();};
+ $('separateFolds').onchange=()=>{state.foldMode=$('separateFolds').checked?'separate':'shared';render();};
+ $('foldPart').onchange=()=>{state.foldPart=$('foldPart').value;syncOverlaps();positionRows();save();};
  ctl.by.onchange=()=>{state.by=ctl.by.value;state.group='all';state.pages=[];state.at=0;render();};
  $('group').onchange=()=>{const v=$('group').value;if(v==='selected'){state.pages=[...selectedAtLoad];state.route='all';}else{state.group=v;state.pages=[];}state.at=0;render();};
  ctl.route.replaceChildren(new Option('Ar → Av → Br → Bv','all'),...T.SLOTS.map(s=>new Option(s+' on each bifolium','slot:'+s)),...T.SLOTS.map(s=>new Option('Candidate correspondence · start '+s,'cycle:'+s)));
@@ -352,7 +378,7 @@
   input.onchange=()=>{if(input.value!==''&&Number.isFinite(input.valueAsNumber))adjustOverlap(state.seam,input.valueAsNumber/100,true);else syncOverlaps();};
  }
  $('resetSeam').onclick=()=>adjustOverlap(state.seam,null);
- $('resetSeams').onclick=()=>{for(const row of sheets)if(row.placement&&row.placement.key)delete state.overlaps[row.placement.key];positionRows();syncOverlaps();save();};
+ $('resetSeams').onclick=()=>{for(const row of sheets)if(row.placement&&row.placement.key)delete (state.foldMode==='separate'?state.folds:state.overlaps)[row.placement.key];positionRows();syncOverlaps();save();};
  $('resetOrder').onclick=()=>{pendingFocus=null;requested=plan.pages[currentIndex()];state.custom=[];pendingJump=true;$('reorderMessage').textContent='Back to the selected order. Overlaps stay with their pairs.';render();};
  // ---- saved boundary sets: in this browser, with JSON as the portable copy
  const presetList=$('presetList'),presetName=$('presetName'),presetMessage=$('presetMessage');
@@ -383,14 +409,15 @@
  $('exportJson').onclick=()=>{
   const placement=new Map(sheets.map(r=>[r.node,r]));
   download(`page_stream_${state.group}_${state.order}.json`.replace(/[^\w.-]+/g,'_'),{schema:1,tool:'vms-spatial page stream',version:compact.version,bundle:bundleKey,baseline:compact.baseline,provenance:compact.provenance,state:T.serialize(state),order:plan.nodes,custom_order:plan.custom,
-   seams:sheets.slice(1).map(r=>({seam:r.placement.key,overlap:r.placement.overlap,manual:r.placement.manual,top_px:r.placement.top,fold_px:r.placement.foldY,row_height_px:r.height})),
+   seams:sheets.filter(r=>r.placement?.key).map(r=>({seam:r.placement.key,mode:state.foldMode,overlap:state.foldMode==='shared'?r.placement.overlap:null,manual:r.placement.manual,top_px:r.placement.top,fold_px:state.foldMode==='shared'?r.placement.foldY:null,row_height_px:r.height,groups:r.placement.lanes||null})),
+   registration:T.studyFrame(state)?{kind:'saved_1a_study',provenance:T.STUDY.provenance,unscored_pages:['f49v']}:{kind:'current'},
    pages:plan.pages.map((p,i)=>{
     const r=recordOf(p.folio),row=placement.get(p.node),part=parts[i];
     return {folio:p.folio,node:p.node,slot:p.slot,position:p.position,face:p.face,panel:p.panel,available:r.selection.available,angle:r.angle,opening:r.selection.origin,shift:r.selection.shift,factor:r.selection.factor,H:r.selection.H,bounds:r.bounds,
      plot:part?{scale_px:part.frame.s,xmin:part.frame.xmin,ymin:part.frame.ymin,pad_x:part.frame.padX,pad_y:part.frame.padY,top_px:part.frame.plotTop==null?null:part.frame.plotTop,row_top_px:row&&row.placement?row.placement.top:null}:null,
      margin_rows:r.marginRows.map(m=>({line:m.line,locus:m.locus,x:m.x,y:m.y,drawn_x:m.point[0],drawn_y:m.point[1]}))};
    }),
-   policy:'One translation per page and an optional uniform body-height scale. Tilt restore adds y + kx, so x is as recorded; tilt turn rotates the page rigidly, so drawn margins lean by the page\'s turn. margin_rows x, y are before the tilt and drawn_x, drawn_y after it. Joined rows translate whole bifolia vertically. No horizontal seam fitting. Joins and overlaps are display choices, not recovered physical placement.'});
+   policy:'One translation per page and an optional uniform body-height scale. Tilt restore adds y + kx, so x is as recorded; tilt turn rotates the page rigidly, so drawn margins lean by the page\'s turn. margin_rows x, y are before the tilt and drawn_x, drawn_y after it. Shared joins translate whole bifolia; separate folds translate Ar, tied Av+Br, and Bv independently. No horizontal seam fitting. Saved 1a fits use study registration, not a new fit. Joins and overlaps are display hypotheses, not recovered physical placement.'});
  };
  // the colours follow the theme; a width change redraws; a pasted link takes effect
  new MutationObserver(()=>render()).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});

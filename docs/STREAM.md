@@ -11,7 +11,7 @@ it reads the same compare data as the Compare page.
 | Control | Address | What it does |
 |---|---|---|
 | Group; Group by, under Settings | `group` (all is the default), `by` = section (golf is the default) | the whole manuscript, a Golf group or a section. No page is held back: every group is on the list, 5a, 6 and quire N included |
-| Order | `order` = path1, herbal_a_1a (bifolia is the default) | Manuscript by bifolium; proposed Path 1; or the seven-sheet Herbal A copying-study candidate below |
+| Order | `order` = path1, herbal_a_1a, herbal_a_1a_folds (bifolia is the default) | Manuscript by bifolium; proposed Path 1; or the ten-sheet Herbal A candidate with shared / separate folds |
 | Arrangement | `view` = stream, overlay (chain is the default) | Bifolium chain, Continuous column, Superimposed overlay |
 | Columns | `columns` = faces (singulion is the default) | chain: singulion Ar Av Br Bv, or the physical faces Bv Ar and Av Br |
 | Joins | `join` = half, frames (touch is the default) | chain: rows that meet with no gap, a 50% default overlap, or separate fixed frames with page headers |
@@ -25,6 +25,7 @@ it reads the same compare data as the Compare page.
 | Coordinates, Scale, under Settings | `coords` = recorded, `scale` = pixels | flat or recorded coordinates; body height scales each page in both directions alike to a common median word height |
 | Bifolium, ⇤ ← → ⇥, slider, `[` `]`, page chips | `at`, a page index | navigation. In a column or chain the page scrolls and every page stays present |
 | Adjust overlaps; a ↕ label in the plot | `overlaps` = `A:1-8>F:42-47=0.333\|…`, `seam`, `strength` | drag a label, or use the arrow keys on it (1%, 5% with Shift, Home, End), or the boundary menu and exact percentage, 0 to 95% of the preceding row's text height. That row and all later rows move, and nothing else. A value belongs to a directed pair of neighbours, so another order cannot carry it to different neighbours |
+| Separate Ar / Av+Br / Bv folds, under Adjust overlaps | `foldMode` = separate (shared is the default); `foldPart` = Ar, inner, Bv; `folds` = `A:1-8>D:27-30@Ar=0.7\|…` | optional independent vertical placements for Ar, tied Av+Br, and Bv. Column handles edit one group and its successors. A missing group value falls back to that pair's shared overlap. Switching off preserves the separate values and restores shared positions |
 | Reorder bifolia | `custom`, the full list of bifolia | drag a row, use ↑ ↓, or Alt + ↑ ↓ on the grip. Pages and panels stay with their sheet and colours stay with their sheets. It applies only to the same set of sheets. Reset order returns to the chosen order, and a pair that recurs gets its overlap back |
 | Saved boundaries | none | named sets in this browser, with Download JSON and Import JSON as the portable copy. Import checks every value and keeps only known settings |
 | Export JSON, under Settings | none | every page's angles, transform, margin rows before and after the tilt, plot position, and every boundary |
@@ -36,19 +37,32 @@ says so. Rigid turn under Tilt shows how one looked there. An address that names
 
 ## Herbal A · 1a candidate
 
-Choose **Order → Herbal A · 1a candidate**, or open `stream.html#order=herbal_a_1a`:
+Two Order presets use the full ten-bifolium configuration:
 
-**D:27-30 → F:42-47 → G:49-56 → A:2-7 → D:25-32 → C:20-21 → E:35-38**.
+**A:1-8 → D:27-30 → F:42-47 → G:49-56 → A:2-7 → D:25-32 → C:20-21 → E:35-38 → A:4-5 → D:28-29**.
 
-This is the initial seven-sheet chain used to identify copying windows in the bifolium drift study, not the complete
-Golf 1a group or an established chronology. All four mapped pages of each sheet are included (28 pages, including f49v).
-Selecting it clears prior page/group filters and manual reordering, and opens a singulion chain in recorded coordinates,
-with source x retained and no added rotation. Physical-face columns remain available. Reset order returns to this chain;
-links and saved boundary sets retain the chosen order and subsequent edits.
+**1a · original single joins** (`#order=herbal_a_1a`) loads the original one-fold overlap values, with separate folds off.
+**1a · separate folds** (`#order=herbal_a_1a_folds`) loads the same order with Ar / shared Av+Br / Bv fits enabled.
+The seven-sheet middle run is the main copying-target chain; the other three joins provide context and have weaker fits.
+All four mapped pages of each sheet are included (40 pages). Selecting either preset clears prior page/group filters and
+manual reordering, and opens a singulion chain in recorded coordinates, with source x retained and no added rotation.
+Physical-face columns remain available. Reset order returns to this chain. Links and saved boundary sets retain the
+fold mode and both shared and separate overlap maps, including explicit resets and zero-overlap edits.
 
-Joins initially touch. The separate Ar / Av+Br / Bv fold estimates from the research snapshot are **not imported**:
-this public renderer moves all four pages together and uses updated geometry and baselines. Existing overlap controls
-can still adjust each join and save its boundaries.
+The small `js/stream_1a_preset.js` bundle is generated from the saved copying-window metrics by
+`research/bifolium_drift_20261030/build_public_1a_preset.py` in the research workspace; it includes source hashes.
+This release does not rerun the fits. The presets use saved opening anchors and H for the 39 originally observed pages,
+and saved sheet extents, whenever coordinates are recorded and scale is body height. Those reproduce the study's
+registered rectangle positions and preserve the fit percentages' denominator. They use current recorded boxes, whose
+extents match that snapshot. f49v is now visible, lies within the saved sheet extents, and retains its current registration;
+it was unscored in the original study. The tied inner fold for either join touching it comes from Br alone.
+Current ink/glyph baseline angles are still displayed; they are not the historical angle inputs of the saved score.
+Other coordinate/scale settings leave the study registration, with a note. The saved scores remain references, not new fits.
+
+Separate folds retain independent cumulative vertical positions, one per group. Av and Br are tied even in physical-face
+column order. Covered text is clipped or faded at its own group's next boundary. No x fitting or extra rotation is added.
+The overlap drawer shows the saved mismatch and chosen constant-score interval; other near alternatives are recorded in
+the data bundle. Ranges describe score tolerances, not confidence intervals. Changing a fold does not rescore the fit.
 
 ## Tilt
 
@@ -85,8 +99,8 @@ already hold the tilt: Tilt is switched off there, because no setting moves anyt
 
 - **A join is a choice.** Rows are placed by the extent of the text, not by the edge of the paper. A boundary you set by hand is
   where you put it, and that the text then lines up is what you were looking for, not evidence that it does.
-- **Only whole rows move.** The pages of a bifolium keep their relative heights from their opening baselines, whichever is
-  shorter. The source images share no vertical origin, so even under Source x the heights are opening-relative.
+- **Shared joins move whole rows.** With separate folds enabled, Ar, tied Av+Br and Bv advance independently. Within each
+  group the page origins stay fixed. Source images share no vertical origin, so even under Source x heights are opening-relative.
 - **The tilt depends on the baseline.** This data reads baselines from ink where a page has clean ink records and from
   glyph-corrected boxes elsewhere (`baseline`, `auto`: 193 and 34 pages). Anchored on glyph-corrected boxes alone, page angles differ
   by a median of 0.13° and at most 1.28° (f45r, −0.18° against +1.10°), and 6 of 202 pages change sign. Say which baseline a number used

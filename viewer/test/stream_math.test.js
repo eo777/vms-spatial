@@ -25,18 +25,60 @@ test('the Herbal A candidate opens recorded geometry and retains explicit change
  const saved=T.normalizePreset({schema:1,name:'1a boundaries',params:T.presetParams(edited)});
  assert.deepEqual(T.parse(saved.params),edited);
 });
-test('choosing the Herbal A candidate clears a Bio selection and starts all seven complete sheets',{skip:!have},()=>{
+test('choosing either Herbal A candidate clears a Bio selection and starts all ten complete sheets',{skip:!have},()=>{
  const bio=T.parse({group:'4a',order:'path1',pages:'f76r,f83v',custom:'M:76-83,M:77-82',coords:'flat',tilt:'turn',view:'overlay',route:'slot:Ar',at:'10',overlaps:'M:76-83>M:77-82=.85'});
  const s=T.selectOrder(bio,T.HERBAL_A_ORDER),list=T.orderPages(orders,s.order,pages),plan=T.sequence(pages,list,s);
- assert.deepEqual(plan.nodes,['D:27-30','F:42-47','G:49-56','A:2-7','D:25-32','C:20-21','E:35-38']);
- assert.equal(plan.pages.length,28);assert.equal(new Set(list).size,28);assert.ok(list.includes('f49v'));
+ assert.deepEqual(plan.nodes,['A:1-8','D:27-30','F:42-47','G:49-56','A:2-7','D:25-32','C:20-21','E:35-38','A:4-5','D:28-29']);
+ assert.equal(plan.pages.length,40);assert.equal(new Set(list).size,40);assert.ok(list.includes('f49v'));
  for(const node of plan.nodes)assert.deepEqual(plan.pages.filter(p=>p.node===node).map(p=>p.slot),T.SLOTS);
  assert.equal(s.group,'all');assert.equal(s.by,'golf');assert.equal(s.at,0);assert.equal(s.coords,'recorded');assert.equal(s.tilt,'none');assert.equal(s.view,'chain');assert.equal(s.anchor,'source');
- assert.deepEqual(s.pages,[]);assert.deepEqual(s.custom,[]);assert.deepEqual(s.overlaps,{});assert.equal(bio.group,'4a','the prior state is not mutated');
+ assert.deepEqual(s.pages,[]);assert.deepEqual(s.custom,[]);assert.equal(s.foldMode,'shared');assert.equal(s.overlaps['D:27-30>F:42-47'],.8);assert.equal(Object.keys(s.overlaps).length,9);assert.equal(bio.group,'4a','the prior state is not mutated');
+ const split=T.selectOrder(bio,T.HERBAL_A_FOLDS);assert.equal(split.foldMode,'separate');assert.deepEqual(T.orderPages(orders,split.order,pages),list);assert.deepEqual(split.overlaps,s.overlaps);assert.deepEqual(split.folds,s.folds);
  for(const order of ['bifolia','path1'])assert.deepEqual(T.orderPages(orders,order,pages),listOf(order));
  assert.equal(T.orderPages(orders,T.selectOrder(s,'bifolia').order,pages).length,Object.keys(pages).length);
  const reversed=T.sequence(pages,list,{custom:[...plan.nodes].reverse()});assert.deepEqual(reversed.nodes,[...plan.nodes].reverse());
  assert.deepEqual(T.sequence(pages,list,{custom:[]}).nodes,plan.nodes,'reset order returns to the candidate chain');
+});
+test('separate folds are opt-in, round-trip edits, and preserve the original shared joins',()=>{
+ assert.equal(T.parse({}).foldMode,'shared');assert.equal(T.parse({order:T.HERBAL_A_ORDER}).foldMode,'shared');
+ const s=T.parse({order:T.HERBAL_A_FOLDS});assert.equal(s.foldMode,'separate');assert.equal(Object.keys(s.folds).length,9);
+ assert.deepEqual(T.serialize(s),{order:T.HERBAL_A_FOLDS});
+ const off={...s,foldMode:'shared'};assert.equal(T.parse(T.serialize(off)).foldMode,'shared');assert.deepEqual(off.folds,s.folds);
+ const edited={...s,foldPart:'inner',overlaps:{},folds:{'A:1-8>D:27-30':{Ar:0,inner:.12,Bv:.95}}};
+ assert.deepEqual(T.parse(T.serialize(edited)),edited);
+ const saved=T.normalizePreset({schema:1,name:'fold edit',params:T.presetParams(edited)});assert.deepEqual(T.parse(saved.params),edited);
+ const cleared={...s,overlaps:{},folds:{}};assert.deepEqual(T.parse(T.serialize(cleared)),cleared,'resetting must not reload the preset defaults');
+ const hash=Object.fromEntries(new URLSearchParams(Object.fromEntries(Object.entries(T.serialize(cleared)).filter(([,v])=>v!=null&&v!==''))));assert.deepEqual(T.parse(hash),cleared,'the common hash writer omits empty values');
+ assert.deepEqual(T.parse(T.normalizePreset({schema:1,name:'reset',params:T.presetParams(cleared)}).params),cleared);
+ for(const folds of ['A>B@side=.2','A>B@inner=abc','A>B@Ar=1.5','A>B@Ar=.2|A>B@Ar=.3'])assert.throws(()=>T.normalizePreset({schema:1,name:'bad',params:{group:'all',order:'path1',folds}}));
+});
+test('three fold groups advance independently, keep Av/Br tied, and restore the shared positions exactly',()=>{
+ const rows=[{node:'A',height:100},{node:'B',height:80},{node:'C',height:60}];
+ const shared={'A>B':.5,'B>C':.25},folds={'A>B':{Ar:.1,inner:.6,Bv:.8},'B>C':{Ar:.2,inner:.3,Bv:.4}};
+ const original=T.stackSheets(rows,{overlaps:shared}),split=T.stackSheets(rows,{overlaps:shared,folds,foldMode:'separate'});
+ near(split.rows[1].lanes.Ar.top,90);near(split.rows[1].lanes.inner.top,40);near(split.rows[1].lanes.Bv.top,20);
+ near(split.rows[2].lanes.Ar.top,154);near(split.rows[2].lanes.inner.top,96);near(split.rows[2].lanes.Bv.top,68);
+ assert.equal(T.foldGroup('Av'),T.foldGroup('Br'));
+ const changed=T.stackSheets(rows,{overlaps:shared,foldMode:'separate',folds:{...folds,'A>B':{...folds['A>B'],inner:.7}}});
+ for(const lane of ['Ar','Bv'])assert.deepEqual(changed.rows.map(r=>r.lanes[lane]),split.rows.map(r=>r.lanes[lane]));
+ near(changed.rows[2].lanes.inner.top,86);assert.deepEqual(T.stackSheets(rows,{overlaps:shared,folds,foldMode:'shared'}),original);
+ const hidden=T.stackSheets(rows,{overlaps:shared,foldMode:'separate',folds,hideCovered:true});
+ near(hidden.rows[0].lanes.Ar.visibleHeight,90);near(hidden.rows[0].lanes.inner.visibleHeight,40);near(hidden.rows[0].lanes.Bv.visibleHeight,20);
+ const reversed=T.stackSheets([...rows].reverse(),{folds,foldMode:'separate'});assert.equal(reversed.rows[1].lanes.Ar.top,60,'no reversed-pair fit is reused');
+});
+test('saved study registration reproduces the source rectangle positions and sheet extents without rotation',{skip:!have},()=>{
+ const state=T.parse({order:T.HERBAL_A_FOLDS});assert.ok(T.studyFrame(state));
+ assert.equal(Object.keys(T.STUDY.pages).length,39);assert.equal(T.STUDY.pages.f49v,undefined);
+ const extents=new Map();
+ for(const [folio,ref] of Object.entries(T.STUDY.pages)){
+  const sel=T.register(folio,pages[folio],words,tokens,{...state,reference:ref}),r=T.orient(pages[folio],sel,state.coords,state.tilt),raw=M.pageUnits(pages[folio],words),factor=M.BODY_HEIGHT_PX/ref.H;
+  assert.equal(r.angle.delta,0);
+  for(const u of sel.all){near(u.rect[0],raw[u.id].rect[0]*factor);near(u.rect[1],(raw[u.id].rect[1]-ref.origin[1])*factor);near(u.rect[3],(raw[u.id].rect[3]-ref.origin[1])*factor);}
+  const b=extents.get(ref.node)||{lo:Infinity,hi:-Infinity};b.lo=Math.min(b.lo,r.bounds.ymin);b.hi=Math.max(b.hi,r.bounds.ymax);extents.set(ref.node,b);
+ }
+ for(const [node,b] of extents){near(b.lo,T.STUDY.sheets[node].ymin*M.BODY_HEIGHT_PX);near(b.hi,T.STUDY.sheets[node].ymax*M.BODY_HEIGHT_PX);}
+ const rows=T.HERBAL_A_NODES.map(node=>({node,height:(T.STUDY.sheets[node].ymax-T.STUDY.sheets[node].ymin)*30})),split=T.stackSheets(rows,{folds:state.folds,foldMode:'separate'});
+ for(let i=1;i<rows.length;i++)for(const g of T.FOLD_GROUPS){const p=split.rows[i-1].lanes[g],q=split.rows[i].lanes[g],edge=T.STUDY.edges[rows[i-1].node+'>'+rows[i].node];near(q.top-p.top,rows[i-1].height*(1-edge.groups[g].value));}
 });
 test('a link from the comparison workspace opens the same view',()=>{
  const link='a=f47r&b=f56r&view=sequence&unit=pages&columns=both&order=folio&coordinates=current&scale=body_height&zoom=0.75&eva=1&seqGroup=all&seqOrder=path1&seqRoute=all&seqIndex=100&seqMode=all&seqAnchor=source&seqOpacity=0.2&seqEdges=1&seqDisplay=four&seqColumns=singulion&seqJoin=touch&seqHideCovered=1&seqCovered=hidden&seqCoveredOpacity=0.3&seqSeam=D%3A27-30%3EA%3A1-8&seqRestore=1&seqOverlaps=%7B%22A%3A1-8%3EF%3A42-47%22%3A0%2C%22D%3A27-30%3EA%3A1-8%22%3A0.575%2C%22A%3A2-7%3ED%3A25-32%22%3A0.274%7D';
