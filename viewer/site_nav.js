@@ -1,7 +1,7 @@
 "use strict";
 // One menu for every page: fills <nav class="site-nav"></nav>, marks the current page, adds the theme toggle.
 (function(){
- const pages=[['./','Atlas'],['compare.html','Compare'],['sections.html','Sections'],['stream.html','Page stream'],['alignment.html','Alignment review'],['about.html','About']];
+ const pages=[['./','Atlas'],['compare.html','Compare'],['sections.html','Sections'],['stream.html','Page stream'],['search.html','Word search'],['alignment.html','Alignment review'],['about.html','About']];
  let nav=document.querySelector('nav.site-nav');
  if(!nav){nav=document.createElement('nav');nav.className='site-nav';document.body.prepend(nav);}
  nav.setAttribute('aria-label','vms-spatial');

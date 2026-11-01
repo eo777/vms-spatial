@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>vms-spatial · Word search</title>
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="compare.css"><link rel="stylesheet" href="stream.css"><link rel="stylesheet" href="search.css">
+<script src="site_nav.js" defer></script>
+</head><body class="compare-page"><nav class="site-nav"></nav>
+<header class="masthead"><div class="eyebrow">VOYNICH MANUSCRIPT · RECORDED WORD POSITIONS</div>
+<h1>Word search</h1><p class="sub">Light up the words that match a pattern on every bifolium at once. Run up to six patterns in their own colours, put the sheets in any order, and open a page to see the matches on its image.</p></header>
+<main class="compare stream search">
+<div class="toolbar" id="toolbar">
+<div class="hl-panel">
+<div class="hl-rows" id="rows"></div>
+<div class="hl-tools"><button type="button" id="addRow">Add pattern</button><span class="hl-try" id="examples"></span>
+<details class="drawer" id="syntax"><summary>Pattern syntax</summary><table class="hl-syntax"><thead><tr><th>Write</th><th>Meaning</th><th>Example</th></tr></thead><tbody id="syntaxRows"></tbody></table>
+<ul class="hl-notes"><li>A pattern matches the whole spelling of a word: <code>aiin</code> finds only the word aiin, and <code>*aiin*</code> finds every word containing it. Click an example to try it.</li><li>Operator words are in capitals, because lowercase <code>or</code> is a Voynich word.</li><li><b><code>NOT</code> or <code>!</code> before a term negates all of it,</b> spelling included: <code>![pgi]p*</code> is every word except the page-initial p-words.</li><li><b><code>!</code> inside the brackets negates the place only:</b> <code>[!pgi]p*</code> is the p-words off a page's first line, the same as <code>p* AND NOT [pgi]*</code>.</li><li>Qualifiers stack: <code>[pi][li]p*</code> opens a paragraph, and <code>[pi][!pgi]p*</code> is <code>[lpi]p*</code>.</li><li>With an offset, write the offset first: <code>-1:[li]*</code>.</li><li>Neighbours never cross a line end or an unreadable token, so a word with none there does not match <code>-1:*</code>.</li></ul>
+</details></div>
+</div>
+<label>Group <select id="group" aria-label="Group"></select></label>
+<label>Order <select id="order"><option value="bifolia">Manuscript by bifolium</option><option value="path1">Path 1 (proposed)</option></select></label>
+<label id="savedLabel" hidden>Saved order <select id="saved" aria-label="Saved order"></select></label>
+<label>Columns <select id="columns"><option value="singulion">Singulion · Ar Av Br Bv</option><option value="faces">Physical faces · Bv Ar | Av Br</option></select></label>
+<label>Tile size <select id="size"><option value="70">Small</option><option value="100">Medium</option><option value="140">Large</option><option value="200">Largest</option></select></label>
+<label class="check"><input type="checkbox" id="merge"> Merge q</label>
+<button type="button" id="resetOrder">Reset order</button>
+<a id="streamLink" class="hl-link">Open in Page stream</a>
+<details class="drawer" id="settingsPanel"><summary>Settings</summary><div class="drawer-body">
+<label>Group by <select id="by"><option value="golf">Golf 2.1 groups</option><option value="section">Sections</option></select></label>
+<button type="button" id="exportCsv">Download matches CSV</button>
+</div></details>
+</div>
+<section class="stream-pane" id="pane">
+<p class="status" id="status" aria-live="polite">Loading…</p>
+<p class="drawer-note hl-message" id="message" role="status"></p>
+<div class="tiles" id="tiles"></div>
+</section>
+<p class="note" id="notes"></p>
+<details class="how" id="tablePanel"><summary>Counts by bifolium</summary><div class="hl-table" id="table"></div></details>
+<details class="how"><summary>How to read this</summary>
+<p><b>Tiles.</b> Each tile is one bifolium and each small panel one page, drawn at one scale in its recorded coordinates, so the words sit where they sit on the photograph. Grey marks are word boxes and coloured marks are matches. A dashed panel is a position with no page in this selection. Foldout panels stay together in their position, so those sheets are wider.</p>
+<p><b>Counts.</b> A count is of words in the transliteration. Shares are over the words where the pattern can match: <code>[pi]p*</code> is out of the words on paragraph-initial lines, and spellings and neighbours never narrow that base. No share is given over fewer than 20 words. A word matching two patterns counts under both and is drawn split between their colours.</p>
+<p><b>What is not drawn.</b> A few words have no box, so a count can run past the marks on a tile: the count line says how many. Where one box holds several words, it lights up when any of them matches, and the count is still of words. Tokens with an unreadable glyph never match, and no neighbour term reaches across one, or across a line end.</p>
+<p><b>Order.</b> Drag a tile by its heading, or use Alt + ← → on its grip. All of a sheet's pages move together. Path 1 is a proposed glyph-statistical ordering, not an established chronology. A custom order stays in the address and carries over to the Page stream, and Saved order reads the boundary sets saved there in this browser.</p>
+<p><b>A page.</b> Click a page to open it. Page image puts the matches on the Voynichese display image, in that image's own word rectangles. The wheel zooms, dragging pans and a double click returns to the whole page. Tiles and pages draw positions and search spellings: nothing here is a statistical test.</p>
+</details>
+</main>
+<dialog class="hl-dialog" id="pageDialog" aria-labelledby="pageTitle">
+<div class="hl-dialog-head">
+<strong id="pageTitle"></strong><span id="pageCount" class="hl-page-count"></span>
+<span class="pager"><button type="button" id="prevOpen" aria-label="Previous page">←</button><button type="button" id="nextOpen" aria-label="Next page">→</button></span>
+<label class="check"><input type="checkbox" id="pageImage"> Page image</label>
+<label class="check"><input type="checkbox" id="pageLabels"> Words</label>
+<button type="button" id="pageZoom" title="Back to the whole page" hidden></button>
+<button type="button" id="closeOpen">Close</button>
+</div>
+<div class="hl-dialog-body"><div class="hl-figure" id="pageFigure"></div><div class="hl-text" id="pageText"></div></div>
+<p class="drawer-note hl-page-note" id="pageNote" role="status"></p>
+</dialog>
+<footer><p>Coordinates and display images: © 2014 The Voynichese Project, Apache-2.0 (<a href="NOTICE.txt">attribution</a>). ZL transliteration and Path 1 ordering. Built with <a href="https://github.com/eo777/vms-spatial">vms-spatial</a>.</p></footer>
+<script src="common.js"></script><script src="../js/zoom_math.js"></script><script src="js/compare_math.js"></script><script src="compare_state.js"></script><script src="js/section_math.js"></script><script src="js/stream_math.js"></script><script src="js/pattern_math.js"></script><script src="search.js"></script></body></html>
