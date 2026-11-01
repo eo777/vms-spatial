@@ -11,7 +11,7 @@ it reads the same compare data as the Compare page.
 | Control | Address | What it does |
 |---|---|---|
 | Group; Group by, under Settings | `group` (all is the default), `by` = section (golf is the default) | the whole manuscript, a Golf group or a section. No page is held back: every group is on the list, 5a, 6 and quire N included |
-| Order | `order` = path1 (bifolia is the default) | Manuscript by bifolium, or Path 1, a proposed glyph-statistical ordering and not an established chronology |
+| Order | `order` = path1, herbal_a_1a (bifolia is the default) | Manuscript by bifolium; proposed Path 1; or the seven-sheet Herbal A copying-study candidate below |
 | Arrangement | `view` = stream, overlay (chain is the default) | Bifolium chain, Continuous column, Superimposed overlay |
 | Columns | `columns` = faces (singulion is the default) | chain: singulion Ar Av Br Bv, or the physical faces Bv Ar and Av Br |
 | Joins | `join` = half, frames (touch is the default) | chain: rows that meet with no gap, a 50% default overlap, or separate fixed frames with page headers |
@@ -33,6 +33,22 @@ it reads the same compare data as the Compare page.
 Links and boundary files from the comparison workspace of the 2026 bifolium drift study open here too, with their order, joins and
 overlaps. That workspace turned its pages rigidly, which leans every margin, so they open on the recorded tilt instead and the page
 says so. Rigid turn under Tilt shows how one looked there. An address that names `tilt=turn` keeps it, with a warning at the top of the page.
+
+## Herbal A · 1a candidate
+
+Choose **Order → Herbal A · 1a candidate**, or open `stream.html#order=herbal_a_1a`:
+
+**D:27-30 → F:42-47 → G:49-56 → A:2-7 → D:25-32 → C:20-21 → E:35-38**.
+
+This is the initial seven-sheet chain used to identify copying windows in the bifolium drift study, not the complete
+Golf 1a group or an established chronology. All four mapped pages of each sheet are included (28 pages, including f49v).
+Selecting it clears prior page/group filters and manual reordering, and opens a singulion chain in recorded coordinates,
+with source x retained and no added rotation. Physical-face columns remain available. Reset order returns to this chain;
+links and saved boundary sets retain the chosen order and subsequent edits.
+
+Joins initially touch. The separate Ar / Av+Br / Bv fold estimates from the research snapshot are **not imported**:
+this public renderer moves all four pages together and uses updated geometry and baselines. Existing overlap controls
+can still adjust each join and save its boundaries.
 
 ## Tilt
 

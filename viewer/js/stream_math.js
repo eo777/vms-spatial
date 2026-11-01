@@ -5,8 +5,11 @@
 'use strict';
 const M=(typeof module!=='undefined'&&module.exports)?require('./compare_math.js'):root.VMS_COMPARE;
 const SLOTS=['Ar','Av','Br','Bv'],CYCLE={Ar:'Bv',Av:'Av',Br:'Ar',Bv:'Br'},MAX_OVERLAP=.95,PRESET_SCHEMA=1;
+// The copying-window study's seven-sheet candidate, not the full Golf 1a group.
+const HERBAL_A_ORDER='herbal_a_1a',HERBAL_A_NODES=Object.freeze(['D:27-30','F:42-47','G:49-56','A:2-7','D:25-32','C:20-21','E:35-38']);
+const orderDefaults=order=>order===HERBAL_A_ORDER?{coords:'recorded',tilt:'none'}:{};
 // the first value of each list is the default
-const BY=['golf','section'],ORDERS=['bifolia','path1'],VIEWS=['chain','stream','overlay'],COLUMNS=['singulion','faces'],JOINS=['touch','half','frames'],COVERED=['faint','outline','margin','hidden','full'];
+const BY=['golf','section'],ORDERS=['bifolia','path1',HERBAL_A_ORDER],VIEWS=['chain','stream','overlay'],COLUMNS=['singulion','faces'],JOINS=['touch','half','frames'],COVERED=['faint','outline','margin','hidden','full'];
 const ANCHORS=['source','opening','margin'],COORDS=['flat','recorded'],SCALES=['body_height','pixels'],TILTS=['restore','turn','none'],TRAILS=['all','pair','single'],ZOOMS=['1','0.5','0.75','1.5','2','3'];
 const ROUTES=['all',...SLOTS.map(s=>'slot:'+s),...SLOTS.map(s=>'cycle:'+s)];
 const pick=(value,allowed)=>allowed.includes(value)?value:allowed[0];
@@ -47,14 +50,15 @@ function fromWorkspace(h){
 function parse(h={}){
  const workspace=Object.keys(h).some(k=>k.startsWith('seq')),oldLink=workspace&&String(h.seqRestore)!=='0';
  if(workspace)h=fromWorkspace(h);
+ h={...orderDefaults(h.order),...h};
  const number=(v,lo,hi,fallback)=>{const n=Number(v);return v!=null&&v!==''&&Number.isFinite(n)?Math.max(lo,Math.min(hi,n)):fallback;};
  return {by:pick(h.by,BY),group:typeof h.group==='string'&&h.group?h.group:'all',order:pick(h.order,ORDERS),route:pick(h.route,ROUTES),view:pick(h.view,VIEWS),columns:pick(h.columns,COLUMNS),join:pick(h.join,JOINS),
   covered:pick(h.covered,COVERED),strength:number(h.strength,0,1,.3),seam:typeof h.seam==='string'?h.seam:'',anchor:pick(h.anchor,ANCHORS),coords:pick(h.coords,COORDS),scale:pick(h.scale,SCALES),trail:pick(h.trail,TRAILS),
   fade:number(h.fade,.02,1,.2),zoom:pick(h.zoom,ZOOMS),tilt:pick(h.tilt,TILTS),words:h.words!=='0',margins:h.margins!=='0',at:Math.max(0,parseInt(h.at,10)||0),overlaps:decodeOverlaps(h.overlaps),custom:decodeList(h.custom),pages:decodeList(h.pages),oldLink};
 }
 function serialize(s){
- const o={};
- for(const [k,d] of [['by',BY[0]],['group','all'],['order',ORDERS[0]],['route',ROUTES[0]],['view',VIEWS[0]],['columns',COLUMNS[0]],['join',JOINS[0]],['covered',COVERED[0]],['strength',.3],['seam',''],['anchor',ANCHORS[0]],['coords',COORDS[0]],['scale',SCALES[0]],['trail',TRAILS[0]],['fade',.2],['zoom',ZOOMS[0]],['tilt',TILTS[0]],['at',0]])if(s[k]!==d)o[k]=String(s[k]);
+ const o={},defaults=orderDefaults(s.order);
+ for(const [k,d] of [['by',BY[0]],['group','all'],['order',ORDERS[0]],['route',ROUTES[0]],['view',VIEWS[0]],['columns',COLUMNS[0]],['join',JOINS[0]],['covered',COVERED[0]],['strength',.3],['seam',''],['anchor',ANCHORS[0]],['coords',COORDS[0]],['scale',SCALES[0]],['trail',TRAILS[0]],['fade',.2],['zoom',ZOOMS[0]],['tilt',TILTS[0]],['at',0]])if(s[k]!==(defaults[k]??d))o[k]=String(s[k]);
  for(const k of ['words','margins'])if(!s[k])o[k]='0';
  const overlaps=encodeOverlaps(s.overlaps);if(overlaps)o.overlaps=overlaps;
  if(s.custom.length)o.custom=s.custom.join(',');
@@ -98,6 +102,15 @@ function normalizePreset(input){
 /* presetParams(state) -> what a saved set stores; group and order are always named, so a set says what it was saved on */
 const presetParams=s=>({group:s.group,order:s.order,...serialize(s)});
 // ---- the order
+function orderPages(orders,order,pages){
+ if(order===HERBAL_A_ORDER)return HERBAL_A_NODES.flatMap(node=>Object.keys(pages).filter(f=>pages[f].node===node).sort((a,b)=>SLOTS.indexOf(pages[a].slot)-SLOTS.indexOf(pages[b].slot)||a.localeCompare(b,undefined,{numeric:true})));
+ const source=orders[order]||orders.bifolia;return (source?source.pages:Object.keys(pages)).filter(f=>pages[f]);
+}
+function selectOrder(state,order){
+ const next={...state,order:pick(order,ORDERS),custom:[],at:0};
+ if(next.order===HERBAL_A_ORDER)Object.assign(next,orderDefaults(next.order),{by:'golf',group:'all',pages:[],route:'all',view:'chain',columns:'singulion',anchor:'source',scale:'body_height',join:'touch',overlaps:{},seam:'',oldLink:false});
+ return next;
+}
 function reorderNodes(base,custom=[]){return Array.isArray(custom)&&custom.length===base.length&&new Set(custom).size===base.length&&custom.every(n=>base.includes(n))?[...custom]:[...base];}
 function moveNode(nodes,node,index){
  if(!nodes.includes(node)||!Number.isInteger(index))return [...nodes];
@@ -190,6 +203,6 @@ function bounds(selections){
  const low=j=>boxes.reduce((a,r)=>Math.min(a,r[j]),Infinity),high=j=>boxes.reduce((a,r)=>Math.max(a,r[j]),-Infinity);
  return {xmin:Math.min(0,low(0))-110,xmax:high(2)+70,ymin:Math.min(0,low(1))-65,ymax:high(3)+65};
 }
-const api={SLOTS,CYCLE,MAX_OVERLAP,PRESET_SCHEMA,PRESET_KEYS,BY,ORDERS,VIEWS,COLUMNS,JOINS,COVERED,ANCHORS,COORDS,SCALES,TILTS,TRAILS,ZOOMS,ROUTES,parse,serialize,clean,fromWorkspace,encodeOverlaps,decodeOverlaps,normalizePreset,presetParams,reorderNodes,moveNode,sequence,visible,nextBifolium,seamKey,stackSheets,marginRows,register,orient,bounds};
+const api={SLOTS,CYCLE,MAX_OVERLAP,PRESET_SCHEMA,PRESET_KEYS,BY,ORDERS,VIEWS,COLUMNS,JOINS,COVERED,ANCHORS,COORDS,SCALES,TILTS,TRAILS,ZOOMS,ROUTES,HERBAL_A_ORDER,HERBAL_A_NODES,orderPages,selectOrder,parse,serialize,clean,fromWorkspace,encodeOverlaps,decodeOverlaps,normalizePreset,presetParams,reorderNodes,moveNode,sequence,visible,nextBifolium,seamKey,stackSheets,marginRows,register,orient,bounds};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.VMS_STREAM=api;
 })(typeof window!=='undefined'?window:globalThis);

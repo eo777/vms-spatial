@@ -16,6 +16,28 @@ test('the address round-trips, and bad values fall back',()=>{
  assert.equal(bad.order,'bifolia');assert.equal(bad.view,'chain');assert.equal(bad.join,'touch');assert.equal(bad.covered,'faint');assert.equal(bad.anchor,'source');assert.equal(bad.strength,1);assert.equal(bad.fade,.02);assert.equal(bad.at,0);assert.equal(bad.zoom,'1');
  assert.deepEqual(bad.overlaps,{'B>C':.95},'a broken pair is dropped and a value past the limit is capped');
 });
+test('the Herbal A candidate opens recorded geometry and retains explicit changes in links and saved sets',()=>{
+ const s=T.parse({order:T.HERBAL_A_ORDER});
+ assert.equal(s.coords,'recorded');assert.equal(s.tilt,'none');assert.equal(s.view,'chain');
+ assert.deepEqual(T.serialize(s),{order:T.HERBAL_A_ORDER});
+ const edited={...s,coords:'flat',tilt:'restore',columns:'faces',overlaps:{'D:27-30>F:42-47':.25},custom:[...T.HERBAL_A_NODES].reverse()};
+ assert.deepEqual(T.parse(T.serialize(edited)),edited,'changing back to the ordinary geometry defaults must survive a reload');
+ const saved=T.normalizePreset({schema:1,name:'1a boundaries',params:T.presetParams(edited)});
+ assert.deepEqual(T.parse(saved.params),edited);
+});
+test('choosing the Herbal A candidate clears a Bio selection and starts all seven complete sheets',{skip:!have},()=>{
+ const bio=T.parse({group:'4a',order:'path1',pages:'f76r,f83v',custom:'M:76-83,M:77-82',coords:'flat',tilt:'turn',view:'overlay',route:'slot:Ar',at:'10',overlaps:'M:76-83>M:77-82=.85'});
+ const s=T.selectOrder(bio,T.HERBAL_A_ORDER),list=T.orderPages(orders,s.order,pages),plan=T.sequence(pages,list,s);
+ assert.deepEqual(plan.nodes,['D:27-30','F:42-47','G:49-56','A:2-7','D:25-32','C:20-21','E:35-38']);
+ assert.equal(plan.pages.length,28);assert.equal(new Set(list).size,28);assert.ok(list.includes('f49v'));
+ for(const node of plan.nodes)assert.deepEqual(plan.pages.filter(p=>p.node===node).map(p=>p.slot),T.SLOTS);
+ assert.equal(s.group,'all');assert.equal(s.by,'golf');assert.equal(s.at,0);assert.equal(s.coords,'recorded');assert.equal(s.tilt,'none');assert.equal(s.view,'chain');assert.equal(s.anchor,'source');
+ assert.deepEqual(s.pages,[]);assert.deepEqual(s.custom,[]);assert.deepEqual(s.overlaps,{});assert.equal(bio.group,'4a','the prior state is not mutated');
+ for(const order of ['bifolia','path1'])assert.deepEqual(T.orderPages(orders,order,pages),listOf(order));
+ assert.equal(T.orderPages(orders,T.selectOrder(s,'bifolia').order,pages).length,Object.keys(pages).length);
+ const reversed=T.sequence(pages,list,{custom:[...plan.nodes].reverse()});assert.deepEqual(reversed.nodes,[...plan.nodes].reverse());
+ assert.deepEqual(T.sequence(pages,list,{custom:[]}).nodes,plan.nodes,'reset order returns to the candidate chain');
+});
 test('a link from the comparison workspace opens the same view',()=>{
  const link='a=f47r&b=f56r&view=sequence&unit=pages&columns=both&order=folio&coordinates=current&scale=body_height&zoom=0.75&eva=1&seqGroup=all&seqOrder=path1&seqRoute=all&seqIndex=100&seqMode=all&seqAnchor=source&seqOpacity=0.2&seqEdges=1&seqDisplay=four&seqColumns=singulion&seqJoin=touch&seqHideCovered=1&seqCovered=hidden&seqCoveredOpacity=0.3&seqSeam=D%3A27-30%3EA%3A1-8&seqRestore=1&seqOverlaps=%7B%22A%3A1-8%3EF%3A42-47%22%3A0%2C%22D%3A27-30%3EA%3A1-8%22%3A0.575%2C%22A%3A2-7%3ED%3A25-32%22%3A0.274%7D';
  const s=T.parse(Object.fromEntries(new URLSearchParams(link)));

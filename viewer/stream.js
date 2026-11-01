@@ -17,7 +17,7 @@
   if(!C)throw Error('index.json has no compare entry: run `vmsspatial viewer-data`.');
   const bundle=index.bundles.find(b=>b.key===C.bundle)||index.bundles[0];bundleKey=bundle.key;
   const [loadedPages,loadedOrders,data]=await Promise.all([SG.load(SG.dataUrl(C.pages)),SG.load(SG.dataUrl(C.orders)),SG.load(SG.dataUrl(bundle.path))]);
-  compact=loadedPages;pages=compact.pages;orders=loadedOrders;words=data.words;tokens=X.lineTokens(data.lines);list=Z.pageList(orders,state.order,pages);
+  compact=loadedPages;pages=compact.pages;orders=loadedOrders;words=data.words;tokens=X.lineTokens(data.lines);list=T.orderPages(orders,state.order,pages);
  }catch(error){loading.end();status.textContent='Could not load the page data.';SG.error(host,error);return;}
  state=T.clean(state,pages,list);
  // a boundary the page chose for itself is not the reader's choice, so it stays out of the address
@@ -214,7 +214,7 @@
  const seamKeys=()=>plan.nodes.slice(1).map((node,i)=>T.seamKey(plan.nodes[i],node));
  function fillGroups(){
   const groups=X.groups(pages,list,state.by),name=n=>n==='—'?'Unassigned':n;
-  $('group').replaceChildren(...(selectedAtLoad.length?[new Option(`Selected pages (${selectedAtLoad.length})`,'selected')]:[]),new Option('Whole manuscript','all'),...groups.map(g=>new Option(`${name(g.name)} (${g.pages.length})`,g.name)));
+  $('group').replaceChildren(...(selectedAtLoad.length?[new Option(`Selected pages (${selectedAtLoad.length})`,'selected')]:[]),new Option(state.order===T.HERBAL_A_ORDER?'All seven candidate bifolia':'Whole manuscript','all'),...groups.map(g=>new Option(`${name(g.name)} (${g.pages.length})`,g.name)));
   if(state.group!=='all'&&!groups.some(g=>g.name===state.group))state.group='all';
   $('group').value=state.pages.length?'selected':state.group;
  }
@@ -290,11 +290,11 @@
  }
  // ---- drawing
  function heading(){
-  const name=state.pages.length?'Selected pages':state.group==='all'?'Whole manuscript':state.group==='—'?'Unassigned':state.group;
+  const name=state.pages.length?'Selected pages':state.order===T.HERBAL_A_ORDER?'Herbal A · 1a candidate':state.group==='all'?'Whole manuscript':state.group==='—'?'Unassigned':state.group;
   return `${name} · ${{chain:'bifolium chain',stream:'continuous column',overlay:'superimposed overlay'}[state.view]}`;
  }
  function draw(){
-  list=Z.pageList(orders,state.order,pages);fillGroups();
+  list=T.orderPages(orders,state.order,pages);fillGroups();
   const width=Math.max(320,pane.clientWidth-2),next=JSON.stringify([state.by,state.group,state.pages,state.order,state.custom,state.route,state.view,state.columns,state.join,state.anchor,state.tilt,state.coords,state.scale,state.zoom,width]);
   if(signature&&signature!==next&&state.view!=='overlay')pendingJump=true;signature=next;
   const chain=state.view==='chain',selectedNodes=new Set(state.pages.map(f=>pages[f].node));
@@ -317,6 +317,7 @@
    notes.dataset.base=(chain?`${plan.nodes.length} bifolia, ${state.columns==='singulion'?'singulion Ar Av Br Bv':'outer Bv Ar, inner Av Br'}. ${{touch:'Rows meet with no added gap, four pages locked together. ',half:'Each row overlaps half of the last: a display choice. ',frames:'Separate fixed frames. '}[state.join]}`:`${plan.pages.length} pages top to bottom, colours by bifolium, one horizontal scale. `)
     +(state.coords==='recorded'?'Recorded coordinates already hold each page\'s tilt. ':{restore:'Each page\'s recorded tilt restored by moving words up or down only, so every x stays as recorded. ',turn:'Recorded tilt restored by a rigid turn, which also leans each margin by the page\'s turn. ',none:'No tilt restored. '}[state.tilt])+({opening:'Opening words at x = 0. ',source:'Source x kept; heights from the opening baselines. ',margin:'Median body margins at x = 0. '}[state.anchor])
     +(absent.length?`No box on the opening line: ${absent.join(', ')}. `:'')+(unturned.length?`No angle, so no tilt restored: ${unturned.join(', ')}. `:'')+(chain&&state.pages.length?'All mapped pages of each selected bifolium are shown. ':'')+(chain&&plan.pages.some(p=>p.panels>1)?'Foldout panels stack within their slot. ':'');
+   if(state.order===T.HERBAL_A_ORDER)notes.dataset.base+='Copying-study candidate order; fold estimates are not loaded. ';
    notes.textContent=notes.dataset.base;syncOverlaps();
   }else{clearStream();delete notes.dataset.base;paintOverlay(width);}
   save();
@@ -326,7 +327,7 @@
  const render=()=>queued||(queued=SG.busy('Drawing the pages…',()=>{queued=null;draw();}));
  // ---- the controls
  const here=()=>{state.at=currentIndex();pendingJump=true;};
- ctl.order.onchange=()=>{state.order=ctl.order.value;state.custom=[];state.at=0;render();};
+ ctl.order.onchange=()=>{state=T.selectOrder(state,ctl.order.value);if(state.order===T.HERBAL_A_ORDER)selectedAtLoad=[];requested=null;render();};
  ctl.by.onchange=()=>{state.by=ctl.by.value;state.group='all';state.pages=[];state.at=0;render();};
  $('group').onchange=()=>{const v=$('group').value;if(v==='selected'){state.pages=[...selectedAtLoad];state.route='all';}else{state.group=v;state.pages=[];}state.at=0;render();};
  ctl.route.replaceChildren(new Option('Ar → Av → Br → Bv','all'),...T.SLOTS.map(s=>new Option(s+' on each bifolium','slot:'+s)),...T.SLOTS.map(s=>new Option('Candidate correspondence · start '+s,'cycle:'+s)));
@@ -370,7 +371,7 @@
   localStorage.setItem(STORE,JSON.stringify(saved));localStorage.setItem(LAST,item.id);fillPresets(item.id);presetName.value=item.name;presetMessage.textContent=`Saved “${item.name}” in this browser.`;
  }
  const attempt=fn=>{try{fn();}catch(error){presetMessage.textContent=error.message||'Could not save in this browser. Download JSON instead.';}};
- function applyParams(params){state=T.clean(T.parse(params),pages,list);selectedAtLoad=[...state.pages];pendingJump=state.view!=='overlay'&&state.at>0;signature='';render();}
+ function applyParams(params){state=T.parse(params);list=T.orderPages(orders,state.order,pages);state=T.clean(state,pages,list);selectedAtLoad=[...state.pages];pendingJump=state.view!=='overlay'&&state.at>0;signature='';render();}
  $('presetSave').onclick=()=>attempt(()=>putPreset(snapshot()));$('presetUpdate').onclick=()=>attempt(()=>putPreset(snapshot(),true));
  presetList.onchange=()=>{$('presetLoad').disabled=$('presetUpdate').disabled=!presetList.value;attempt(()=>{const item=readPresets().find(x=>x.id===presetList.value);if(item){presetName.value=item.name;localStorage.setItem(LAST,item.id);}});};
  $('presetLoad').onclick=()=>attempt(()=>{const item=readPresets().find(x=>x.id===presetList.value);if(!item)throw Error('Choose a saved set.');localStorage.setItem(LAST,item.id);applyParams(item.params);});
