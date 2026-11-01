@@ -21,7 +21,7 @@
   lines=P.textLines(bundle,pages,tokens);for(const l of lines){if(!byFolio.has(l.folio))byFolio.set(l.folio,[]);byFolio.get(l.folio).push(l);}
   list=Z.pageList(orders,state.order,pages);bits=new Uint8Array(bundle.words.length);
  }catch(error){loading.end();status.textContent='Could not load the page data.';SG.error(host,error);return;}
- state.custom=T.clean({overlaps:{},pages:[],custom:state.custom},pages,list).custom;state.pages=state.pages.filter(f=>pages[f]);
+ state.custom=P.cleanCustom(state.custom,pages,list);state.pages=state.pages.filter(f=>pages[f]);
  const save=()=>SG.setHash({data:SG.hash().data,...P.serialize(state)});
  const css=name=>getComputedStyle(document.documentElement).getPropertyValue(name).trim();
  const colourVar=slot=>`var(--hl-${slot})`;
@@ -90,7 +90,7 @@
  }
  function build(){
   host.replaceChildren();minis=[];tileRows=[];
-  const size=Number(state.size);
+  const size=Number(state.size);host.style.fontSize=Math.max(11,Math.round(size/22))+'px';    // the labels grow with the tiles above Extra large
   for(const tile of P.tiles(plan,state.columns)){
    const el=h('article','tile'),head=h('header','tile-head'),grip=h('button','grip','⠿'),count=h('span','tile-count'),row=h('div','tile-pages'+(state.columns==='faces'?' faces':'')),first=tile.pages[0];
    el.dataset.node=tile.node;grip.type='button';grip.title='Drag to reorder; Alt + ← → also moves this bifolium';grip.setAttribute('aria-label','Reorder '+tile.node);

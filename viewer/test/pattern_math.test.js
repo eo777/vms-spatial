@@ -101,6 +101,24 @@ test('the address round-trips, keeps a pattern\'s colour, and shares the Page st
  assert.equal(P.parse(T.fromWorkspace({seqOrder:'path1',seqCustomOrder:'["B","A"]'})).order,'path1');
  assert.deepEqual(P.parse({seqOrder:'path1',seqCustomOrder:'["B","A"]'}).custom,['B','A']);
 });
+test('a custom order stays only while every bifolium it names is in the list, by the Page stream\'s own rule',()=>{
+ const pages={a:{node:'A'},b:{node:'B'}};
+ assert.deepEqual(P.cleanCustom(['B','A'],pages,['a','b']),['B','A']);
+ assert.deepEqual(P.cleanCustom(['B','Z'],pages,['a','b']),[]);
+});
+test('an order the menu does not have opens by bifolium, so the menu and the tiles agree',()=>{
+ const menu=fs.readFileSync(path.join(__dirname,'..','search.html'),'utf8').match(/<select id="order">(.*?)<\/select>/)[1];
+ assert.deepEqual([...menu.matchAll(/value="(\w+)"/g)].map(m=>m[1]),P.ORDERS);
+ assert.equal(P.parse({order:'path1'}).order,'path1');
+ assert.equal(P.parse({order:'herbal_a_1a'}).order,'bifolia');
+});
+test('the Tile size menu offers the sizes the address accepts, largest last, and an older link keeps its size',()=>{
+ const menu=fs.readFileSync(path.join(__dirname,'..','search.html'),'utf8').match(/<select id="size">(.*?)<\/select>/)[1];
+ assert.deepEqual([...menu.matchAll(/value="(\d+)"/g)].map(m=>m[1]),P.SIZES);
+ assert.match(menu,/value="450">Largest</);
+ for(const size of P.SIZES.slice(1))assert.deepEqual(P.serialize(P.parse({size})),{size});
+ assert.equal(P.parse({size:'200'}).size,'200');
+});
 test('the real text: the same words as the bundle, the unreadable tokens back in place, and the Echo rule builder\'s counts',{skip:!have},()=>{
  const bundle=gz(path.join(DATA,'manuscript/words.json.gz')),compact=gz(path.join(DATA,'compare/pages.json.gz')),review=gz(REVIEW);
  const lines=P.textLines(bundle,compact.pages,review.tokens),os=P.occurrences(lines);

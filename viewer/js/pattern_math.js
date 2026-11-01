@@ -6,7 +6,7 @@
 (function(root){
 'use strict';
 const T=(typeof module!=='undefined'&&module.exports)?require('./stream_math.js'):root.VMS_STREAM;
-const LAYERS=6,SIZES=['70','100','140','200'],MIN_SHARE=20;
+const LAYERS=6,SIZES=['70','100','140','200','300','450'],ORDERS=['bifolia','path1'],MIN_SHARE=20;
 const OPERATORS={'&':'AND','|':'OR','!':'NOT',AND:'AND',OR:'OR',NOT:'NOT'};
 const core=word=>word&&word.replace(/^q/,'');
 // ---- the places a word can stand
@@ -227,14 +227,16 @@ function tiles(plan,columns='singulion'){
 function parse(h={}){
  const s=T.parse(h),layers=[];
  for(let slot=1;slot<=LAYERS;slot++)if(typeof h['q'+slot]==='string')layers.push({slot,query:h['q'+slot].slice(0,160)});
- return {by:s.by,group:s.group,order:s.order,columns:s.columns,custom:s.custom,pages:s.pages,layers:layers.length?layers:[{slot:1,query:''}],merge:h.merge==='1',size:SIZES.includes(h.size)?h.size:SIZES[0],open:typeof h.open==='string'?h.open:'',image:h.image!=='0',labels:h.labels==='1'};
+ return {by:s.by,group:s.group,order:ORDERS.includes(s.order)?s.order:ORDERS[0],columns:s.columns,custom:s.custom,pages:s.pages,layers:layers.length?layers:[{slot:1,query:''}],merge:h.merge==='1',size:SIZES.includes(h.size)?h.size:SIZES[0],open:typeof h.open==='string'?h.open:'',image:h.image!=='0',labels:h.labels==='1'};
 }
+/* cleanCustom(custom, pages, list) -> the order as the Page stream would keep it, for this page's state, which has no joins of its own */
+const cleanCustom=(custom,pages,list)=>T.clean({overlaps:{},folds:{},pages:[],custom},pages,list).custom;
 function serialize(s){
  const o=T.serialize({...T.parse({}),by:s.by,group:s.group,order:s.order,columns:s.columns,custom:s.custom,pages:s.pages});
  for(const l of s.layers)if(l.query.trim())o['q'+l.slot]=l.query;
  if(s.merge)o.merge='1';if(s.size!==SIZES[0])o.size=s.size;if(s.open)o.open=s.open;if(!s.image)o.image='0';if(s.labels)o.labels='1';
  return o;
 }
-const api={LAYERS,SIZES,MIN_SHARE,QUALIFIERS,core,markPageInitial,qualifierName,parsePattern,glob,occurrencePattern,indexAt,describePattern,patternQualifiers,patternTerms,literalWord,rateBase,advice,textLines,occurrences,displayParts,share,tiles,parse,serialize};
+const api={LAYERS,SIZES,ORDERS,MIN_SHARE,QUALIFIERS,core,markPageInitial,qualifierName,parsePattern,glob,occurrencePattern,indexAt,describePattern,patternQualifiers,patternTerms,literalWord,rateBase,advice,textLines,occurrences,displayParts,share,tiles,parse,serialize,cleanCustom};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.VMS_PATTERN=api;
 })(typeof window!=='undefined'?window:globalThis);

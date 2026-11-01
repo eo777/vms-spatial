@@ -45,7 +45,7 @@ neighbour without one initial q, and a term starting q then finds nothing.
 | Drag a tile's heading; Alt + ← → on its grip | `custom`, the full list of bifolia | moves the sheet. Reset order returns to the chosen order. A custom order applies only to the same set of sheets |
 | Saved order | none | the boundary sets saved on the Page stream in this browser, read only |
 | Columns | `columns` = faces (singulion is the default) | singulion Ar Av Br Bv, or the physical faces Bv Ar and Av Br |
-| Tile size | `size` = 100, 140, 200 (70 is the default) | the height of a page in pixels |
+| Tile size | `size` = 100, 140, 200, 300, 450 (70 is the default) | the height of a page in pixels |
 | Open in Page stream | none | the same group and order on that page. `group`, `by`, `order`, `columns`, `custom` and `pages` mean the same on both pages, so a link's tail works on either |
 | Click a page | `open`, `image=0`, `labels=1` | the page on its image, with the transcription beside it. The wheel zooms, dragging pans, ← → step through the sequence |
 | Counts by bifolium | none | counts and rates per 1,000 words, sheet by sheet, in the order shown |
