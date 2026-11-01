@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="darkreader-lock">
 <title>vms-spatial · About</title><link rel="stylesheet" href="style.css"><script src="site_nav.js" defer></script>
 <style>main.about{max-width:900px}main.about h2{margin-top:28px}main.about code{background:var(--bg);padding:1px 4px;border-radius:4px}</style></head>
 <body><nav class="site-nav"></nav><header class="masthead"><div class="eyebrow">VMS-SPATIAL</div><h1>About this viewer</h1>
@@ -19,6 +19,8 @@
 <p><a href="search.html">Word search</a> lights up the words that match a pattern on every bifolium at once. Each bifolium is a small tile of its pages, up to six patterns run in their own colours, and the sheets go in any order. Patterns can test spellings, the words before and after, and where a word stands on its line, paragraph and page. A page opens to show its matches on its image.</p>
 <h2>The alignment review</h2>
 <p>The <a href="alignment.html">alignment review</a> page shows, for every page, how each ZL word is associated with the recorded rectangles, and which assignments are shared or disputed. Only reviewed word-level assignments enter spatial calculations; shared boxes keep their complete text but no invented word position.</p>
+<h2>Dark Reader</h2>
+<p>Dark Reader is turned off on these pages. They have their own Light and Dark themes, the colours carry data that it would change, and repainting the Atlas under it froze the tab.</p>
 <h2>Build your own</h2>
 <p>The viewer reads <code>data/index.json</code>, <code>data/layout.json.gz</code>, the alignment review that <code>index.json</code> names, and one <code>words.json.gz</code> bundle per text, all written by <code>vmsspatial viewer-data</code>. A bundle is a plain JSON structure (words, lines, geometry, components) that any other viewer can read, and a study can add its own per-word measures, page overlays and line notes to one (<code>vmsspatial.viewer_data.study_data</code>) and open this atlas on its data folder with <code>#data=&lt;url&gt;</code>, copying nothing; the page renderer (<code>atlas.js</code>) and the measures (<code>../js/</code>) are small standalone scripts. Source and documentation: <a href="https://github.com/eo777/vms-spatial">github.com/eo777/vms-spatial</a>.</p>
 </main><footer><p>Coordinates: © 2014 The Voynichese Project, Apache-2.0 (<a href="NOTICE.txt">attribution</a>).</p></footer>
