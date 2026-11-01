@@ -341,3 +341,15 @@ list of ranges, `mean_within` takes them, and `outcomes.token_meta` gives each t
 products are keyed by page and locus or by token id (`ink.for_bundle`, `baselines.table_for`, `wheels.wheels_for`). Key
 your own tables the same way. Functions: `Manuscript.bifolium_ranges`, `measures.mean_within`, `measures.group_table`.
 
+## 28. A tilt put back by rotation leans the margin
+
+**Trap.** Flattening moves words up and down only, so a flat page has lost its line tilt and kept every x. Turning that page
+rigidly to bring the tilt back looks exact, and word sizes and distances hold, but a rotation also moves x, which flattening never did.
+Each margin then leans by the page's own turn: drawn margin = true margin − turn, to 0.015 degrees on 183 pages. The added lean has a median of
+1.10 degrees and reaches 4.75, f30v's 5.48 degree margin draws at 9.67, and between Path 1 neighbours the median gap in margin slope doubles from
+0.95 to 1.86 degrees. A view built to compare angles would be drawing part of what it compares.
+
+**Toolkit.** Undo a y-only change with a y-only change: `y + kx`, with `k = tan(recorded) - tan(flat)`. The Page stream's default does this, and
+its rigid turn is labelled as leaning the margins. To read a margin, use recorded coordinates or the unturned points (`x`, `y` in its export,
+not `drawn_x`, `drawn_y`). Functions: `viewer/js/stream_math.js` `orient`, `compare.page_drift`.
+

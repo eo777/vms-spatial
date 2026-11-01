@@ -1,0 +1,131 @@
+// The Page stream's model on the real data: every page present and in its sheet, translations and turns that leave words unchanged, restored tilt, chain placement.
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('fs'),path=require('path'),zlib=require('zlib');
+const M=require('../js/compare_math.js'),T=require('../js/stream_math.js'),X=require('../js/section_math.js');
+const DATA=path.join(__dirname,'..','data'),gz=p=>JSON.parse(zlib.gunzipSync(fs.readFileSync(path.join(DATA,p))));
+const have=['compare/pages.json.gz','compare/orders.json','manuscript/words.json.gz'].every(p=>fs.existsSync(path.join(DATA,p)));
+const compact=have?gz('compare/pages.json.gz'):null,bundle=have?gz('manuscript/words.json.gz'):null,orders=have?JSON.parse(fs.readFileSync(path.join(DATA,'compare/orders.json'))):null;
+const pages=have?compact.pages:null,words=have?bundle.words:null,tokens=have?X.lineTokens(bundle.lines):null;
+const listOf=o=>orders[o].pages.filter(f=>pages[f]),near=(a,b,eps=1e-8)=>assert.ok(Math.abs(a-b)<=eps,`${a} vs ${b}`);
+const sheets=[{node:'A',height:200},{node:'B',height:80},{node:'C',height:120}],key=T.seamKey('A','B');
+
+test('the address round-trips, and bad values fall back',()=>{
+ const h={by:'section',group:'Herbal A',order:'path1',route:'cycle:Ar',view:'overlay',columns:'faces',join:'half',covered:'outline',strength:'0.6',seam:'A:1-8>F:42-47',anchor:'margin',coords:'recorded',scale:'pixels',trail:'pair',fade:'0.4',zoom:'0.75',tilt:'turn',at:'12',words:'0',margins:'0',overlaps:'A:1-8>F:42-47=0.333|D:27-30>A:1-8=0.575',custom:'F:42-47,A:1-8',pages:'f1r,f2r'};
+ assert.deepEqual(T.serialize(T.parse(h)),h);
+ assert.deepEqual(T.serialize(T.parse({})),{});
+ const bad=T.parse({order:'x',view:'y',join:'z',covered:'q',anchor:'r',strength:'9',fade:'-1',at:'abc',zoom:'8',overlaps:'A>A=.5|A>B=abc|B>C=7|broken'});
+ assert.equal(bad.order,'bifolia');assert.equal(bad.view,'chain');assert.equal(bad.join,'touch');assert.equal(bad.covered,'faint');assert.equal(bad.anchor,'source');assert.equal(bad.strength,1);assert.equal(bad.fade,.02);assert.equal(bad.at,0);assert.equal(bad.zoom,'1');
+ assert.deepEqual(bad.overlaps,{'B>C':.95},'a broken pair is dropped and a value past the limit is capped');
+});
+test('a link from the comparison workspace opens the same view',()=>{
+ const link='a=f47r&b=f56r&view=sequence&unit=pages&columns=both&order=folio&coordinates=current&scale=body_height&zoom=0.75&eva=1&seqGroup=all&seqOrder=path1&seqRoute=all&seqIndex=100&seqMode=all&seqAnchor=source&seqOpacity=0.2&seqEdges=1&seqDisplay=four&seqColumns=singulion&seqJoin=touch&seqHideCovered=1&seqCovered=hidden&seqCoveredOpacity=0.3&seqSeam=D%3A27-30%3EA%3A1-8&seqRestore=1&seqOverlaps=%7B%22A%3A1-8%3EF%3A42-47%22%3A0%2C%22D%3A27-30%3EA%3A1-8%22%3A0.575%2C%22A%3A2-7%3ED%3A25-32%22%3A0.274%7D';
+ const s=T.parse(Object.fromEntries(new URLSearchParams(link)));
+ assert.equal(s.view,'chain');assert.equal(s.order,'path1');assert.equal(s.columns,'singulion');assert.equal(s.group,'all');assert.equal(s.anchor,'source');assert.equal(s.coords,'flat');assert.equal(s.scale,'body_height');assert.equal(s.zoom,'0.75');assert.equal(s.covered,'hidden');assert.equal(s.seam,'D:27-30>A:1-8');assert.equal(s.at,100);assert.equal(s.tilt,'turn','its pages were turned rigidly there, so it opens that way');assert.equal(s.words,true);
+ assert.deepEqual(s.overlaps,{'A:1-8>F:42-47':0,'D:27-30>A:1-8':.575,'A:2-7>D:25-32':.274});
+ assert.equal(T.parse({seqDisplay:'four',seqRestore:'0'}).tilt,'none');assert.equal(T.parse({}).tilt,'restore');
+ assert.equal(T.parse({seqDisplay:'overlay',seqHideCovered:'0'}).covered,'full');
+ assert.equal(T.parse({seqDisplay:'four',coordinates:'recorded',seqEdges:'0'}).coords,'recorded');
+ assert.equal(T.parse({seqDisplay:'four',seqCustomOrder:'["B:9-16","A:1-8"]'}).custom.length,2);
+});
+test('clean drops what the manuscript does not have',{skip:!have},()=>{
+ const list=listOf('bifolia'),s=T.clean(T.parse({overlaps:'A:1-8>F:42-47=0.3|Z:1-2>A:1-8=0.3',custom:'A:1-8,Z:1-2',pages:'f1r,f999r'}),pages,list);
+ assert.deepEqual(Object.keys(s.overlaps),['A:1-8>F:42-47']);assert.deepEqual(s.custom,[]);assert.deepEqual(s.pages,['f1r']);
+});
+test('rows stack, overlap by the preceding row and hide what lies under the fold',()=>{
+ const before=JSON.stringify(sheets);
+ assert.deepEqual(T.stackSheets(sheets).rows.map(r=>r.top),[0,200,280]);
+ assert.deepEqual(T.stackSheets(sheets,{join:'half'}).rows.map(r=>r.top),[0,100,140]);
+ const config={overlaps:{[key]:.75},hideCovered:true},masked=T.stackSheets(sheets,config);
+ assert.deepEqual(masked.rows.map(r=>r.top),[0,50,130]);assert.deepEqual(masked.rows.map(r=>r.visibleHeight),[50,80,120]);
+ assert.equal(T.stackSheets(sheets.slice(0,2),config).height,130,'an older sheet stays hidden where it runs past a shorter one');
+ assert.equal(T.stackSheets(sheets.slice(0,2),{...config,hideCovered:false}).height,200);
+ const scaled=T.stackSheets(sheets.map(s=>({...s,height:2*s.height})),config);
+ masked.rows.forEach((r,i)=>{near(scaled.rows[i].top,2*r.top);near(scaled.rows[i].visibleHeight,2*r.visibleHeight);});
+ assert.equal(T.stackSheets(sheets,{overlaps:{[key]:Infinity}}).rows[1].overlap,0);assert.equal(T.stackSheets(sheets,{overlaps:{[key]:2}}).rows[1].overlap,.95);assert.equal(T.stackSheets(sheets,{overlaps:{[key]:-1}}).rows[1].overlap,0);
+ assert.equal(T.stackSheets([]).height,0);assert.equal(JSON.stringify(sheets),before);
+});
+test('a boundary stays with its pair: a new pair takes the default and an old pair gets its value back',()=>{
+ const config={overlaps:{[key]:.75},hideCovered:true},moved=T.moveNode(['A','B','C'],'C',1),reordered=T.stackSheets(moved.map(n=>sheets.find(s=>s.node===n)),config);
+ assert.deepEqual(moved,['A','C','B']);assert.deepEqual(reordered.rows.map(r=>r.top),[0,200,320]);assert.ok(reordered.rows.every(r=>!r.manual));
+ assert.equal(T.stackSheets(sheets,config).rows[1].overlap,.75);
+ assert.deepEqual(T.reorderNodes(['A','B','C'],['A','B','B']),['A','B','C']);assert.deepEqual(T.reorderNodes(['A','B','C'],['C','A']),['A','B','C']);assert.deepEqual(T.reorderNodes(['D','E'],moved),['D','E']);assert.deepEqual(T.moveNode(moved,'missing',0),moved);
+});
+test('reordering keeps every page and panel with its sheet',()=>{
+ const toy={};for(const node of ['A','B','C'])['Ar','Av','Br','Bv'].forEach((slot,i)=>{toy[node+i]={node,slot,face:'',panel:'',section:'S',group:'t'};});
+ toy['B0-panel']={node:'B',slot:'Ar',face:'',panel:'2',section:'S',group:'t'};
+ const list=Object.keys(toy),custom=T.moveNode(['A','B','C'],'C',1),plan=T.sequence(toy,list,{group:'t',custom});
+ assert.deepEqual(plan.nodes,custom);assert.equal(plan.custom,true);assert.deepEqual(plan.baseNodes,['A','B','C']);assert.equal(plan.pages.length,list.length);assert.deepEqual(new Set(plan.pages.map(p=>p.folio)),new Set(list));
+ for(const node of custom){const at=plan.pages.flatMap((p,i)=>p.node===node?[i]:[]);assert.equal(at[at.length-1]-at[0]+1,at.length);}
+ assert.equal(plan.pages.find(p=>p.folio==='B0-panel').panels,2);
+ assert.deepEqual(T.sequence(toy,list,{group:'t',custom,route:'cycle:Ar'}).pages.map(p=>p.slot),['Ar','Bv','Br']);
+});
+test('a saved boundary set keeps its values, and only known settings',()=>{
+ const preset={schema:1,name:'Golf 1a boundaries',params:{group:'1a',order:'path1',custom:'F:42-47,A:1-8',overlaps:'A:1-8>F:42-47=0.333',covered:'outline',strength:.3,coords:'recorded',scale:'body_height',arbitraryUrl:'javascript:invalid'}};
+ const n=T.normalizePreset(JSON.parse(JSON.stringify(preset)));
+ assert.equal(n.params.overlaps,preset.params.overlaps);assert.equal(n.params.custom,preset.params.custom);assert.equal(n.params.strength,'0.3');assert.ok(!Object.hasOwn(n.params,'arbitraryUrl'));
+ assert.throws(()=>T.normalizePreset({...preset,params:{...preset.params,overlaps:'A>B=1.5'}}));assert.throws(()=>T.normalizePreset({...preset,params:{}}));assert.throws(()=>T.normalizePreset({...preset,schema:2}));assert.throws(()=>T.normalizePreset({...preset,params:{...preset.params,custom:'A,A'}}));
+ const round=T.normalizePreset({schema:1,name:'x',params:T.presetParams(T.parse({overlaps:'A>B=0.25',order:'path1'}))});assert.deepEqual(T.parse(round.params).overlaps,{'A>B':.25});assert.equal(T.parse(round.params).order,'path1');
+ const study=T.normalizePreset({schema:1,name:'Golf 1a',params:{view:'sequence',seqGroup:'1a',seqOrder:'path1',seqDisplay:'four',seqJoin:'touch',seqCovered:'outline',seqCoveredOpacity:.3,seqOverlaps:'{"A:1-8>F:42-47":0.333}',seqCustomOrder:'["F:42-47","A:1-8"]',coordinates:'recorded',scale:'body_height'}});
+ assert.equal(study.params.group,'1a');assert.equal(study.params.view,'chain');assert.equal(study.params.overlaps,'A:1-8>F:42-47=0.333');assert.equal(study.params.coords,'recorded');
+ assert.throws(()=>T.normalizePreset({schema:1,name:'x',params:{seqGroup:'1a',seqOrder:'path1',seqOverlaps:'{"A>B":1.5}'}}));
+ assert.throws(()=>T.normalizePreset({schema:1,name:'x',params:{seqGroup:'1a',seqOrder:'path1',seqCustomOrder:'not json'}}));
+});
+test('the sequence covers the manuscript: every page once, each sheet whole, in the order asked',{skip:!have},()=>{
+ const list=listOf('path1'),plan=T.sequence(pages,list,{});
+ assert.equal(plan.pages.length,Object.keys(pages).length);assert.equal(new Set(plan.pages.map(p=>p.folio)).size,plan.pages.length);assert.equal(plan.nodes.length,52);
+ assert.deepEqual(T.sequence(pages,list,{group:'1.5a'}).nodes,['A:3-6','C:17-24','G:52-53','G:51-54','Q:93-96']);
+ const g=T.sequence(pages,list,{group:'1.5a'});assert.deepEqual(g.pages.slice(0,4).map(p=>p.folio),['f3r','f3v','f6r','f6v']);assert.equal(g.pages.length,20);
+ assert.deepEqual(T.sequence(pages,list,{group:'1.5a',route:'cycle:Ar'}).pages.map(p=>p.slot),['Ar','Bv','Br','Ar','Bv']);
+ assert.ok(T.sequence(pages,list,{group:'3c'}).pages.some(p=>p.node.startsWith('N:')),'no pages are held back: the study left quire N out of 3c, this page does not');
+ assert.ok(T.sequence(pages,list,{group:'5a'}).pages.length>0);
+ assert.deepEqual(T.sequence(pages,list,{selected:['f51v','f52r','f53v']}).pages.map(p=>p.folio),['f52r','f53v','f51v']);
+ assert.deepEqual(T.sequence(pages,listOf('bifolia'),{}).nodes,T.sequence(pages,listOf('folio'),{}).nodes,'by bifolium and by folio are one chain');
+ assert.equal(T.nextBifolium(g.pages,3,1),4);assert.equal(T.nextBifolium(g.pages,4,-1),0);assert.equal(T.nextBifolium(g.pages,19,1),19);assert.equal(T.visible(g.pages,4,'all').length,5);assert.deepEqual(T.visible(g.pages,4,'pair').map(p=>p.folio),['f6v','f17r']);
+});
+test('registering and turning a page moves it whole and changes no word, on every page',{skip:!have},()=>{
+ let units=0,turned=0;const quarantine=new Set(compact.quarantine);
+ for(const [folio,page] of Object.entries(pages))for(const coords of T.COORDS)for(const scale of T.SCALES){
+  const options={coords,scale},plain=T.register(folio,page,words,tokens,{...options,anchor:'opening'}),source=T.register(folio,page,words,tokens,{...options,anchor:'source'}),margin=T.register(folio,page,words,tokens,{...options,anchor:'margin'});
+  const factor=scale==='body_height'?M.BODY_HEIGHT_PX/(page.H||30):1,raw=M.pageUnits(page,words);
+  source.all.forEach((u,i)=>{const r=coords==='recorded'?raw[u.id].rect:raw[u.id].flat;near(u.rect[0],r[0]*factor,1e-6);near(u.rect[2],r[2]*factor,1e-6);assert.equal(u.rect[1],plain.all[i].rect[1]);near(margin.all[i].rect[0],plain.all[i].rect[0]-margin.shift);});
+  for(const r of plain.marginRows){const [,first,category,orientation]=page.lines[r.line];assert.ok(!first&&category==='P'&&orientation==='horizontal');}
+  const up=T.orient(page,margin,coords,'turn'),off=T.orient(page,margin,coords,'none'),back=T.orient(page,margin,coords,'restore');
+  assert.equal(off.angle.delta,0);if(coords==='recorded')assert.equal(up.angle.delta,0);
+  margin.all.forEach((u,i)=>{
+   const q=up.words[i].quad,d=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+   near(d(q[0],q[1]),u.rect[2]-u.rect[0]);near(d(q[0],q[3]),u.rect[3]-u.rect[1]);assert.deepEqual(off.words[i].quad[0],[u.rect[0],u.rect[1]]);
+   back.words[i].quad.forEach((p,j)=>assert.equal(p[0],off.words[i].quad[j][0]));units++;
+  });
+  back.marginRows.forEach(r=>assert.equal(r.point[0],r.x));
+  if(up.angle.delta)turned++;
+  if(up.angle.restored&&coords==='flat'&&scale==='pixels'){
+   // an independent check: the flat chords, turned, must have the recorded median, from the boxes and not from the stored angles. The file rounds boxes
+   // to 0.01 px, which puts a recalculated page angle up to 0.0021 degrees from the stored one (all 404 page angles), and this compares two of them
+   const flat=M.pageDrift(page,words,'flat',quarantine.has(folio)),recorded=M.pageDrift(page,words,'recorded',quarantine.has(folio));
+   near(M.median(flat.lines.filter(l=>l.qualifies).map(l=>l.angle+up.angle.delta)),recorded.angle,.005);assert.equal(flat.n,recorded.n);
+  }
+ }
+ assert.ok(units>140000,`${units} word checks`);assert.ok(turned>300,`${turned} turned pages`);
+});
+test('a restored page shows its recorded angle; a page with no angle stays as it is and says so',{skip:!have},()=>{
+ const f8r=T.orient(pages.f8r,T.register('f8r',pages.f8r,words,tokens),'flat','restore');
+ near(f8r.angle.displayed,pages.f8r.drift.recorded.angle);near(f8r.angle.delta,pages.f8r.drift.recorded.angle-pages.f8r.drift.flat.angle);assert.ok(f8r.angle.delta>3);
+ const none=T.orient(pages.f67r2,T.register('f67r2',pages.f67r2,words,tokens),'flat','restore');
+ assert.equal(none.angle.restored,false);assert.equal(none.angle.delta,0);assert.equal(none.angle.recorded,null);assert.ok(none.angle.unavailable);
+ const all=Object.entries(pages).map(([f,p])=>[f,T.register(f,p,words,tokens)]),missing=all.filter(([,s])=>!s.available).map(([f])=>f);
+ assert.ok(missing.length<=3,`pages with no opening box: ${missing.join(', ')}`);
+ const b=T.bounds(all.map(([,s])=>s));assert.ok(Object.values(b).every(Number.isFinite));
+});
+test('restoring tilt keeps the true margin; a rigid turn leans it by the page\'s own turn',{skip:!have},()=>{
+ const slope=pts=>{const n=pts.length,mx=pts.reduce((a,p)=>a+p[0],0)/n,my=pts.reduce((a,p)=>a+p[1],0)/n;let xy=0,yy=0;for(const [x,y] of pts){xy+=(x-mx)*(y-my);yy+=(y-my)**2;}return Math.atan2(xy,yy)*180/Math.PI;};
+ const view=(f,coords,tilt)=>T.orient(pages[f],T.register(f,pages[f],words,tokens,{coords,anchor:'source'}),coords,tilt),gaps={back:[],turn:[],lean:[]};
+ for(const f of Object.keys(pages)){
+  const truth=view(f,'recorded','none'),back=view(f,'flat','restore'),turn=view(f,'flat','turn');
+  if(truth.marginRows.length<6||!back.angle.restored)continue;
+  const m=v=>slope(v.marginRows.map(r=>r.point));gaps.back.push(Math.abs(m(back)-m(truth)));gaps.turn.push(Math.abs(m(turn)-m(truth)));gaps.lean.push(Math.abs(m(turn)-(m(truth)-turn.angle.delta)));
+ }
+ const med=a=>M.median(a);
+ assert.ok(gaps.back.length>170,`${gaps.back.length} pages`);
+ assert.ok(med(gaps.back)<.05,`restored margin against the recorded margin: ${med(gaps.back)}`);
+ assert.ok(med(gaps.turn)>.8,`a rigid turn moves the margin: ${med(gaps.turn)}`);
+ assert.ok(med(gaps.lean)<.05,`and by the page's turn: ${med(gaps.lean)}`);
+});

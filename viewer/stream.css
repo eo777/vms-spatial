@@ -1,0 +1,84 @@
+/* The Page stream page, on top of compare.css. The gutter is reserved so that the scrollbar arriving with a long stream cannot change the width the rows were drawn for. */
+html{scrollbar-gutter:stable}
+main.stream{max-width:none;padding-inline:16px}
+.stream .toolbar [hidden],.stream [hidden]{display:none!important}
+.stream .toolbar select{max-width:190px}
+.stream .toolbar{max-height:70vh;overflow-y:auto}
+.stream-steps{display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;flex-basis:100%;font-size:12px;color:var(--ink2)}
+.stream-steps input[type=range]{width:160px;accent-color:var(--ink2);margin:0}
+.stream-steps strong{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.stream .drawer{font-size:12.5px;color:var(--ink2)}
+.stream .drawer summary{cursor:pointer;font-weight:600;font-size:12.5px;color:var(--ink)}
+.stream .drawer[open]{flex-basis:100%}
+.stream .drawer-body{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;padding:6px 0 2px}
+.stream .drawer-body button{font-size:12px;padding:4px 8px}
+.stream .drawer-body input[type=range]{width:130px;accent-color:var(--ink2);margin:0}
+.stream .drawer-body input[type=number]{width:64px;font:inherit;padding:4px;border:1px solid var(--line2);border-radius:4px;background:var(--surface);color:var(--ink)}
+.stream .drawer-body input[type=text]{width:210px;font:inherit;padding:5px 7px;border:1px solid var(--line2);border-radius:4px;background:var(--surface);color:var(--ink)}
+.stream .drawer-note{flex-basis:100%;margin:0;font-size:12px;color:var(--ink2)}
+.reorder-list{flex-basis:100%;max-width:500px;max-height:190px;overflow-y:auto;overscroll-behavior:contain;list-style:none;padding:2px;margin:0}
+.reorder-list li{display:flex;align-items:center;gap:6px;border-left:4px solid var(--sheet);border-block:2px solid transparent;padding:2px 5px;background:var(--surface);cursor:grab}
+.reorder-list .name{flex:1;color:var(--sheet);font-weight:600}
+.reorder-list button{font:inherit;padding:2px 7px;line-height:1.3}
+.reorder-list .grip{cursor:grab}
+.reorder-list .dragging{opacity:.4}
+.reorder-list .drop-before{border-top-color:var(--accent)}
+.reorder-list .drop-after{border-bottom-color:var(--accent)}
+.stream .status{font-size:12px;color:var(--ink2);margin:8px 0}
+.stream .note{font-size:12.5px;color:var(--ink2)}
+.stream .how{margin:8px 0;font-size:13px;color:var(--ink2)}
+.stream .how summary{cursor:pointer;font-weight:600;font-size:12.5px;color:var(--ink)}
+.stream .how p{line-height:1.55;max-width:80ch}
+.stream-pane{min-width:0}
+.stream-strip{display:flex;gap:8px;overflow:auto;margin:0 0 10px;max-height:160px;padding-bottom:5px}
+.stream-card{flex:0 0 auto;border:1px solid var(--line2);border-top:4px solid var(--sheet);border-radius:4px;padding:5px;background:var(--surface)}
+.stream-card strong{display:block;color:var(--sheet);font-size:12px;margin-bottom:4px}
+.stream-card>div{display:flex;gap:3px}
+.stream-card button{font:11px var(--sans);padding:4px 6px;opacity:.55;border:1px solid var(--line2);border-radius:4px;background:var(--surface);color:var(--ink);cursor:pointer}
+.stream-card button small{display:block;font-size:10px;color:var(--ink2)}
+.stream-card button.visited{opacity:1}
+.stream-card button[aria-current=true]{outline:2px solid var(--sheet);background:var(--line)}
+.stream-focus{font-size:14px;font-weight:600;border-left:4px solid;padding-left:9px;color:var(--ink)}
+.stream-overlay{max-width:100%;overflow:auto;border:1px solid var(--line2);border-radius:6px;background:var(--surface)}
+.stream-overlay canvas{display:block;max-width:none}
+.page-stream{overflow-x:auto;border:1px solid var(--line2);border-radius:6px;background:var(--surface)}
+.stream-page{width:max(100%,var(--stream-width));margin:0;border-left:3px solid var(--sheet);box-sizing:border-box}
+.stream-page canvas{display:block;max-width:none}
+.stream-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--bg);border-top:1px dashed var(--line2);padding:5px 10px;font-size:12px;min-height:32px;color:var(--sheet)}
+.stream-angle{font-variant-numeric:tabular-nums;font-size:11px;color:var(--ink2)}
+.stream-boundary{background:var(--bg);color:var(--sheet);font-size:11px;font-weight:700;letter-spacing:.5px;padding:5px 10px;border-top:3px solid var(--sheet)}
+.stream-boundary.end{border-top:0;border-bottom:3px solid var(--sheet)}
+.stream-gap{font-size:12px;padding:12px;margin:0;color:var(--ink2)}
+/* the chain: four columns a row */
+.stream-sheet{width:var(--row-width)}
+.stream-sheet+.stream-sheet{margin-top:12px}
+.stream-singulion{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.stream-faces{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.stream-face{min-width:0}
+.stream-face h3,.stream-sheet>h3{margin:0;padding:6px 8px;font-size:13px;text-align:center;background:var(--bg);color:var(--ink)}
+.stream-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0}
+.stream-col{min-width:0;border:1px solid var(--line2)}
+.stream-col+.stream-col{border-left:1px dashed var(--line2)}
+.stream-col h4{margin:0;padding:5px 6px;font-size:12px;font-weight:600;text-align:center;color:var(--ink2);background:var(--bg)}
+.stream-col .stream-page{width:100%;border-left:0}
+.stream-col .stream-head{display:block;padding:4px 7px;min-height:60px}
+.stream-col .stream-head strong{display:block;font-size:12px}
+.stream-col .stream-angle{display:block;font-size:10px;line-height:1.35}
+/* joined rows sit on one plot: only whole rows move, and later rows lie over earlier ones */
+.chain-heads{box-sizing:border-box;width:var(--row-width);padding:6px 0 6px var(--gutter);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;font-size:11px;text-align:center;background:var(--bg);color:var(--ink2)}
+.chain-heads strong{font-weight:600}
+.chain-stack{position:relative;width:var(--row-width)}
+.joined .stream-sheet{position:absolute;margin:0}
+.joined .stream-sheet>.stream-faces,.joined .stream-sheet>.stream-singulion{margin-left:var(--gutter)}
+.joined .stream-sheet>.stream-boundary,.joined .stream-sheet>h3,.joined .stream-face h3,.joined .stream-col h4,.joined .stream-col .stream-head{display:none}
+.joined .stream-col{border-block:0}
+.joined .stream-sheet::before{content:'';position:absolute;top:0;left:var(--gutter);right:0;border-top:1px dashed var(--sheet);opacity:.5;pointer-events:none}
+.joined .manual-seam::before{border-top-style:solid;opacity:.8}
+.chain-label{position:absolute;left:0;top:0;bottom:0;width:calc(var(--gutter) - 6px);overflow:hidden;box-sizing:border-box;padding:3px 2px 3px 4px;color:var(--sheet);font-size:9.5px;line-height:1.4;font-variant-numeric:tabular-nums;background:var(--surface);border-left:3px solid var(--sheet)}
+.chain-label strong,.chain-label span{display:block;white-space:nowrap}
+.chain-label strong{font-size:10px;margin-bottom:3px}
+.chain-seam{display:block;width:100%;padding:2px 0;margin:0 0 2px;font:700 9.5px/1.4 var(--sans);border:1px solid currentColor;border-radius:3px;color:var(--sheet);cursor:ns-resize;touch-action:none;user-select:none;background:var(--surface)}
+.chain-seam[aria-pressed=true],.chain-seam:hover,.chain-seam.dragging{background:var(--line);color:var(--sheet);border-color:currentColor;outline:1px solid currentColor}
+.chain-gap{box-sizing:border-box;margin:0;padding:8px;font-size:10px;color:var(--ink2);overflow:hidden;background:repeating-linear-gradient(135deg,transparent,transparent 8px,var(--line) 8px,var(--line) 9px)}
+/* a phone keeps the page: the bar would otherwise take the whole screen */
+@media (max-width:760px){.stream .toolbar{position:static;max-height:none}main.stream{padding-inline:16px}}

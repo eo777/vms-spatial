@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>vms-spatial · Page stream</title>
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="compare.css"><link rel="stylesheet" href="stream.css">
+<script src="site_nav.js" defer></script>
+</head><body class="compare-page"><nav class="site-nav"></nav>
+<header class="masthead"><div class="eyebrow">VOYNICH MANUSCRIPT · RECORDED WORD POSITIONS</div>
+<h1>Page stream</h1><p class="sub">Whole pages in a chosen order: a chain of bifolia with four pages to a row, one continuous column, or laid over each other. Restore each page's recorded tilt, set how far each bifolium overlaps the last, and see whether margins and angles carry from sheet to sheet.</p></header>
+<main class="compare stream">
+<div class="toolbar" id="toolbar">
+<label>Group <select id="group" aria-label="Group"></select></label>
+<label>Order <select id="order"><option value="bifolia">Manuscript by bifolium</option><option value="path1">Path 1 (proposed)</option></select></label>
+<label>Arrangement <select id="view"><option value="chain">Bifolium chain</option><option value="stream">Continuous column</option><option value="overlay">Superimposed overlay</option></select></label>
+<label id="columnsLabel">Columns <select id="columns"><option value="singulion">Singulion · Ar Av Br Bv</option><option value="faces">Physical faces · Bv Ar | Av Br</option></select></label>
+<label id="joinLabel">Joins <select id="join"><option value="touch">Continuous</option><option value="half">50% overlap</option><option value="frames">Separate frames</option></select></label>
+<label id="coveredLabel">Covered area <select id="covered"><option value="faint">Faint text</option><option value="outline">Box outlines</option><option value="margin">Margin trace only</option><option value="hidden">Hidden</option><option value="full">Full overlay</option></select></label>
+<label id="routeLabel">Page positions <select id="route"></select></label>
+<label id="trailLabel">Trail <select id="trail"><option value="all">Accumulate pages</option><option value="pair">Previous + current</option><option value="single">Current only</option></select></label>
+<label>Align <select id="anchor"><option value="source">Source x</option><option value="opening">Opening word</option><option value="margin">Median body margin</option></select></label>
+<label id="tiltLabel">Tilt <select id="tilt"><option value="restore">Recorded, true margins</option><option value="turn">Rigid turn, margins lean</option><option value="none">None</option></select></label>
+<label class="check"><input type="checkbox" id="words"> Words</label>
+<label class="check"><input type="checkbox" id="margins"> Margin points</label>
+<label>Zoom <select id="zoom"><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1">Fit</option><option value="1.5">1.5×</option><option value="2">2×</option><option value="3">3×</option></select></label>
+<div class="stream-steps">
+<label id="jumpLabel">Bifolium <select id="jump" aria-label="Jump to bifolium"></select></label>
+<span class="pager"><button type="button" id="prevSheet" aria-label="Previous bifolium">⇤</button><button type="button" id="prevPage" aria-label="Previous page">←</button><button type="button" id="nextPage" aria-label="Next page">→</button><button type="button" id="nextSheet" aria-label="Next bifolium">⇥</button></span>
+<input type="range" id="slider" min="0" step="1" aria-label="Page in the sequence">
+<button type="button" id="first">Start</button>
+<strong id="position" aria-live="polite"></strong>
+</div>
+<details class="drawer" id="overlapPanel"><summary id="overlapSummary">Adjust overlaps</summary><div class="drawer-body">
+<label>Boundary <select id="seam" aria-label="Overlap boundary"></select></label>
+<label>Overlap <input type="range" id="overlap" min="0" max="95" step="0.1" aria-label="Boundary overlap"><input type="number" id="overlapNumber" min="0" max="95" step="0.1" aria-label="Boundary overlap percent"> %</label>
+<button type="button" id="resetSeam">Reset boundary</button><button type="button" id="resetSeams">Reset shown</button>
+<label id="strengthLabel">Covered-area strength <input type="range" id="strength" min="0" max="1" step="0.05" aria-label="Covered area opacity"><output id="strengthValue"></output></label>
+<p class="drawer-note">Drag a ↕ label in the plot, or use the arrow keys on it: 1%, or 5% with Shift. That bifolium and everything after it move. An overlap belongs to this pair of neighbours.</p>
+</div></details>
+<details class="drawer" id="reorderPanel"><summary id="reorderSummary">Reorder bifolia</summary><div class="drawer-body">
+<p class="drawer-note">Drag a row or use ↑ ↓. All of a bifolium's pages move together. Alt + ↑ ↓ on the grip moves it from the keyboard.</p>
+<button type="button" id="resetOrder">Reset order</button><span class="drawer-note" id="reorderMessage" role="status"></span>
+<ol class="reorder-list" id="reorderList" aria-label="Bifolium order"></ol>
+</div></details>
+<details class="drawer" id="presetPanel"><summary id="presetSummary">Saved boundaries</summary><div class="drawer-body">
+<input type="text" id="presetName" maxlength="100" placeholder="Name this boundary set" aria-label="Boundary set name"><button type="button" id="presetSave">Save new</button>
+<select id="presetList" aria-label="Saved boundary set"></select><button type="button" id="presetLoad">Load</button><button type="button" id="presetUpdate">Update selected</button>
+<button type="button" id="presetDownload">Download JSON</button><button type="button" id="presetImport">Import JSON</button><input type="file" id="presetFile" accept=".json,application/json" hidden>
+<p class="drawer-note">Kept in this browser, with the order, overlaps, coordinates and scale. Download JSON for a portable copy.</p><span class="drawer-note" id="presetMessage" role="status"></span>
+</div></details>
+<details class="drawer" id="settingsPanel"><summary>Settings</summary><div class="drawer-body">
+<label>Group by <select id="by"><option value="golf">Golf 2.1 groups</option><option value="section">Sections</option></select></label>
+<label>Coordinates <select id="coords"><option value="flat">Flat</option><option value="recorded">Recorded</option></select></label>
+<label>Scale <select id="scale"><option value="body_height">Body height</option><option value="pixels">Source pixels</option></select></label>
+<label id="fadeLabel">Earlier pages <input type="range" id="fade" min="0.02" max="1" step="0.02" aria-label="Earlier page opacity"></label>
+<button type="button" id="exportJson">Export JSON</button>
+</div></details>
+</div>
+<section class="stream-pane" id="streamPane">
+<p class="status" id="status" aria-live="polite">Loading…</p>
+<div class="stream-strip" id="strip"></div>
+<p class="stream-focus" id="focus" hidden></p>
+<div class="stream-overlay" id="overlayWrap" hidden><canvas id="overlay" role="img" aria-label="Word boxes of the sequence laid over each other"></canvas></div>
+<div class="page-stream" id="pageStream"></div>
+</section>
+<p class="note" id="notes"></p>
+<details class="how"><summary>How to read this</summary>
+<p><b>Arrangements.</b> Bifolium chain stacks every bifolium of the sequence, one row a sheet, four pages to a row. Continuous column runs the complete pages top to bottom. Superimposed overlay lays the pages over each other in one fixed frame, and you step through them. No arrangement mirrors a page: all the text stays upright. Ar is A recto (outer), Av A verso (inner), Br B recto (inner), Bv B verso (outer). These are positions on the sheet, which are not always facing pages in the bound book.</p>
+<p><b>Joins.</b> A continuous chain crops the empty space outside each bifolium's combined text and starts each row where the last one ends. The four pages of a row stay locked together, so a shorter page keeps the blank space beside a longer one, and only whole rows move. Drag a ↕ label to overlap a bifolium onto the one before, from 0 to 95% of that one's text height. This is an arrangement for looking at, not a measurement of how the sheets lay: it uses the text's extent, not the edge of the paper.</p>
+<p><b>Covered area.</b> Where a row overlaps the one before, the older text below the fold can stay as faint text, box outlines or the margin trace alone, disappear, or stay at full strength. This changes only what is drawn. The fold, the angles and the geometry stay as they are.</p>
+<p><b>Tilt.</b> Flat coordinates take out each page's warp, and with it the page's overall tilt. Flattening moves words up and down only, so Recorded, true margins puts the tilt back the same way: each line returns to its recorded angle, every x stays where it was recorded, and only the local warp stays out. Rigid turn rotates the page by the same angle instead. A rotation moves x as well, which flattening never did, so each drawn margin leans by the page's own turn on top of its true slope: compare margins only under the first setting, or in recorded coordinates. The side labels give each page's recorded tilt: positive falls to the right. The angle is the median over lines with at least 4 located boxes spanning at least 3 median word widths, so a page with no such line shows none and keeps its flat tilt. This restores an orientation for inspection, not a physical page edge.</p>
+<p><b>Align.</b> Source x keeps each page's horizontal position from its source image. Opening word puts the first word of each page at x = 0. Median body margin puts the median left edge of the page's body rows at x = 0. Each is one horizontal translation of the page. The height always comes from the opening baseline, because the source images share no vertical origin. Body height scales each page, in both directions alike, to a common median word height.</p>
+<p><b>Margin points.</b> A dot is the left end of a complete paragraph row that is not a paragraph's first line, and a line joins only consecutive rows, so a gap stays a gap. Nothing joins one page's margin to the next page's. In the overlay the lines are solid for Ar, dashed for Av, dotted for Br and dash-dot for Bv.</p>
+<p><b>Orders.</b> By bifolium is the manuscript's own. Path 1 is a proposed glyph-statistical ordering, not an established chronology. Reorder bifolia changes only what you see, and its colours stay with their sheets. Candidate correspondence, under Page positions, walks Ar → Bv → Br → Ar and Av → Av between neighbouring bifolia: a hypothesis to inspect, not an established reading order.</p>
+<p><b>Foldouts and gaps.</b> Foldout panels keep their own names and stack within their slot. Missing positions and pages without an opening box are named, and nothing stands in for them.</p>
+</details>
+</main>
+<footer><p>Coordinates: © 2014 The Voynichese Project, Apache-2.0 (<a href="NOTICE.txt">attribution</a>). ZL transliteration and Path 1 ordering. Built with <a href="https://github.com/eo777/vms-spatial">vms-spatial</a>.</p></footer>
+<script src="common.js"></script><script src="js/compare_math.js"></script><script src="compare_state.js"></script><script src="js/section_math.js"></script><script src="js/stream_math.js"></script><script src="stream.js"></script></body></html>
