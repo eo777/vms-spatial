@@ -2,15 +2,14 @@
 (async()=>{
  const {$,esc}=SG,page=$('reviewPage'),filter=$('reviewFilter'),image=$('reviewImage'),labels=$('reviewLabels'),sources=$('reviewSources'),closeup=$('reviewCloseup'),colors=$('reviewColors');
  let data,tokens,byId,byPage,selected=null,sourceData,sourceCtx,sourcePositions,colorScores,colorDomain,colorTask;
- const displayBoxScores=new Map();
+ const displayBoxScores=new Map();let imageJob=null;
  const interesting=t=>filter.value==='all'?true:filter.value==='review'?!t.strict:t.flags.includes(filter.value);
  const flags=a=>a.map(f=>'<span class="review-flag">'+esc(f.replaceAll('_',' '))+'</span>').join('');
  function save(){SG.setHash({page:page.value,token:selected,filter:filter.value,sources:sources.checked?'1':undefined,closeup:closeup.checked?'1':undefined,labels:labels.checked?'1':undefined,colors:colors.value==='review'?undefined:colors.value});}
  async function ensureColors(){
   if(colors.value!=='components'||colorScores)return;
-  $('reviewSummary').textContent='Calculating component diversity…';
   if(!colorTask)colorTask=SG_SOURCES.series(sourceCtx,100,'spatial',{left:3,depth:8,angle:45,weight:'distance'}).then(stats=>{colorScores=stats.map(s=>s.components);colorDomain=SG_SOURCES.colorDomain(colorScores);});
-  await colorTask;
+  $('reviewSummary').textContent='Calculating component diversity…';await SG.busy('Calculating component diversity…',colorTask);
  }
  async function update(){await ensureColors();render();save();}
  function originalBoxScore(group,part){
@@ -25,6 +24,7 @@
   displayBoxScores.set(key,value);return value;
  }
  function componentColor(value){return Number.isFinite(value)?sourceData.palette[Math.min(500,Math.floor(SG_SOURCES.colorFraction(value,colorDomain)*501))]:null;}
+ function watchImage(el){imageJob?.end();imageJob=null;if(!el)return;const job=imageJob=SG.busyStart('Loading the page image…');for(const ev of ['load','error'])el.addEventListener(ev,()=>job.end(),{once:true});}
  function choose(id){selected=selected===id?null:id;render();save();}
  function render(){
   const rows=byPage.get(page.value)||[],shown=rows.filter(interesting),info=data.pages[page.value];
@@ -84,6 +84,7 @@
    if(sourceMode)$('reviewImageStatus').append(' · 8 line spacings up; 45° half-angle; 3 word widths left.');
   }
   for(const el of $('reviewCanvas').querySelectorAll('image[data-source-image]'))el.setAttribute('href',info.display_image);
+  watchImage($('reviewCanvas').querySelector('image[data-source-image]'));
   // Overlay derived word boundaries only when that original assignment is
   // selected. The audit's pink rectangles remain the untouched source evidence.
   if(selectedGroup&&data.groups[selectedGroup]?.resolved){
@@ -99,6 +100,7 @@
    for(const el of $('reviewCrops').querySelectorAll('image[data-source-image]'))el.setAttribute('href',info.display_image);
   }
  }
+ const loading=SG.busyStart('Loading the alignment review…');
  try{
   const config=await fetch('config.json').then(r=>r.ok?r.json():{}).catch(()=>({}));
   SG.setBase(SG.hash().data||config.dataBase||'data/');
@@ -117,5 +119,5 @@
   $('reviewNext').onclick=()=>{const at=pages.indexOf(page.value);for(let k=1;k<=pages.length;k++){const p=pages[(at+k)%pages.length];if(byPage.get(p).some(interesting)){page.value=p;selected=null;render();save();break;}}};
   document.querySelector('main').addEventListener('click',e=>{const item=e.target.closest('[data-token]');if(item)choose(item.dataset.token);else if(e.target.closest('svg')){selected=null;render();save();}});
   document.querySelector('main').addEventListener('keydown',e=>{const item=e.target.closest('g[data-token]');if(item&&(e.key==='Enter'||e.key===' ')){e.preventDefault();choose(item.dataset.token);}});
- }catch(error){$('reviewSummary').textContent='Could not load the alignment review.';SG.error($('reviewDetails'),error);}
+ }catch(error){$('reviewSummary').textContent='Could not load the alignment review.';SG.error($('reviewDetails'),error);}finally{loading.end();}
 })();

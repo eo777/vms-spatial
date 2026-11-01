@@ -7,6 +7,14 @@ const gz=p=>JSON.parse(zlib.gunzipSync(fs.readFileSync(path.join(DATA,p))));
 const have=fs.existsSync(path.join(DATA,'manuscript/words.json.gz'))&&fs.existsSync(path.join(DATA,'layout.json.gz'));
 const data=have?gz('manuscript/words.json.gz'):null,layout=have?gz('layout.json.gz'):null;
 
+test('a mounted atlas leaves nothing behind when it is rebuilt',()=>{
+ // mount() closes over every box of the atlas: anything that outlives destroy() keeps a whole atlas, 115,000 nodes, at each change of order or text
+ const src=fs.readFileSync(path.resolve(__dirname,'../heatmap.js'),'utf8');
+ assert.doesNotMatch(src,/new (Mutation|Resize|Intersection)Observer/,'an observer in mount() has to be disconnected, so keep it in boot.js');
+ assert.doesNotMatch(src,/\b(window|document)\.addEventListener/,'listeners go through on(), which destroy() aborts');
+ assert.match(src,/destroy\(\)\{[^}]*abort\.abort\(\)/);
+});
+
 test('rows cover every page once in every grouping and order',{skip:!have},()=>{
  const pages=new Set(data.lines.map(l=>l.page));
  for(const grouping of ['bifolia','leaves','pages'])for(const order of ['bifolia','folio','path1']){

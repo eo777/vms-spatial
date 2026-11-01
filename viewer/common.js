@@ -1,5 +1,5 @@
 "use strict";
-// Shared by the viewer pages: data loading, formatting, the location hash, tooltips, errors.
+// Shared by the viewer pages: data loading, formatting, the location hash, tooltips, errors, the loading indicator.
 const SG=(()=>{
  const $=id=>document.getElementById(id);
  const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -69,6 +69,25 @@ const SG=(()=>{
    el.addEventListener('mouseleave',hideTip);
   });
  }
+ // ---- the loading indicator, one on every page, for any wait the reader would otherwise have to guess at. It fades in after a moment, so that
+ // quick work shows nothing, and both of its animations run off the page's thread, so it keeps turning while a rebuild holds the page
+ const jobs=[];let busyNode=null;
+ function nextPaint(){return new Promise(done=>{const fallback=setTimeout(done,250);requestAnimationFrame(()=>setTimeout(()=>{clearTimeout(fallback);done();},0));});}   // the timer serves a hidden tab, which paints nothing
+ function showBusy(){
+  if(!busyNode){busyNode=document.createElement('div');busyNode.className='busy';busyNode.setAttribute('role','status');busyNode.innerHTML='<i aria-hidden="true"></i><span></span>';document.body.append(busyNode);}
+  const job=jobs[jobs.length-1];busyNode.classList.toggle('on',!!job);busyNode.lastChild.textContent=job?job.label:'';
+ }
+ function busyStart(label){
+  const job={label,set(text){job.label=text;showBusy();},end(){const i=jobs.indexOf(job);if(i>=0){jobs.splice(i,1);showBusy();}}};
+  jobs.push(job);showBusy();return job;
+ }
+ // a function runs once the indicator is on screen, because work that blocks the page would otherwise keep it from ever being painted; a promise
+ // is simply watched. The indicator stays until the result has been painted
+ async function busy(label,work){
+  const job=busyStart(label);
+  try{if(typeof work==='function'){await nextPaint();return await work();}return await work;}
+  finally{await nextPaint();job.end();}
+ }
  function hash(){const o={};for(const [k,v] of new URLSearchParams(location.hash.slice(1)))o[k]=v;return o;}
  function setHash(o){const p=new URLSearchParams();for(const k of Object.keys(o))if(o[k]!=null&&o[k]!=='')p.set(k,o[k]);history.replaceState(null,'',(p.toString()?'#'+p.toString():location.pathname));}
  function error(el,e){el.innerHTML=`<div class="error">${esc(e.message||e)}\n\nThe pages read their data with fetch(); open the viewer through a web server (for example: python -m http.server in the viewer folder), not from a file:// address, and build the data first (vmsspatial viewer-data).</div>`;console.error(e);}
@@ -80,5 +99,6 @@ const SG=(()=>{
    return '#'+stops[i].map((c,j)=>Math.round(c+(stops[i+1][j]-c)*f).toString(16).padStart(2,'0')).join('');
   });
  }
- return {$,esc,finite,fmt,int,pct,signed,load,readGz,setBase,dataUrl,units,showTip,hideTip,attachTips,hash,setHash,error,defaultPalette};
+ return {$,esc,finite,fmt,int,pct,signed,load,readGz,setBase,dataUrl,units,showTip,hideTip,attachTips,busy,busyStart,nextPaint,hash,setHash,error,defaultPalette};
 })();
+if(typeof module!=='undefined')module.exports=SG;

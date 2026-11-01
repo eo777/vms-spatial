@@ -36,6 +36,7 @@
  let margin=WIDE_MARGIN;
  let shown=[];                                        // the panels of the last render
  // ---- data
+ const loading=SG.busyStart('Loading the manuscript…');
  const config=await fetch('config.json').then(r=>r.ok?r.json():{}).catch(()=>({}));
  SG.setBase(SG.hash().data||config.dataBase||'data/');
  try{
@@ -43,11 +44,11 @@
   if(!C)throw Error('index.json has no compare entry: run `vmsspatial viewer-data`.');
   const bundle=index.bundles.find(b=>b.key===C.bundle)||index.bundles[0];
   [compact,orders,words]=await Promise.all([SG.load(SG.dataUrl(C.pages)),SG.load(SG.dataUrl(C.orders)),SG.load(SG.dataUrl(bundle.path)).then(d=>{lines=d.lines;return d.words;})]);
- }catch(error){status.textContent='Could not load the comparison data.';SG.error(figure,error);return;}
+ }catch(error){loading.end();status.textContent='Could not load the comparison data.';SG.error(figure,error);return;}
  quarantine=new Set(compact.quarantine||[]);
  lineOfToken=new Int32Array(words.length).fill(-1);lines.forEach((L,i)=>{for(let t=L.start;t<L.end;t++)lineOfToken[t]=i;});
- const loadRankings=()=>rankings?Promise.resolve(rankings):SG.load(SG.dataUrl(C.rankings)).then(r=>(rankings=r));
- const loadWheels=()=>wheels?Promise.resolve(wheels):SG.load(SG.dataUrl(C.wheels)).then(w=>(wheels=w));
+ const loadRankings=()=>rankings?Promise.resolve(rankings):SG.busy('Loading the match rankings…',SG.load(SG.dataUrl(C.rankings))).then(r=>(rankings=r));
+ const loadWheels=()=>wheels?Promise.resolve(wheels):SG.busy('Loading the wheels…',SG.load(SG.dataUrl(C.wheels))).then(w=>(wheels=w));
  $('baselineNote').textContent=`Data ${compact.version} · anchors: ${compact.baseline} baseline (ink where the page has clean ink records, glyph-corrected box baseline elsewhere; ${compact.baseline_pages?Object.entries(compact.baseline_pages).map(([k,v])=>v+' '+k).join(', '):''}) · geometry policy ${compact.policy} · ${Object.keys(compact.pages).length} pages.`;
  // ---- lists and controls
  const ORDER_LABELS={bifolia:'Bifolia',folio:'Folio',path1:'Path 1'};
@@ -521,7 +522,9 @@
  };
  addEventListener('hashchange',async()=>{const s=S.parse(SG.hash());if(JSON.stringify(S.serialize(s))===JSON.stringify(S.serialize(state)))return;state=s;pendingZoom=s.zoom;frameKey='';groupHit=null;rebuildLists();syncControls();if(state.view==='matches')await loadRankings();render();});
  // ---- start
- rebuildLists();syncControls();
- if(state.view==='matches')await loadRankings();
- render();
+ try{
+  rebuildLists();syncControls();
+  if(state.view==='matches')await loadRankings();
+  await render();
+ }finally{loading.end();}
 })();

@@ -3,11 +3,6 @@
 .heatmap-page .masthead{padding-bottom:22px}
 .heatmap-atlas .controls{position:sticky;top:0;z-index:5;background:var(--bg);border-block:1px solid var(--line2);padding:10px 0;display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;font-size:13px}
 .heatmap-atlas .controls label{display:flex;align-items:center;gap:8px}
-.heatmap-atlas .calculation-status{display:inline-flex;align-items:center;gap:5px;min-width:16px;font-size:11px;font-variant-numeric:tabular-nums;color:var(--ink2);white-space:nowrap}
-.heatmap-atlas .calculation-spinner{display:inline-block;width:14px;height:14px;box-sizing:border-box;border:2px solid var(--line2);border-top-color:var(--heat-single);border-right-color:var(--heat-single);border-radius:50%;animation:heatmap-spin .8s linear infinite}
-.heatmap-atlas .calculation-stage{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-@keyframes heatmap-spin{to{transform:rotate(360deg)}}
-@media(prefers-reduced-motion:reduce){.heatmap-atlas .calculation-spinner{animation:none}}
 .heatmap-atlas select{padding:8px;max-width:100%}
 .heatmap-atlas .legend{display:block;min-width:180px;flex:1 1 180px;max-width:300px;order:0}
 .heatmap-atlas #scope{max-width:190px}

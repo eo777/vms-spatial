@@ -9,6 +9,7 @@
  const LAYER_LABELS={heatmap:'Heatmap',polygons:'Paragraph polygons',boxes:'Word boxes',breaks:'Breaks',starts:'Paragraph starts',ends:'Paragraph ends'};
  let state=X.parse(SG.hash()),pages,words,tokens,list,view=null,full=null,drawn=[],editTarget='';
  const cache=new Map(),undo=new Map(),SLACK=.85;    // the view may be dragged this far past the frame: pages can leave the margin, and a part always stays in sight
+ const loading=SG.busyStart('Loading the manuscript…');
  const config=await fetch('config.json').then(r=>r.ok?r.json():{}).catch(()=>({}));
  SG.setBase(SG.hash().data||config.dataBase||'data/');
  try{
@@ -17,7 +18,7 @@
   const bundle=index.bundles.find(b=>b.key===C.bundle)||index.bundles[0];
   const [compact,orders,data]=await Promise.all([SG.load(SG.dataUrl(C.pages)),SG.load(SG.dataUrl(C.orders)),SG.load(SG.dataUrl(bundle.path))]);
   pages=compact.pages;words=data.words;tokens=X.lineTokens(data.lines);list=Z.pageList(orders,'bifolia',pages);
- }catch(error){status.textContent='Could not load the page data.';SG.error(figure,error);return;}
+ }catch(error){loading.end();status.textContent='Could not load the page data.';SG.error(figure,error);return;}
  state.edits=X.cleanEdits(pages,list,state.edits);
  const save=()=>SG.setHash({data:SG.hash().data,...X.serialize(state)});
  const dark=()=>{const c=getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();return parseInt(c.slice(1,3),16)<128;};
@@ -144,7 +145,10 @@
  // ---- the view
  function applyView(){if(!full)return;if(view&&Z.isFit(view,full))view=null;const v=view||full;for(const p of drawn)p.svg.setAttribute('viewBox',`${v.x} ${v.y} ${v.w} ${v.h}`);$('zoomLevel').textContent=view?Z.zoomScale(view,full).toFixed(1).replace(/\.0$/,'')+'×':'';}
  function applyOpacity(){for(const [k] of X.OPACITY)figure.style.setProperty('--o-'+k,String(state.op[k]/100));legend.style.setProperty('--o-heatmap',String(state.op.heatmap/100));}
- function render(){
+ // every change redraws, and several changes in one frame redraw once
+ let queued=null;
+ const render=()=>queued||(queued=SG.busy('Drawing the pages…',()=>{queued=null;draw();}));
+ function draw(){
   const all=customized();
   ctl.group.replaceChildren(new Option('All groups','all'),...all.map(g=>new Option(`${label(g.name)} (${g.pages.length})${g.added.length||g.removed.length?' · edited':''}`,g.name)));
   if(state.group!=='all'&&!all.some(g=>g.name===state.group))state.group=all[0].name;
@@ -196,5 +200,5 @@
  // the heatmap's colours follow the theme
  new MutationObserver(()=>render()).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
  if(!state.group)state.group=X.groups(pages,list,state.by)[0].name;
- render();
+ try{await render();}finally{loading.end();}
 })();

@@ -1,7 +1,7 @@
 "use strict";
 /* The heatmap controller. VMS_HEATMAP.mount({atlas, data, layout, pageDisplay}) binds the page controls to an atlas
    rendered by VMS_ATLAS (rows of pages with <rect data-token-indices>), computes the colors and the row means, and
-   handles clicks: a word's window, its weighted spatial sources, the cone. It returns {destroy, reorder, rowMeans,
+   handles clicks: a word's window, its weighted spatial sources, the cone. It returns {ready, destroy, reorder, rowMeans,
    update}. Rows are any grouping of pages (bifolia, leaves, pages); each row's token ranges are in data-ranges.
    Static page geometry: recompute only when controls change; clicks touch one window. */
 const VMS_HEATMAP=(()=>{
@@ -25,7 +25,6 @@ function mount({atlas,data,layout,pageDisplay}){
  const rows=[...atlas.querySelectorAll('.bifolio')];
  const scopeDefs=new Map((layout.scopes||[]).map(s=>[s.key,s]));
  const summary=document.getElementById('windowSummary'),restoreButton=document.getElementById('restoreHeatmap'),detailsPanel=document.getElementById('wordDetails'),detailsButton=document.getElementById('wordDetailsButton');let detailsOpen=false;
- const calculation=document.getElementById('calculationStatus'),calculationProgress=document.getElementById('calculationProgress'),calculationStage=document.getElementById('calculationStage');
  const caption=atlas.querySelector('.caption'),shared=document.getElementById('sharedChoice'),choose=document.getElementById('boxWord');
  const tokenBoxes=new Map(),entries=[],byBox=new WeakMap();
  let rolling=null,impact=null,selected=-1,origin=null,marked=[],revision=0,sizeTimer=null,destroyed=false;
@@ -39,10 +38,12 @@ function mount({atlas,data,layout,pageDisplay}){
   const cap=figure.querySelector('figcaption'),page=cap.textContent.trim(),button=document.createElement('button');
   figure.dataset.page=page;pageFigures.set(page,figure);button.type='button';button.className='expand-page';button.textContent='⤢';
   button.setAttribute('aria-label','Expand '+page);button.setAttribute('aria-expanded','false');button.title='Expand '+page;
-  on(button,'click',()=>{expandPage(expandedPage===figure?null:figure);saveHash();});cap.append(button);
+  on(button,'click',()=>showPage(expandedPage===figure?null:figure));cap.append(button);
  }
  const segmentsOf=row=>row.dataset.ranges?row.dataset.ranges.split(',').filter(Boolean).map(r=>r.split('-').map(Number)):[];
  const pagesOf=row=>row.dataset.pages.split(',');
+ // opening a page and going back lay the whole atlas out again
+ const showPage=figure=>SG.busy(figure?'Opening '+figure.dataset.page+'…':'Returning to the rows…',()=>{expandPage(figure);saveHash();});
  function expandPage(figure,scroll=true){
   if(figure===expandedPage)return;
   if(figure&&selected>=0&&!figure.contains(origin))restore();
@@ -89,7 +90,6 @@ function mount({atlas,data,layout,pageDisplay}){
  // the clicked word's notes wait behind Details: a tall sticky bar would cover the page and the word itself
  function syncDetails(){const any=[...detailsPanel.children].some(c=>!c.hidden);detailsButton.hidden=!any;detailsPanel.hidden=!any||!detailsOpen;detailsButton.setAttribute('aria-expanded',String(any&&detailsOpen));detailsButton.textContent=any&&detailsOpen?'Hide details':'Details';}
  on(detailsButton,'click',()=>anchored(origin,()=>{detailsOpen=!detailsOpen;syncDetails();}));
- new MutationObserver(()=>{summary.title=summary.textContent;}).observe(summary,{childList:true});   // the full text when it is cut short
  for(const box of atlas.querySelectorAll('rect[data-token-indices]')){
   const entry={box,indices:box.dataset.tokenIndices.split(',').map(Number),title:box.querySelector('title')};
   entries.push(entry);byBox.set(box,entry);
@@ -499,13 +499,11 @@ function mount({atlas,data,layout,pageDisplay}){
    entry.box.classList.toggle('incomplete',entry.indices.every(i=>!Number.isFinite(rolling.scores[i])));
   }
  }
+ let busyJob=null;
  function setBusy(stage,percent=null){
-  calculation.hidden=!stage;
-  if(!stage){atlas.removeAttribute('aria-busy');return;}
-  atlas.setAttribute('aria-busy','true');calculation.title=stage+(percent===null?'':' · '+percent+'%');
-  const announcement=stage+(percent===null?'':' · '+Math.floor(percent/10)*10+'%');
-  if(calculationStage.textContent!==announcement)calculationStage.textContent=announcement;
-  const progress=percent===null?'':percent+'%';if(calculationProgress.textContent!==progress)calculationProgress.textContent=progress;
+  if(!stage){atlas.removeAttribute('aria-busy');busyJob?.end();busyJob=null;return;}
+  atlas.setAttribute('aria-busy','true');const text=stage+(percent===null?'…':' · '+percent+'%');
+  if(busyJob)busyJob.set(text);else busyJob=SG.busyStart(text);
  }
  async function update(){
   clearTimeout(sizeTimer);
@@ -513,7 +511,7 @@ function mount({atlas,data,layout,pageDisplay}){
   const ticket=++revision;
   readControls();setBusy('Updating colors');
   try{
-   await new Promise(requestAnimationFrame);if(ticket!==revision||destroyed)return;
+   await SG.nextPaint();if(ticket!==revision||destroyed)return;       // not a bare animation frame: that runs before the paint, and the indicator would never show
    if(advanced()){
     const key=JSON.stringify([width,mode,sourceOptions,copyView()]);
     if(key!==sourceKey){
@@ -566,12 +564,12 @@ function mount({atlas,data,layout,pageDisplay}){
  });
  on(choose,'change',()=>select(origin,Number(choose.value),false));
  on(restoreButton,'click',()=>restore(true));
- on(document,'keydown',e=>{if(e.key==='Escape'){if(selected>=0){e.preventDefault();restore(true);}else if(expandedPage){e.preventDefault();expandPage(null);saveHash();}}});
+ on(document,'keydown',e=>{if(e.key==='Escape'){if(selected>=0){e.preventDefault();restore(true);}else if(expandedPage){e.preventDefault();showPage(null);}}});
  for(const control of [size,direction,colors,leftReach,aboveDepth,coneAngle,sourceWeight,targetMode,editLimit,candidateUnit])on(control,'change',update);
  on(size,'input',()=>{clearTimeout(sizeTimer);if(size.value!==''&&size.validity.valid)sizeTimer=setTimeout(update,180);});
  on(size,'keydown',e=>{if(e.key==='Enter'){e.preventDefault();update();}});
- if(selector)on(selector,'change',()=>{expandPage(null);restore();saveHash();});
- on(window,'hashchange',()=>{if(destroyed)return;fromHash();restore();update();});
+ if(selector)on(selector,'change',()=>SG.busy('Updating the rows…',()=>{if(destroyed)return;expandPage(null);restore();saveHash();}));
+ on(window,'hashchange',()=>SG.busy('Updating the view…',()=>{if(destroyed)return;fromHash();restore();return update();}));
  // bind the data
  sourceCtx=SG_SOURCES.prepare(data);copyCtx=SG_COPY.prepare(data);
  for(const entry of entries){
@@ -583,9 +581,10 @@ function mount({atlas,data,layout,pageDisplay}){
  }
  pageDisplay.setData(data);
  fromHash();visibility();summary.textContent='Calculating…';setBusy('Loading');
- update();
+ const ready=update();
  return {
-  destroy(){destroyed=true;abort.abort();clearTimeout(sizeTimer);SG.hideTip();for(const g of atlas.querySelectorAll('.source-guide'))g.remove();for(const old of colors.querySelectorAll('optgroup[data-bundle-measures]'))old.remove();},
+  ready,
+  destroy(){destroyed=true;revision++;setBusy(null);abort.abort();clearTimeout(sizeTimer);SG.hideTip();for(const g of atlas.querySelectorAll('.source-guide'))g.remove();for(const old of colors.querySelectorAll('optgroup[data-bundle-measures]'))old.remove();},
   update,
   reorder(ids){const host=rows[0]?.parentElement;if(!host)return;const byId=new Map(rows.map(r=>[r.dataset.row,r]));for(const id of ids){const r=byId.get(id);if(r)host.append(r);}},
   rowMeans(){return new Map(rows.map(r=>[r.dataset.row,r.dataset.mean===''||r.dataset.mean==null?NaN:Number(r.dataset.mean)]));},

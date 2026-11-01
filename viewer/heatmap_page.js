@@ -180,6 +180,9 @@ const SG_HEATMAP_PAGE=(()=>{
    }
    s.svg.append(layer);
   }
+  // the indicator for a page image, which comes over the network: a newer apply() ends the one before it
+  let imageJob=null;
+  function imageLoading(label){imageJob?.end();imageJob=label?SG.busyStart(label):null;}
   // the status line: what the Coordinates choice does here, then the page's own message, then the overlay note
   function setStatus(text){status.textContent=[coordState(expanded).note,text,overlayNote].filter(Boolean).join(' · ');}
   function noteStatus(){if(overlayNote&&!status.textContent.includes(overlayNote))status.textContent+=' · '+overlayNote;}
@@ -191,7 +194,7 @@ const SG_HEATMAP_PAGE=(()=>{
    return ` Detection coverage: ${placed} of ${total} words placed.`;
   }
   async function apply(){
-   const current=++ticket;controls.hidden=!expanded;status.hidden=!expanded;
+   const current=++ticket;imageLoading(null);controls.hidden=!expanded;status.hidden=!expanded;
    if(!expanded){if(zoomReset)zoomReset.hidden=true;if(zoomLevel)zoomLevel.textContent='';if(locusChoice)locusChoice.hidden=true;return;}
    const figure=expanded,s=state(figure);
    figure.dataset.boxStyle=boxStyle.value;raw(figure);labels();overlays();fillLoci();applyPending();onChange();
@@ -205,17 +208,17 @@ const SG_HEATMAP_PAGE=(()=>{
     const image=document.createElementNS(NS,'image');image.setAttribute('class','manuscript-image');image.setAttribute('width',String(self.width));image.setAttribute('height',String(self.height));
     image.setAttribute('aria-hidden','true');image.setAttribute('preserveAspectRatio','none');
     const note=detectedNote(figure.dataset.page);
-    image.addEventListener('load',()=>{if(current===ticket)setStatus('Beinecke image (quarter scale) with detected word boxes: positions found on the image and linked to the transcription by the toolkit, not recorded coordinates. Thin amber boxes have unresolved positions.'+note);});
-    image.addEventListener('error',()=>{if(current===ticket)setStatus('The page image could not load. Turn off Page image to return to the coordinate view.');});
-    s.svg.prepend(image);image.setAttribute('href',self.image);labels();overlays();applyPending();onChange();
+    image.addEventListener('load',()=>{if(current===ticket){imageLoading(null);setStatus('Beinecke image (quarter scale) with detected word boxes: positions found on the image and linked to the transcription by the toolkit, not recorded coordinates. Thin amber boxes have unresolved positions.'+note);}});
+    image.addEventListener('error',()=>{if(current===ticket){imageLoading(null);setStatus('The page image could not load. Turn off Page image to return to the coordinate view.');}});
+    imageLoading('Loading the page image…');s.svg.prepend(image);image.setAttribute('href',self.image);labels();overlays();applyPending();onChange();
     return;
    }
-   setStatus('Loading matching Voynichese image coordinates…');
+   imageLoading('Loading the page image…');setStatus('Loading matching Voynichese image coordinates…');
    try{
     if(!reviewPromise)reviewPromise=SG.load(reviewUrl).catch(error=>{reviewPromise=null;throw error;});
     const review=await reviewPromise;if(current!==ticket)return;
     const native=SG_REVIEW.nativePage(review,figure.dataset.page);
-    if(!native.image||!native.boxes.size){setStatus('No registered Voynichese image is available for this page.');return;}
+    if(!native.image||!native.boxes.size){imageLoading(null);setStatus('No registered Voynichese image is available for this page.');return;}
     s.native=native;s.svg.setAttribute('viewBox','0 0 636 900');s.svg.dataset.baseView='0 0 636 900';figure.classList.add('image-backed');
     let missing=0;
     for(const {box} of s.boxes){
@@ -225,13 +228,13 @@ const SG_HEATMAP_PAGE=(()=>{
     }
     const image=document.createElementNS(NS,'image');image.setAttribute('class','manuscript-image');image.setAttribute('width','636');image.setAttribute('height','900');
     image.setAttribute('aria-hidden','true');image.setAttribute('preserveAspectRatio','none');
-    image.addEventListener('load',()=>{if(current===ticket)setStatus('Voynichese image · matching native word boxes · commas mark uncertain spaces.'+(missing?' '+missing+' unregistered boxes are hidden.':''));});
-    image.addEventListener('error',()=>{if(current===ticket)setStatus('The external image could not load. Turn off Page image to return to the coordinate view.');});
+    image.addEventListener('load',()=>{if(current===ticket){imageLoading(null);setStatus('Voynichese image · matching native word boxes · commas mark uncertain spaces.'+(missing?' '+missing+' unregistered boxes are hidden.':''));}});
+    image.addEventListener('error',()=>{if(current===ticket){imageLoading(null);setStatus('The external image could not load. Turn off Page image to return to the coordinate view.');}});
     s.svg.prepend(image);image.setAttribute('href',native.image);labels();overlays();
     // the boxes moved into the image's frame: re-frame the chosen locus or re-clamp the view there
     if(framedLocus)frameLocus(framedLocus);else if(view)setView(SG_ZOOM.clampTo({...view,x:view.x*636/Number(s.viewBox.split(/\s+/)[2]),y:view.y*900/Number(s.viewBox.split(/\s+/)[3]),w:view.w*636/Number(s.viewBox.split(/\s+/)[2]),h:view.h*900/Number(s.viewBox.split(/\s+/)[3])},fullView()));
     onChange();
-   }catch(error){if(current===ticket)setStatus('Could not load the image registration. Turn Page image off and on to retry.');}
+   }catch(error){if(current===ticket){imageLoading(null);setStatus('Could not load the image registration. Turn Page image off and on to retry.');}}
   }
   function overlayDefault(){const keys=Object.keys(data?.overlays||{});return data?.overlay_default||(keys.length>1?'all':keys[0]||'none');}
   function syncOverlays(){
@@ -242,7 +245,7 @@ const SG_HEATMAP_PAGE=(()=>{
    if(control===imageToggle)apply();else{if(expanded)expanded.dataset.boxStyle=boxStyle.value;labels();onChange();}
   });
   if(overlayList)overlayList.addEventListener('change',e=>{if(e.target.checked)chosenOverlays.add(e.target.value);else chosenOverlays.delete(e.target.value);syncOverlays();overlays();onChange();});
-  if(coordSel)coordSel.addEventListener('change',()=>{placeRows();apply();onChange();atlas.dispatchEvent(new CustomEvent('coordinates:changed'));});
+  if(coordSel)coordSel.addEventListener('change',()=>SG.busy('Moving the boxes…',()=>{placeRows();apply();onChange();atlas.dispatchEvent(new CustomEvent('coordinates:changed'));}));
   if(locusSel)locusSel.addEventListener('change',()=>{if(locusSel.value)frameLocus(locusSel.value);else setView(null);});
   if(zoomReset)zoomReset.addEventListener('click',()=>setView(null));
   atlas.addEventListener('wheel',onWheel,{passive:false});
