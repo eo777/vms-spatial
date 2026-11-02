@@ -92,6 +92,14 @@ test('tiles keep the sequence, empty positions and foldout panels',()=>{
  assert.deepEqual(tiles[0].cells[2].pages.map(p=>p.folio),['c','d']);
  assert.deepEqual(P.tiles(plan,'faces')[1].cells.map(c=>c.slot),['Bv','Ar','Av','Br']);
 });
+test('ordinary bifolia share the widest one\'s width; a foldout keeps its own',()=>{
+ const shape={a:1100/1500,w:1800/1500},tile=cells=>({cells:cells.map(c=>({pages:c.map(folio=>({folio}))}))}),aspect=f=>shape[f];
+ assert.equal(P.plainTile(tile([['a'],[],['a'],['a']]),aspect),true,'an empty position is still an ordinary bifolium');
+ assert.equal(P.plainTile(tile([['a','a'],['a'],['a'],['a']]),aspect),false,'panels together in one position are a foldout');
+ assert.equal(P.plainTile(tile([['w'],['a'],['a'],['a']]),aspect),false,'a page wider than it is tall is a foldout');
+ assert.equal(P.evenWidth([{width:420,plain:true},{width:457,plain:true},{width:553,plain:false}]),457);
+ assert.equal(P.evenWidth([{width:614,plain:false}]),0,'no ordinary bifolium, no common width');
+});
 test('the address round-trips, keeps a pattern\'s colour, and shares the Page stream\'s order keys',()=>{
  const h={by:'section',group:'Herbal A',order:'path1',columns:'faces',custom:'A,B',pages:'f1r',q1:'*aiin',q3:'[li]p* OR q*',merge:'1',size:'140',open:'f1r',image:'0',labels:'1'};
  assert.deepEqual(P.serialize(P.parse(h)),h);

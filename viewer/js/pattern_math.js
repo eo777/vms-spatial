@@ -222,6 +222,10 @@ function tiles(plan,columns='singulion'){
  const slots=columns==='faces'?['Bv','Ar','Av','Br']:T.SLOTS;
  return plan.nodes.map((node,index)=>{const members=plan.pages.filter(p=>p.node===node);return {node,index,pages:members,cells:slots.map(slot=>({slot,pages:members.filter(p=>p.slot===slot)}))};});
 }
+/* plainTile(tile, aspect) -> true for an ordinary bifolium: one page at most in each position, none wider than it is tall (aspect = width / height of a folio's frame).
+   evenWidth(cards) -> the width every card is given, so the cards line up: the widest ordinary card's, 0 when there is none. A foldout keeps its own width */
+const plainTile=(tile,aspect)=>tile.cells.every(c=>c.pages.length<=1&&c.pages.every(p=>aspect(p.folio)<=1));
+const evenWidth=cards=>cards.reduce((m,c)=>c.plain?Math.max(m,c.width):m,0);
 // ---- the address: group, order, columns, custom and pages mean what they mean on the Page stream, so a link's tail works on both pages
 /* parse(hash) -> the page's state, every value checked; serialize(state) -> the hash, defaults left out. A pattern's key names its colour: q3 stays the third colour */
 function parse(h={}){
@@ -237,6 +241,6 @@ function serialize(s){
  if(s.merge)o.merge='1';if(s.size!==SIZES[0])o.size=s.size;if(s.open)o.open=s.open;if(!s.image)o.image='0';if(s.labels)o.labels='1';
  return o;
 }
-const api={LAYERS,SIZES,ORDERS,MIN_SHARE,QUALIFIERS,core,markPageInitial,qualifierName,parsePattern,glob,occurrencePattern,indexAt,describePattern,patternQualifiers,patternTerms,literalWord,rateBase,advice,textLines,occurrences,displayParts,share,tiles,parse,serialize,cleanCustom};
+const api={LAYERS,SIZES,ORDERS,MIN_SHARE,QUALIFIERS,core,markPageInitial,qualifierName,parsePattern,glob,occurrencePattern,indexAt,describePattern,patternQualifiers,patternTerms,literalWord,rateBase,advice,textLines,occurrences,displayParts,share,tiles,plainTile,evenWidth,parse,serialize,cleanCustom};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.VMS_PATTERN=api;
 })(typeof window!=='undefined'?window:globalThis);

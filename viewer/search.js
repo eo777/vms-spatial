@@ -90,7 +90,7 @@
  }
  function build(){
   host.replaceChildren();minis=[];tileRows=[];
-  const size=Number(state.size);host.style.fontSize=Math.max(11,Math.round(size/22))+'px';    // the labels grow with the tiles above Extra large
+  const size=Number(state.size),cards=[],aspect=folio=>{const f=framed(folio);return f.width/f.height;};host.style.fontSize=Math.max(11,Math.round(size/22))+'px';    // the labels grow with the tiles above Extra large
   for(const tile of P.tiles(plan,state.columns)){
    const el=h('article','tile'),head=h('header','tile-head'),grip=h('button','grip','⠿'),count=h('span','tile-count'),row=h('div','tile-pages'+(state.columns==='faces'?' faces':'')),first=tile.pages[0];
    el.dataset.node=tile.node;grip.type='button';grip.title='Drag to reorder; Alt + ← → also moves this bifolium';grip.setAttribute('aria-label','Reorder '+tile.node);
@@ -102,8 +102,16 @@
     else{const empty=h('div','mini-empty');empty.style.width=Math.round(size*.72)+'px';empty.style.height=size+'px';empty.title=`${tile.node}: no page in position ${cell.slot} in this selection`;box.append(empty);}
     row.append(box);
    }
-   el.append(head,row);bindTile(el,head,grip,tile.node);host.append(el);tileRows.push({node:tile.node,element:el,count,pages:tile.pages.map(p=>p.folio)});
+   el.append(head,row);bindTile(el,head,grip,tile.node);host.append(el);tileRows.push({node:tile.node,element:el,count,pages:tile.pages.map(p=>p.folio)});cards.push({el,row,plain:P.plainTile(tile,aspect)});
   }
+  evenCards(cards);
+ }
+ // the pages keep their own widths at one scale, so ordinary bifolia differ by a few pixels: give each the widest one's width, and the spare space goes between the pages
+ function evenCards(cards){
+  if(!cards.length)return;
+  const gap=parseFloat(getComputedStyle(cards[0].row).columnGap)||0,chrome=cards[0].el.offsetWidth-cards[0].row.clientWidth;
+  const even=P.evenWidth(cards.map(c=>({plain:c.plain,width:[...c.row.children].reduce((w,cell)=>w+cell.offsetWidth,0)+gap*(c.row.children.length-1)})));
+  if(even)for(const c of cards)c.el.style.minWidth=`min(100%,${even+chrome}px)`;
  }
  function paint(item,colours,faint){
   const {canvas,width,height,scale:s,folio}=item,dpr=Math.min(2,devicePixelRatio||1);
