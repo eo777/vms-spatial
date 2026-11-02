@@ -44,7 +44,7 @@
   const g=canvas.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);
   if(!F.joined){g.fillStyle=css('--surface');g.fillRect(0,0,F.w,F.h);}
   const xy=([x,y])=>[F.padX+(x-F.xmin)*F.s,F.padY+(y-F.ymin)*F.s],col=color(page.node),dash=DASHES[T.SLOTS.indexOf(page.slot)]||[];
-  if(F.xmin<=0&&F.xmax>=0){g.strokeStyle=css('--line2');g.setLineDash([3,5]);g.beginPath();g.moveTo(xy([0,0])[0],0);g.lineTo(xy([0,0])[0],F.h);g.stroke();g.setLineDash([]);}
+  if(F.xmin<=0&&F.xmax>=0&&state.scale!=='paper'){g.strokeStyle=css('--line2');g.setLineDash([3,5]);g.beginPath();g.moveTo(xy([0,0])[0],0);g.lineTo(xy([0,0])[0],F.h);g.stroke();g.setLineDash([]);}
   const draw=(style,alpha,from,to)=>{
    if(to<=from||style==='hidden')return;
    g.save();g.beginPath();g.rect(0,from,F.w,to-from);g.clip();
@@ -131,8 +131,9 @@
   if(key===drawnKey){positionRows();return;}
   clearStream();drawnKey=key;shown=records;
   const chain=state.view==='chain',joined=chain&&state.join!=='frames',valid=records.filter(r=>r.selection.available),singulion=state.columns==='singulion',zoom=Number(state.zoom);
-  const xmin=Math.min(0,...valid.map(r=>r.bounds.xmin))-35,xmax=Math.max(600,...valid.map(r=>r.bounds.xmax))+35,ymin=Math.min(0,...valid.map(r=>r.bounds.ymin)),ymax=Math.max(80,...valid.map(r=>r.bounds.ymax));
-  const rowWidth=Math.max(360,Math.max(320,width)*zoom),gutter=joined?GUTTER:0,w=chain?(rowWidth-gutter-26)/4:Math.max(320,width)*zoom,padX=chain?10:24,s=(w-2*padX)/(xmax-xmin);
+  // on the parchment every column is one leaf, fold to fore-edge, with nothing added at the fold, so the two pages of a face meet there
+  const paper=state.scale==='paper',xmin=paper?0:Math.min(0,...valid.map(r=>r.bounds.xmin))-35,xmax=paper?T.LEAF_MM*T.PAPER_UNITS:Math.max(600,...valid.map(r=>r.bounds.xmax))+35,ymin=Math.min(0,...valid.map(r=>r.bounds.ymin)),ymax=Math.max(80,...valid.map(r=>r.bounds.ymax));
+  const rowWidth=Math.max(360,Math.max(320,width)*zoom),gutter=joined?GUTTER:0,w=chain?(rowWidth-gutter-26)/4:Math.max(320,width)*zoom,padX=chain?(paper?0:10):24,s=(w-2*padX)/(xmax-xmin);
   host.style.setProperty('--stream-width',w+'px');host.style.setProperty('--row-width',rowWidth+'px');host.style.setProperty('--gutter',gutter+'px');host.classList.toggle('joined',joined);host.classList.toggle('split-folds',joined&&state.foldMode==='separate');
   const byNode=new Map();let parent=host;
   if(joined){
@@ -228,6 +229,14 @@
   const missing=included.filter(p=>!selections[plan.pages.indexOf(p)].available).map(p=>p.folio);
   notes.textContent=`${drawn.length} ${drawn.length===1?'page':'pages'} shown: the current page strong, earlier pages faded, colours by bifolium. No page is turned here. `+(missing.length?`No box on the opening line: ${missing.join(', ')}. `:'')+(plan.missing.length?`Requested position missing on: ${plan.missing.join(', ')}. `:'')+(state.route.startsWith('cycle:')?'Experimental position mapping, not a claimed chronology. ':'');
  }
+ // ---- the parchment scale says what was measured and what was estimated, for the pages on show
+ function paperNote(records){
+  const P=compact.paper,rec=f=>pages[f].paper,on=k=>plan.pages.filter(p=>rec(p.folio)&&rec(p.folio)[k]!=='measured').map(p=>p.folio),edge=T.LEAF_MM*T.PAPER_UNITS;
+  const none=plan.pages.filter(p=>!rec(p.folio)).map(p=>p.folio),wide=records.filter(r=>r.selection.available&&rec(r.folio)&&(r.bounds.xmin<-1||r.bounds.xmax>edge+1)).map(r=>r.folio),fold=on('fold_method'),top=on('top_method'),scale=on('scale_method');
+  return `Parchment scale, estimated: each page in millimetres from the edge where its leaf meets the binding, taken as the fold, and from the leaf's top edge, both found on the Beinecke scans, which are scaled so that the median leaf is the catalogue's ${P?P.catalogue.height:225} mm tall. A column is one ${T.LEAF_MM} mm leaf; the strip of a leaf hidden in the binding is not measured. `
+   +(fold.length?`Fold estimated from the median inner margin${P?' ('+P.medians.inner_margin_mm+' mm)':''}: ${fold.join(', ')}. `:'')+(top.length?`Top edge estimated from the bottom edge or the median top margin: ${top.join(', ')}. `:'')
+   +(scale.length?`Scale estimated: ${scale.join(', ')}. `:'')+(wide.length?`Wider than one leaf, cut at the column edge: ${wide.join(', ')}. `:'')+(none.length?`Not on the parchment: ${none.join(', ')}. `:'');
+ }
  // ---- the controls that follow the sequence
  const seamKeys=()=>plan.nodes.slice(1).map((node,i)=>T.seamKey(plan.nodes[i],node));
  function fillGroups(){
@@ -261,6 +270,7 @@
   $('separateFolds').checked=state.foldMode==='separate';$('foldPartLabel').hidden=state.foldMode!=='separate';$('foldPart').value=state.foldPart;
   $('columnsLabel').hidden=$('joinLabel').hidden=$('jumpLabel').hidden=!chain;$('routeLabel').hidden=chain;$('trailLabel').hidden=$('fadeLabel').hidden=flowing;$('tiltLabel').hidden=!flowing;
   ctl.tilt.disabled=state.coords==='recorded';    // recorded coordinates already hold the tilt: no setting moves anything there
+  ctl.anchor.disabled=state.scale==='paper';ctl.anchor.title=state.scale==='paper'?'On the parchment scale every page is placed by its fold and top edge.':'';
   const flatTurn=flowing&&state.coords==='flat',note=flatTurn&&state.tilt==='turn'?TILT_NOTES.turn:flatTurn&&state.tilt==='restore'&&state.oldLink?TILT_NOTES.oldLink:'';
   $('tiltNote').textContent=note;$('tiltNote').hidden=!note;
   $('overlapPanel').hidden=$('coveredLabel').hidden=!joined;$('prevPage').hidden=$('nextPage').hidden=slider.hidden=strip.hidden=chain;
@@ -330,7 +340,7 @@
   jumpTo.replaceChildren(...plan.nodes.map(n=>new Option(n,n)));jumpTo.value=active?active.node:'';
   fillReorder();
   position.textContent=(active?(chain?`${plan.nodes.length} bifolia · ${active.node}`:`${state.at+1} of ${plan.pages.length} · ${active.folio} · ${active.slot}`):'No pages in this selection')+(plan.custom?' · custom order':'');
-  status.textContent=`${heading()} · ${plan.pages.length} ${plan.pages.length===1?'page':'pages'} · ${state.coords} coordinates · ${state.scale==='body_height'?'body-height scale':'source pixels'}`;
+  status.textContent=`${heading()} · ${plan.pages.length} ${plan.pages.length===1?'page':'pages'} · ${state.coords} coordinates · ${{body_height:'body-height scale',pixels:'source pixels',paper:'parchment scale, estimated'}[state.scale]}`;
   focus.textContent=active?`${active.node} · ${active.folio} · ${active.panels>1?'slot '+active.position:active.position+'/4'} ${active.slot} · ${active.face} face${active.slot==='Ar'?' · BIFOLIUM START':active.slot==='Bv'?' · BIFOLIUM END':''}${active.panels>1?' · foldout panel':''}`:'';
   focus.style.borderColor=active?color(active.node):'';
   fillSeams();
@@ -338,8 +348,8 @@
    const records=plan.pages.map(p=>recordOf(p.folio));overlay.width=overlay.height=1;build(records,width);
    const absent=records.filter(r=>!r.selection.available).map(r=>r.folio),unturned=state.tilt!=='none'?records.filter(r=>r.selection.available&&!r.angle.restored).map(r=>r.folio):[];
    notes.dataset.base=(chain?`${plan.nodes.length} bifolia, ${state.columns==='singulion'?'singulion Ar Av Br Bv':'outer Bv Ar, inner Av Br'}. ${{touch:'Rows meet with no added gap, four pages locked together. ',half:'Each row overlaps half of the last: a display choice. ',frames:'Separate fixed frames. '}[state.join]}`:`${plan.pages.length} pages top to bottom, colours by bifolium, one horizontal scale. `)
-    +(state.coords==='recorded'?'Recorded coordinates already hold each page\'s tilt. ':{restore:'Each page\'s recorded tilt restored by moving words up or down only, so every x stays as recorded. ',turn:'Recorded tilt restored by a rigid turn, which also leans each margin by the page\'s turn. ',none:'No tilt restored. '}[state.tilt])+({opening:'Opening words at x = 0. ',source:'Source x kept; heights from the opening baselines. ',margin:'Median body margins at x = 0. '}[state.anchor])
-    +(absent.length?`No box on the opening line: ${absent.join(', ')}. `:'')+(unturned.length?`No angle, so no tilt restored: ${unturned.join(', ')}. `:'')+(chain&&state.pages.length?'All mapped pages of each selected bifolium are shown. ':'')+(chain&&plan.pages.some(p=>p.panels>1)?'Foldout panels stack within their slot. ':'');
+    +(state.coords==='recorded'?'Recorded coordinates already hold each page\'s tilt. ':{restore:'Each page\'s recorded tilt restored by moving words up or down only, so every x stays as recorded. ',turn:'Recorded tilt restored by a rigid turn, which also leans each margin by the page\'s turn. ',none:'No tilt restored. '}[state.tilt])+(state.scale==='paper'?paperNote(records):{opening:'Opening words at x = 0. ',source:'Source x kept; heights from the opening baselines. ',margin:'Median body margins at x = 0. '}[state.anchor])
+    +(chain&&state.columns==='faces'&&state.scale!=='paper'?'The space across each fold is not to scale here: Scale, under Settings, has Parchment. ':'')+(absent.length?`No box on the opening line: ${absent.join(', ')}. `:'')+(unturned.length?`No angle, so no tilt restored: ${unturned.join(', ')}. `:'')+(chain&&state.pages.length?'All mapped pages of each selected bifolium are shown. ':'')+(chain&&plan.pages.some(p=>p.panels>1)?'Foldout panels stack within their slot. ':'');
    if(state.foldMode==='separate'&&chain)notes.dataset.base=notes.dataset.base.replace('four pages locked together.','Ar, Av+Br and Bv advance separately; inner pages stay together.');
    if(T.isHerbal(state.order))notes.dataset.base+=T.studyFrame(state)?'Ten-sheet study configuration: saved opening anchors, body heights and sheet extents; current recorded boxes. f49v is visible but was not scored. ':'Ten-sheet candidate; current registration differs from the saved fit. ';
    notes.textContent=notes.dataset.base;syncOverlaps();

@@ -10,7 +10,7 @@
     audit summary|flagged|token|page|check   the alignment review: counts, flagged words, one word, one page, invariants
     fetch-images                      page images (Beinecke scans or Voynichese display images) into the image cache
     ink-measure                       measure the words' ink on the page images (the ink_measures data product)
-    build-products                    rebuild the shipped products from the review: manuscript bundle, registrations, baselines table, page warp, wheels (docs/DATA_MODEL.md)
+    build-products                    rebuild the shipped products from the review: manuscript bundle, registrations, baselines table, page warp, wheels, leaves (docs/DATA_MODEL.md)
     orientation                       the orientation counts of a bundle (lines by kind, pages by kind)
     audit coverage                    the coverage table per page and locus type (coverage_by_page.csv)
     realign                           align the ZL tokens to the rectangles, word by word (vmsspatial.realign; needs the XML inputs)
@@ -236,7 +236,7 @@ def cmd_build_products(args):
     from .baselines import build_table, TABLE_KEY
     from .warp import build as build_warp, PRODUCT_KEY as WARP_KEY
     from .wheels import build as build_wheels, PRODUCT_KEY as WHEELS_KEY
-    what = set(args.what or ['bundle', 'registrations', 'baselines', 'warp', 'wheels'])
+    what = set(args.what or ['bundle', 'registrations', 'baselines', 'warp', 'wheels', 'leaves'])
     if 'bundle' in what:
         write_manuscript()
         register('manuscript/spatial_review.json.gz', 'The alignment review of all 39,026 ZL tokens: assignment groups with the original and display rectangles, flags, and the strict / sensitivity eligibility.')
@@ -261,6 +261,10 @@ def cmd_build_products(args):
     if 'wheels' in what:
         build_wheels(app, ms)
         register(WHEELS_KEY, 'The wheels of the circular text (vmsspatial.wheels): per page the accepted wheels (centre, radius, rings with their fits and member tokens, nearby labels) and the rejected circular loci with reasons; recorded frame and warp state (fRos detected).')
+    if 'leaves' in what:
+        from .leaves import build as build_leaves, PRODUCT_KEY as LEAVES_KEY
+        build_leaves(app, ms)
+        register(LEAVES_KEY, 'The leaves on the parchment (vmsspatial.leaves): per page the fold, the top and bottom edges and the scale in mm, measured on the Beinecke scans or estimated, in the recorded frame. Numbers only.')
     return 0
 
 
@@ -377,8 +381,8 @@ def main(argv=None):
     p.add_argument('--source', default='beinecke', choices=('beinecke', 'display'))
     p.add_argument('--folios', help='comma-separated folios (default: every mapped page)')
     p.add_argument('--build-index', action='store_true', help='rebuild resources/beinecke_iiif.json from the Yale manifest first')
-    p = sub.add_parser('build-products', help='rebuild the shipped products from the review (manuscript bundle, registrations, baselines table, page warp, wheels) and their manifest entries')
-    p.add_argument('what', nargs='*', choices=['bundle', 'registrations', 'baselines', 'warp', 'wheels'], help='default: all five')
+    p = sub.add_parser('build-products', help='rebuild the shipped products from the review (manuscript bundle, registrations, baselines table, page warp, wheels, leaves) and their manifest entries')
+    p.add_argument('what', nargs='*', choices=['bundle', 'registrations', 'baselines', 'warp', 'wheels', 'leaves'], help='default: all six')
     p = sub.add_parser('orientation', help='orientation counts of the manuscript bundle')
     p.add_argument('--policy', default='sensitivity')
     p.add_argument('--no-extra', action='store_true')

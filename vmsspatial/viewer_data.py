@@ -400,6 +400,8 @@ COMPARE_FIELDS = dict(
           'flags: 1 intrusion boundary after the unit, 2 clean (one unflagged word-level token), 4 anchor is the box centre (no baseline: non-horizontal line), 8 grouped (several tokens in one rectangle). '
           'Units are in reading order per line (left to right on horizontal lines). Text = bundle words[first..last] joined by spaces; atoms = compare_math.atoms(text).',
     breaks='[[line, left unit id, right unit id, kind]]: the intrusion breaks of geometry.line_breaks (kind 1 transcript <-> or <~>, 2 geometric gap, 3 both) whose right word lies right of the left word',
+    paper='{mm, fold, top, fold_method, top_method, scale_method}: the page on the parchment (vmsspatial.leaves, data/manuscript/leaves.json.gz): recorded px per mm, recorded x of the fold '
+          '(where the leaf meets the binding) and recorded y of the leaf top edge, each measured on the Beinecke scan or estimated; absent for a page with no located box',
     drift='{recorded: {angle, slope, n, dropped, unavailable}, flat: {...}, lines: [[line, angle_recorded, angle_flat, units, span, qualifies]], method, source}: '
           'the drift indicator (compare.page_drift). angle = median signed first-to-last baseline chord angle (degrees, positive falls right) over the qualifying horizontal '
           'paragraph lines (at least 4 located boxes spanning 3 median word widths, both endpoints baseline anchors); recorded = pre-correction (the workspace\'s guide), '
@@ -430,6 +432,8 @@ def compare_data(out_dir=None, app=None, ms=None, baseline='auto', top=50, bundl
     if app is None:
         app = load_bundle('sensitivity', pages=ms.page_set, order=ms.order, warp='recorded')
     data = C.prepare(app, ms, baseline=baseline, log=log)
+    from .leaves import load_leaves, for_viewer
+    leaves = load_leaves()
     pages = {}
     for folio in data['folios']:
         p = data['pages'][folio]
@@ -451,6 +455,9 @@ def compare_data(out_dir=None, app=None, ms=None, baseline='auto', top=50, bundl
                             quire_num=p['quire_num'], H=p['H'], W=p['W'], warp_fitted=bool(p['warp']['fitted']), geometry_kind=p['geometry_kind'], frame=p['frame'],
                             lines=[[l['locus'], 1 if l['first'] else 0, l['category'], l['orientation']] for l in p['lines']],
                             blocks=[[b['key'], b['lines']] for b in p['blocks']], units=units, breaks=breaks, drift=drift)
+        paper = for_viewer(leaves, folio)
+        if paper:
+            pages[folio]['paper'] = paper
         pages[folio]['_unit_id'] = unit_id
     t = tags(app)
     pages_out = {f: {k: v for k, v in p.items() if k != '_unit_id'} for f, p in pages.items()}
@@ -458,6 +465,7 @@ def compare_data(out_dir=None, app=None, ms=None, baseline='auto', top=50, bundl
     write_json(dict(version=COMPARE_VERSION, bundle=bundle_key, frame=t['frame'], warp='recorded', source=t['source'], policy=app.get('policy'), baseline=baseline,
                     baseline_pages=data['baseline_pages'], page_warp_version=data['provenance']['page_warp_version'], provenance=data['provenance'], fields=COMPARE_FIELDS, quarantine=quarantine,
                     drift_pages=sum(1 for p in pages.values() if p['drift']['recorded']['angle'] is not None),
+                    paper=dict(version=leaves['version'], catalogue=leaves['catalogue'], calibration=leaves['calibration'], medians=leaves['medians'], counts=leaves['counts']) if leaves else None,
                     note='Comparison extras of the atlas (vmsspatial.viewer_data.compare_data). Translation-only overlay scores describe resemblance, not copying; '
                          'a centred wheel composite is a display transform, not evidence (docs/PITFALLS.md 24, 25).',
                     pages=pages_out), out / 'compare' / 'pages.json.gz')

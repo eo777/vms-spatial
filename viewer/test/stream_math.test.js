@@ -148,7 +148,7 @@ test('the sequence covers the manuscript: every page once, each sheet whole, in 
 });
 test('registering and turning a page moves it whole and changes no word, on every page',{skip:!have},()=>{
  let units=0,turned=0;const quarantine=new Set(compact.quarantine);
- for(const [folio,page] of Object.entries(pages))for(const coords of T.COORDS)for(const scale of T.SCALES){
+ for(const [folio,page] of Object.entries(pages))for(const coords of T.COORDS)for(const scale of T.SCALES.filter(s=>s!=='paper')){
   const options={coords,scale},plain=T.register(folio,page,words,tokens,{...options,anchor:'opening'}),source=T.register(folio,page,words,tokens,{...options,anchor:'source'}),margin=T.register(folio,page,words,tokens,{...options,anchor:'margin'});
   const factor=scale==='body_height'?M.BODY_HEIGHT_PX/(page.H||30):1,raw=M.pageUnits(page,words);
   source.all.forEach((u,i)=>{const r=coords==='recorded'?raw[u.id].rect:raw[u.id].flat;near(u.rect[0],r[0]*factor,1e-6);near(u.rect[2],r[2]*factor,1e-6);assert.equal(u.rect[1],plain.all[i].rect[1]);near(margin.all[i].rect[0],plain.all[i].rect[0]-margin.shift);});
@@ -170,6 +170,23 @@ test('registering and turning a page moves it whole and changes no word, on ever
   }
  }
  assert.ok(units>140000,`${units} word checks`);assert.ok(turned>300,`${turned} turned pages`);
+});
+test('on the parchment a page is in millimetres from its fold and its top edge, whatever the anchor, and its text lies on its leaf',{skip:!have||!compact.paper},()=>{
+ let measured=0,units=0;const edge=T.LEAF_MM*T.PAPER_UNITS,mm=T.PAPER_UNITS;
+ for(const [folio,page] of Object.entries(pages)){
+  const P=page.paper;if(!P)continue;
+  const raw=M.pageUnits(page,words),k=T.PAPER_UNITS/P.mm,off=page.side==='v'?edge:0;
+  const reg=T.register(folio,page,words,tokens,{coords:'recorded',scale:'paper'}),other=T.register(folio,page,words,tokens,{coords:'recorded',scale:'paper',anchor:'opening'});
+  reg.all.forEach((u,i)=>{const r=raw[u.id].rect;near(u.rect[0],(r[0]-P.fold)*k+off,1e-6);near(u.rect[3],(r[3]-P.top)*k,1e-6);assert.deepEqual(other.all[i].rect,u.rect);units++;});
+  if(P.fold_method==='measured'&&P.top_method==='measured'&&reg.all.length){
+   const xs=reg.all.flatMap(u=>[u.rect[0],u.rect[2]]),ys=reg.all.map(u=>u.rect[1]);
+   // the fold is found outside the text: a recto's text starts right of it, a verso's ends left of it, and the text is below the top edge
+   assert.ok(page.side==='v'?Math.max(...xs)<=edge+2*mm:Math.min(...xs)>=-2*mm,`${folio}: text across its fold`);assert.ok(Math.min(...ys)>=-2*mm,`${folio}: text above its top edge`);
+   measured++;
+  }
+ }
+ assert.ok(measured>=180,`${measured} pages measured`);assert.ok(units>30000,`${units} words`);
+ assert.equal(T.register('f116v',pages.f116v,words,tokens,{scale:'paper'}).factor,1,'a page with no paper record keeps its pixels');
 });
 test('a restored page shows its recorded angle; a page with no angle stays as it is and says so',{skip:!have},()=>{
  const f8r=T.orient(pages.f8r,T.register('f8r',pages.f8r,words,tokens),'flat','restore');

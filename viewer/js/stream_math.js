@@ -14,8 +14,10 @@ const studyFrame=state=>isHerbal(state.order)&&state.coords==='recorded'&&state.
 const orderDefaults=order=>isHerbal(order)?{coords:'recorded',tilt:'none',foldMode:order===HERBAL_A_FOLDS?'separate':'shared',overlaps:encodeOverlaps(Object.fromEntries(Object.entries(STUDY.edges).map(([k,e])=>[k,e.shared]))),folds:encodeFolds(Object.fromEntries(Object.entries(STUDY.edges).map(([k,e])=>[k,Object.fromEntries(FOLD_GROUPS.map(g=>[g,e.groups[g].value]))])))}:{};
 // the first value of each list is the default
 const BY=['golf','section'],ORDERS=['bifolia','path1',HERBAL_A_ORDER,HERBAL_A_FOLDS],VIEWS=['chain','stream','overlay'],COLUMNS=['singulion','faces'],JOINS=['touch','half','frames'],COVERED=['faint','outline','margin','hidden','full'];
-const ANCHORS=['source','opening','margin'],COORDS=['flat','recorded'],SCALES=['body_height','pixels'],TILTS=['restore','turn','none'],TRAILS=['all','pair','single'],ZOOMS=['1','0.5','0.75','1.5','2','3'];
+const ANCHORS=['source','opening','margin'],COORDS=['flat','recorded'],SCALES=['body_height','pixels','paper'],TILTS=['restore','turn','none'],TRAILS=['all','pair','single'],ZOOMS=['1','0.5','0.75','1.5','2','3'];
 const ROUTES=['all',...SLOTS.map(s=>'slot:'+s),...SLOTS.map(s=>'cycle:'+s)];
+// scale 'paper': PAPER_UNITS drawing units a millimetre on the parchment, and a verso's fold at the catalogue's leaf width (225 x 160 mm)
+const PAPER_UNITS=6,LEAF_MM=160;
 const pick=(value,allowed)=>allowed.includes(value)?value:allowed[0];
 const clampOverlap=v=>Math.max(0,Math.min(MAX_OVERLAP,v));
 // ---- the address
@@ -205,13 +207,21 @@ function marginRows(folio,page,units,tokens){
 }
 /* register(folio, page, words, tokens, {coords, scale, anchor}) -> a whole-page selection in the page's own frame, its opening baseline at y = 0.
    anchor 'opening' puts the opening word at x = 0, 'source' keeps the page's source x, and 'margin' puts the median body margin at x = 0.
-   available is false when the page's opening line has no box, because then there is nothing to hang the page on. */
+   available is false when the page's opening line has no box, because then there is nothing to hang the page on.
+   scale 'paper' puts the page on the parchment (page.paper, vmsspatial.leaves): PAPER_UNITS a millimetre, x from the fold and y from the leaf's top
+   edge, so the two pages of a face meet at the fold and share the top edge. A verso's fold is at x = LEAF_MM, so every page lies in one leaf's
+   frame, and anchor has no part. The fold and the top are measured on the Beinecke scans or estimated (page.paper.fold_method, top_method).
+   A page with no paper record keeps its source pixels. */
 function register(folio,page,words,tokens,{coords='flat',scale='body_height',anchor='source',reference=null}={}){
- const ref=coords==='recorded'&&scale==='body_height'?reference:null,p=ref?{...page,H:ref.H}:page;
- const sel=M.selectUnits(p,words,{block:'page',cutoff:'all',coordinates:coords,alignment:'page',scale}),factor=scale==='body_height'?M.BODY_HEIGHT_PX/(p.H||30):1;
+ const paper=scale==='paper'&&page.paper||null,ref=coords==='recorded'&&scale==='body_height'?reference:null,p=ref?{...page,H:ref.H}:page;
+ const sel=M.selectUnits(p,words,{block:'page',cutoff:'all',coordinates:coords,alignment:'page',scale:scale==='paper'?'pixels':scale}),factor=paper?PAPER_UNITS/paper.mm:scale==='body_height'?M.BODY_HEIGHT_PX/(p.H||30):1;
  if(ref){const dy=(sel.origin[1]-ref.origin[1])*factor;sel.all=sel.all.map(u=>({...u,rect:u.rect.map((v,j)=>j%2?v+dy:v),baseline:u.baseline+dy}));sel.origin=[sel.origin[0],ref.origin[1]];}
+ if(paper){
+  const dx=(sel.origin[0]-paper.fold)*factor+(page.side==='v'?LEAF_MM*PAPER_UNITS:0),dy=(sel.origin[1]-paper.top)*factor;
+  sel.all=sel.all.map(u=>({...u,rect:u.rect.map((v,j)=>v*factor+(j%2?dy:dx)),baseline:u.baseline*factor+dy}));Object.assign(sel,{W:sel.W*factor,H:sel.H*factor});
+ }
  const opening=page.blocks[0][1][0],before=marginRows(folio,page,sel.all,tokens);
- const shift=anchor==='source'?-sel.origin[0]*factor:anchor==='margin'&&before.length?M.median(before.map(r=>r.x)):0;
+ const shift=paper?0:anchor==='source'?-sel.origin[0]*factor:anchor==='margin'&&before.length?M.median(before.map(r=>r.x)):0;
  const all=sel.all.map(u=>({...u,rect:u.rect.map((v,j)=>j%2?v:v-shift)}));
  return {...sel,folio,factor,all,chosen:all.filter(u=>u.selected),available:sel.available&&sel.all.some(u=>u.anchor&&u.line_abs===opening),shift,marginRows:marginRows(folio,page,all,tokens)};
 }
@@ -239,6 +249,6 @@ function bounds(selections){
  const low=j=>boxes.reduce((a,r)=>Math.min(a,r[j]),Infinity),high=j=>boxes.reduce((a,r)=>Math.max(a,r[j]),-Infinity);
  return {xmin:Math.min(0,low(0))-110,xmax:high(2)+70,ymin:Math.min(0,low(1))-65,ymax:high(3)+65};
 }
-const api={SLOTS,CYCLE,MAX_OVERLAP,PRESET_SCHEMA,PRESET_KEYS,BY,ORDERS,VIEWS,COLUMNS,JOINS,COVERED,ANCHORS,COORDS,SCALES,TILTS,TRAILS,ZOOMS,ROUTES,STUDY,HERBAL_A_ORDER,HERBAL_A_FOLDS,HERBAL_A_NODES,FOLD_GROUPS,foldGroup,isHerbal,studyFrame,encodeFolds,decodeFolds,orderPages,selectOrder,parse,serialize,clean,fromWorkspace,encodeOverlaps,decodeOverlaps,normalizePreset,presetParams,reorderNodes,moveNode,sequence,visible,nextBifolium,seamKey,stackSheets,marginRows,register,orient,bounds};
+const api={SLOTS,CYCLE,MAX_OVERLAP,PRESET_SCHEMA,PRESET_KEYS,BY,ORDERS,VIEWS,COLUMNS,JOINS,COVERED,ANCHORS,COORDS,SCALES,TILTS,TRAILS,ZOOMS,ROUTES,PAPER_UNITS,LEAF_MM,STUDY,HERBAL_A_ORDER,HERBAL_A_FOLDS,HERBAL_A_NODES,FOLD_GROUPS,foldGroup,isHerbal,studyFrame,encodeFolds,decodeFolds,orderPages,selectOrder,parse,serialize,clean,fromWorkspace,encodeOverlaps,decodeOverlaps,normalizePreset,presetParams,reorderNodes,moveNode,sequence,visible,nextBifolium,seamKey,stackSheets,marginRows,register,orient,bounds};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.VMS_STREAM=api;
 })(typeof window!=='undefined'?window:globalThis);
