@@ -1,5 +1,5 @@
 {
- "version": "2026-11-02",
+ "version": "2026-11-03.4",
  "site": "https://eo777.github.io/vms-dynamic-citation/",
  "description": "Every data file the toolkit reads, with its SHA-256. Files with a url can be downloaded with `vmsspatial fetch-data`; files without one are copied from a research workspace with `--from-workspace` (raw audit inputs).",
  "files": [
@@ -2723,6 +2723,16 @@
    "note": "The leaves on the parchment (vmsspatial.leaves): per page the fold, the top and bottom edges and the scale in mm, measured on the Beinecke scans or estimated, in the recorded frame. Numbers only.",
    "sha256": "c3d20fdffbcbf689b90f5e2470eff514139db1c9d631002474abc659e634aa74",
    "bytes": 21971,
+   "optional": false
+  },
+  {
+   "key": "manuscript/msi_leaf_audit.json.gz",
+   "group": "manuscript",
+   "workspace": "apps/spatial_toolkit/data/manuscript/msi_leaf_audit.json.gz",
+   "url": null,
+   "note": "Ruler-calibrated photographic projections of curved f1r/f8r leaves, recorded text-registration check and existing warp summaries. Supplementary evidence; not flattened physical ground truth or revised copy placements.",
+   "sha256": "ae590d78a4293c4db2de8f5e2957a3400dc296f9f2c80e0f961f209e6d7d1d37",
+   "bytes": 7991,
    "optional": false
   }
  ],

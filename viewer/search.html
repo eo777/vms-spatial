@@ -4,9 +4,7 @@
 <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="compare.css"><link rel="stylesheet" href="stream.css"><link rel="stylesheet" href="search.css">
 <script src="site_nav.js" defer></script>
 </head><body class="compare-page"><nav class="site-nav"></nav>
-<header class="masthead"><div class="eyebrow">VOYNICH MANUSCRIPT · RECORDED WORD POSITIONS</div>
-<h1>Word search</h1><p class="sub">Light up the words that match a pattern on every bifolium at once. Run up to six patterns in their own colours, put the sheets in any order, and open a page to see the matches on its image.</p></header>
-<main class="compare stream search">
+<main class="compare stream search"><h1 class="sr-only">Word search</h1>
 <div class="toolbar" id="toolbar">
 <div class="hl-panel">
 <div class="hl-rows" id="rows"></div>
@@ -25,6 +23,8 @@
 <a id="streamLink" class="hl-link">Open in Page stream</a>
 <details class="drawer" id="settingsPanel"><summary>Settings</summary><div class="drawer-body">
 <label>Group by <select id="by"><option value="golf">Golf 2.1 groups</option><option value="section">Sections</option></select></label>
+<label>Coordinates <select id="coords"><option value="recorded">Recorded (as drawn)</option><option value="flat">Flat (dewarped)</option></select></label>
+<label>Scale <select id="scale"><option value="frame">Page photograph</option><option value="paper">Parchment (mm, estimated)</option></select></label>
 <button type="button" id="exportCsv">Download matches CSV</button>
 </div></details>
 </div>
@@ -36,7 +36,8 @@
 <p class="note" id="notes"></p>
 <details class="how" id="tablePanel"><summary>Counts by bifolium</summary><div class="hl-table" id="table"></div></details>
 <details class="how"><summary>How to read this</summary>
-<p><b>Tiles.</b> Each tile is one bifolium and each small panel one page, drawn at one scale in its recorded coordinates, so the words sit where they sit on the photograph. Grey marks are word boxes and coloured marks are matches. A dashed panel is a position with no page in this selection. Foldout panels stay together in their position, so those sheets are wider.</p>
+<p><b>Tiles.</b> Each tile is one bifolium and each small panel one page. Grey marks are word boxes and coloured marks are matches. A dashed panel is a position with no page in this selection. Foldout panels stay together in their position, so those sheets are wider.</p>
+<p><b>Coordinates and scale.</b> Under Settings. Recorded coordinates put the words where they sit on the photograph; Flat takes out each page's shared curve and tilt (the dewarped state), moving words up and down only. Page photograph draws each page's photograph frame at the tile height. Parchment draws each page on its leaf, in millimetres from the fold and the leaf's top edge, measured on the Beinecke scans or estimated as on the Page stream, so in Physical faces the two pages of a face meet at the fold. An open page always stays in recorded coordinates, because only those sit on the image.</p>
 <p><b>Counts.</b> A count is of words in the transliteration. Shares are over the words where the pattern can match: <code>[pi]p*</code> is out of the words on paragraph-initial lines, and spellings and neighbours never narrow that base. No share is given over fewer than 20 words. A word matching two patterns counts under both and is drawn split between their colours.</p>
 <p><b>What is not drawn.</b> A few words have no box, so a count can run past the marks on a tile: the count line says how many. Where one box holds several words, it lights up when any of them matches, and the count is still of words. Tokens with an unreadable glyph never match, and no neighbour term reaches across one, or across a line end.</p>
 <p><b>Order.</b> Drag a tile by its heading, or use Alt + ← → on its grip. All of a sheet's pages move together. Path 1 is a proposed glyph-statistical ordering, not an established chronology. A custom order stays in the address and carries over to the Page stream, and Saved order reads the boundary sets saved there in this browser.</p>

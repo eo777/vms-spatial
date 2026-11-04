@@ -39,6 +39,9 @@
 /* a card wider than its pages (search.js gives ordinary bifolia one width) spreads them out; the faces keep their pages together at the fold */
 .tile-pages{display:flex;gap:3px;justify-content:space-between;overflow-x:auto;scrollbar-width:thin}
 .tile-pages.faces .tile-cell:nth-child(3){padding-left:7px;margin-left:auto}
+/* on the parchment the two pages of a face touch at the fold */
+.tile-pages.faces.paper{gap:0}
+.tile-pages.paper .mini canvas{border-radius:0}
 .tile-cell{display:flex;gap:2px}
 .mini{display:block;padding:0;margin:0;border:0;border-radius:2px;background:none;color:var(--ink2);cursor:pointer;font:inherit;text-align:left}
 .mini canvas{display:block;background:var(--bg);border-radius:2px}

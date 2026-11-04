@@ -46,7 +46,9 @@ neighbour without one initial q, and a term starting q then finds nothing.
 | Saved order | none | the boundary sets saved on the Page stream in this browser, read only |
 | Columns | `columns` = faces (singulion is the default) | singulion Ar Av Br Bv, or the physical faces Bv Ar and Av Br |
 | Tile size | `size` = 100, 140, 200, 300, 450 (70 is the default) | the height of a page in pixels. Every page keeps its own width at that one scale, so every ordinary bifolium's card is as wide as the widest one in the selection, with the spare space between the pages. A sheet with foldout panels, or with a page wider than it is tall, keeps its own width |
-| Open in Page stream | none | the same group and order on that page. `group`, `by`, `order`, `columns`, `custom` and `pages` mean the same on both pages, so a link's tail works on either |
+| Coordinates, under Settings | `coords` = flat (recorded is the default) | Recorded draws the words as drawn on the photographs. Flat draws them dewarped (docs/DEWARPING.md): each page's shared curve and tilt taken out, words moved up and down only |
+| Scale, under Settings | `scale` = paper (frame is the default) | Page photograph draws each page's photograph frame at the tile height. Parchment draws each page on its leaf, in millimetres from the fold and the leaf's top edge, as the Page stream's parchment scale does (docs/STREAM.md): a panel is one 160 × 225 mm leaf, a recto's fold on its left edge and a verso's on its right, so in physical faces the two pages of a face meet at the dashed fold. A page whose text runs past one leaf gets a wider panel rather than losing words, and the note names it, and the estimated folds, top edges and scales. f116v has no paper record and keeps its frame |
+| Open in Page stream | none | the same group and order on that page, and the same coordinates and parchment scale. `group`, `by`, `order`, `columns`, `custom` and `pages` mean the same on both pages, so a link's tail works on either. `coords` and `scale` have their own defaults on each page |
 | Click a page | `open`, `image=0`, `labels=1` | the page on its image, with the transcription beside it. The wheel zooms, dragging pans, ← → step through the sequence |
 | Counts by bifolium | none | counts and rates per 1,000 words, sheet by sheet, in the order shown |
 | Download matches CSV, under Settings | none | one row a match: pattern, folio, bifolium, locus, place on the line, word, whether it has a box |
@@ -63,7 +65,9 @@ neighbour without one initial q, and a term starting q then finds nothing.
   load for `-1:` to be exact, and the page says so if it does not.
 - **`first` means a paragraph here.** The compact pages also set it on every label, circle and radial line. `textLines` counts it on paragraph lines
   only, which gives 740 paragraph-initial lines, 207 of them page initial.
-- **Tiles are in recorded coordinates**, at one scale, so words sit where they sit on the photograph. No measure is read from a tile.
+- **Tiles are in recorded coordinates by default**, each page's photograph frame at the tile height, so words sit where they sit on the photograph.
+  Coordinates and Scale under Settings change that, and an open page always stays in recorded coordinates, because only those sit on its image.
+  No measure is read from a tile.
 - **Page images** are the Voynichese display images, drawn with that image's own word rectangles, as on the Atlas. A box with no rectangle on the
   image is left out and the page says how many. f116v has no image, and fRos uses the toolkit's copy with its detected boxes.
 

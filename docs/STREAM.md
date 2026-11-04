@@ -113,6 +113,8 @@ median of 0.46 mm with the tilt taken out, and 0.27 mm with it put back.
 
 ## Tilt
 
+The independent [f1r/f8r MSI audit](MSI_LEAF_AUDIT.md) checks the catalogue-scaled parchment frame against photographed rulers and visible front-leaf edges. It finds approximately 3 mm less bottom margin on both pages and a direction-dependent scale discrepancy on f8r. Its compact data are preserved separately; the scalar parchment view above has not been silently recalibrated.
+
 A flat page has lost its overall tilt along with its warp. The side labels and page headers give each page's **recorded tilt**:
 the median signed first-to-last baseline angle of its qualifying lines (at least 4 located boxes spanning at least 3 median
 word widths, `compare.page_drift`), positive falling to the right. It is the slope of the text lines, not of the left margin.

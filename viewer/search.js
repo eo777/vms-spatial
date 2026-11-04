@@ -4,11 +4,11 @@
  const {$,esc,int}=SG,T=VMS_STREAM,X=VMS_SECTIONS,Z=COMPARE_STATE,P=VMS_PATTERN;
  const h=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n;};
  const host=$('tiles'),status=$('status'),message=$('message'),notes=$('notes'),rows=$('rows'),dialog=$('pageDialog'),figure=$('pageFigure');
- const ctl={by:$('by'),order:$('order'),columns:$('columns'),size:$('size')},STORE='vms-boundary-presets-v1',BAND=.56,BAND_TOP=.3;   // a tile draws a box from 30% to 86% of its height, or the lines of a page run together at this size
+ const ctl={by:$('by'),order:$('order'),columns:$('columns'),size:$('size'),coords:$('coords'),scale:$('scale')},STORE='vms-boundary-presets-v1',BAND=.56,BAND_TOP=.3;   // a tile draws a box from 30% to 86% of its height, or the lines of a page run together at this size
  const EXAMPLES=['*aiin','qok*','[li]p*','*y AND 1:qo*','[pgi]*'];
  const SYNTAX=[[['*'],'any letters, or none','*aiin'],[['?'],'one character','ch?y'],[['AND','&'],'both','qok* AND *y'],[['OR','|'],'either','chol OR chor'],[['NOT','!'],'not; binds before AND, AND before OR','*y AND NOT qo*'],[['( )'],'group','(chol OR chor) AND 1:*y'],
   [['-1:','1:','-2:','…'],'the word before or after a match, within its line','*aiin AND -1:*k*'],[['[li]'],'the word starts its line','[li]p*'],[['[lf]'],'the word ends its line','[lf]*m'],[['[pi]'],'on a paragraph-initial line','[pi]p*'],[['[pgi]'],'on a page-initial line, a page\'s first prose line','[pgi]p*'],[['[lpi]'],'on a later paragraph-initial line','[lpi]p*'],[['[npi]'],'on a line that is not paragraph initial','[npi]p*'],[['[!code]'],'! inside the brackets negates that place only','[!pgi]p*']];
- let state=P.parse(SG.hash()),selectedAtLoad=[...state.pages],pages,bundle,layout,orders,lines,review,list,byFolio=new Map(),occurrences=null,occurrenceKey=null,plan={nodes:[],baseNodes:[],pages:[],missing:[],custom:false},shown=new Set(),minis=[],tileRows=[],bits=new Uint8Array(0),gaps=true;
+ let state=P.parse(SG.hash()),selectedAtLoad=[...state.pages],pages,bundle,layout,orders,lines,review,list,byFolio=new Map(),occurrences=null,occurrenceKey=null,plan={nodes:[],baseNodes:[],pages:[],missing:[],custom:false},shown=new Set(),minis=[],tileRows=[],bits=new Uint8Array(0),gaps=true,paperInfo=null;
  const loading=SG.busyStart('Loading the manuscript…');
  const config=await fetch('config.json').then(r=>r.ok?r.json():{}).catch(()=>({}));
  SG.setBase(SG.hash().data||config.dataBase||'data/');
@@ -17,7 +17,7 @@
   if(!C)throw Error('index.json has no compare entry: run `vmsspatial viewer-data`.');
   const info=index.bundles.find(b=>b.key===C.bundle)||index.bundles[0];
   const [compact,loadedOrders,data,loadedLayout,tokens]=await Promise.all([SG.load(SG.dataUrl(C.pages)),SG.load(SG.dataUrl(C.orders)),SG.load(SG.dataUrl(info.path)),SG.load(SG.dataUrl(index.layout||'layout.json.gz')),index.review?SG.load(SG.dataUrl(index.review)).then(r=>r.tokens).catch(()=>null):null]);
-  pages=compact.pages;orders=loadedOrders;bundle=data;layout=loadedLayout;review=data.spatialReview;gaps=!!tokens;
+  pages=compact.pages;paperInfo=compact.paper||null;orders=loadedOrders;bundle=data;layout=loadedLayout;review=data.spatialReview;gaps=!!tokens;
   lines=P.textLines(bundle,pages,tokens);for(const l of lines){if(!byFolio.has(l.folio))byFolio.set(l.folio,[]);byFolio.get(l.folio).push(l);}
   list=Z.pageList(orders,state.order,pages);bits=new Uint8Array(bundle.words.length);
  }catch(error){loading.end();status.textContent='Could not load the page data.';SG.error(host,error);return;}
@@ -82,17 +82,20 @@
  $('addRow').onclick=()=>{const layer=addLayer();if(layer)layer.row.querySelector('input').focus();};
  // ---- the tiles
  const framed=folio=>{const f=layout.pages[folio];return f&&f.height?{width:f.width,height:f.height}:{width:1100,height:1500};};
+ const leaf=[T.LEAF_MM,paperInfo&&paperInfo.catalogue?paperInfo.catalogue.height:225];
+ // a panel is the page's photograph frame at the tile height, or on the parchment its leaf, a leaf's height being the tile height
  function mini(page){
-  const frame=framed(page.folio),height=Number(state.size),width=Math.round(height*frame.width/frame.height),b=h('button','mini'),canvas=h('canvas'),label=h('small'),count=h('b');
+  const frame=framed(page.folio),geo=P.place(pages[page.folio],frame,{coords:state.coords,scale:state.scale,leaf}),s=Number(state.size)/(geo.paper?leaf[1]:frame.height);
+  const width=Math.round((geo.box[2]-geo.box[0])*s),height=Math.round((geo.box[3]-geo.box[1])*s),b=h('button','mini'),canvas=h('canvas'),label=h('small'),count=h('b');
   b.type='button';b.dataset.folio=page.folio;b.style.width=width+'px';b.onclick=()=>openPage(page.folio);canvas.style.width=width+'px';canvas.style.height=height+'px';
   label.append(h('span','',page.folio),count);b.append(canvas,label);
-  const item={folio:page.folio,page,button:b,canvas,count,width,height,scale:height/frame.height};minis.push(item);return b;
+  const item={folio:page.folio,page,button:b,canvas,count,width,height,scale:s,geo};minis.push(item);return b;
  }
  function build(){
   host.replaceChildren();minis=[];tileRows=[];
   const size=Number(state.size),cards=[],aspect=folio=>{const f=framed(folio);return f.width/f.height;};host.style.fontSize=Math.max(11,Math.round(size/22))+'px';    // the labels grow with the tiles above Extra large
   for(const tile of P.tiles(plan,state.columns)){
-   const el=h('article','tile'),head=h('header','tile-head'),grip=h('button','grip','⠿'),count=h('span','tile-count'),row=h('div','tile-pages'+(state.columns==='faces'?' faces':'')),first=tile.pages[0];
+   const el=h('article','tile'),head=h('header','tile-head'),grip=h('button','grip','⠿'),count=h('span','tile-count'),row=h('div','tile-pages'+(state.columns==='faces'?' faces':'')+(state.scale==='paper'?' paper':'')),first=tile.pages[0];
    el.dataset.node=tile.node;grip.type='button';grip.title='Drag to reorder; Alt + ← → also moves this bifolium';grip.setAttribute('aria-label','Reorder '+tile.node);
    const about=first?[first.section,first.group].filter(x=>x&&x!=='—').join(' · '):'';
    head.append(grip,h('strong','',`${tile.index+1} · ${tile.node}`),h('span','tile-about',about),count);head.title=`${tile.node}${about?' · '+about:''}`;
@@ -114,17 +117,20 @@
   if(even)for(const c of cards)c.el.style.minWidth=`min(100%,${even+chrome}px)`;
  }
  function paint(item,colours,faint){
-  const {canvas,width,height,scale:s,folio}=item,dpr=Math.min(2,devicePixelRatio||1);
+  const {canvas,width,height,scale:s,folio,geo}=item,dpr=Math.min(2,devicePixelRatio||1),[bx,by]=geo.box;
   canvas.width=Math.ceil(width*dpr);canvas.height=Math.ceil(height*dpr);
-  const g=canvas.getContext('2d'),lit=[];g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle=faint;g.globalAlpha=.3;g.beginPath();
-  for(const u of pages[folio].units){
+  const g=canvas.getContext('2d'),lit=[];g.setTransform(dpr,0,0,dpr,0,0);
+  if(geo.paper){const x=Math.min(width-.5,Math.max(.5,(geo.fold-bx)*s));g.strokeStyle=faint;g.globalAlpha=.45;g.setLineDash([2,3]);g.beginPath();g.moveTo(x,0);g.lineTo(x,height);g.stroke();g.setLineDash([]);}    // the fold
+  g.fillStyle=faint;g.globalAlpha=.3;g.beginPath();
+  pages[folio].units.forEach((u,j)=>{
    let mask=0;for(let i=u[0];i<=u[1];i++)mask|=bits[i];
-   if(mask)lit.push([u,mask]);else g.rect(u[3]*s,(u[4]+BAND_TOP*(u[6]-u[4]))*s,Math.max(.8,(u[5]-u[3])*s),Math.max(.8,BAND*(u[6]-u[4])*s));
-  }
+   const r=geo.rects[j];
+   if(mask)lit.push([r,mask]);else g.rect((r[0]-bx)*s,(r[1]+BAND_TOP*(r[3]-r[1])-by)*s,Math.max(.8,(r[2]-r[0])*s),Math.max(.8,BAND*(r[3]-r[1])*s));
+  });
   g.fill();g.globalAlpha=1;
-  for(const [u,mask] of lit){
-   const on=state.layers.filter(l=>mask&(1<<l.slot)),w=Math.max(1.6,(u[5]-u[3])*s),hh=Math.max(1.4,BAND*(u[6]-u[4])*s),y=(u[4]+BAND_TOP*(u[6]-u[4]))*s;
-   on.forEach((l,k)=>{g.fillStyle=colours[l.slot];g.fillRect(u[3]*s+k*w/on.length,y,w/on.length,hh);});
+  for(const [r,mask] of lit){
+   const on=state.layers.filter(l=>mask&(1<<l.slot)),w=Math.max(1.6,(r[2]-r[0])*s),hh=Math.max(1.4,BAND*(r[3]-r[1])*s),y=(r[1]+BAND_TOP*(r[3]-r[1])-by)*s;
+   on.forEach((l,k)=>{g.fillStyle=colours[l.slot];g.fillRect((r[0]-bx)*s+k*w/on.length,y,w/on.length,hh);});
   }
  }
  function paintAll(){
@@ -206,15 +212,26 @@
   const name=state.pages.length?'Selected pages':state.group==='all'?'Whole manuscript':state.group==='—'?'Unassigned':state.group,total=lines.filter(l=>shown.has(l.folio)).reduce((n,l)=>n+l.positions.filter(p=>p>=0).length,0);
   status.textContent=`${name} · ${plan.nodes.length} bifolia · ${plan.pages.length} pages · ${int(total)} words${plan.custom?' · custom order':''}`;
   const link={by:state.by,group:state.group,order:state.order,columns:state.columns,custom:state.custom,pages:state.pages};
-  $('streamLink').href='stream.html#'+new URLSearchParams(P.serialize({...P.parse({}),...link,layers:[]})).toString();
-  notes.textContent=`Grey marks are word boxes, coloured marks are matches, at one scale in recorded coordinates.${gaps?'':' The list of unreadable tokens could not be loaded, so neighbour terms can reach across them here.'}`;
-  build();update();
+  // the Page stream opens flat on body height: say what this page shows
+  const tail=P.serialize({...P.parse({}),...link,layers:[]});if(state.coords==='recorded')tail.coords='recorded';if(state.scale==='paper')tail.scale='paper';
+  $('streamLink').href='stream.html#'+new URLSearchParams(tail).toString();
+  build();notes.textContent=tileNote();update();
+ }
+ function tileNote(){
+  const paper=state.scale==='paper',rec=f=>pages[f].paper,est=k=>plan.pages.filter(p=>rec(p.folio)&&rec(p.folio)[k]!=='measured').map(p=>p.folio);
+  const wide=minis.filter(m=>m.geo.paper&&(m.geo.box[0]<-.5||m.geo.box[1]<-.5||m.geo.box[2]>leaf[0]+.5||m.geo.box[3]>leaf[1]+.5)).map(m=>m.folio),none=plan.pages.filter(p=>!rec(p.folio)).map(p=>p.folio),[fold,top,scale]=['fold_method','top_method','scale_method'].map(est);
+  return `Grey marks are word boxes and coloured marks are matches, `+(paper?`on the parchment: each page in millimetres from its fold (dashed) and its leaf's top edge, a panel one ${leaf[0]} × ${leaf[1]} mm leaf, as on the Page stream's estimated parchment scale.`:`each page's photograph frame at the tile height.`)
+   +(state.coords==='flat'?' Dewarped (flat) coordinates: each page\'s shared curve and tilt are taken out, moving words up and down only.':' Recorded coordinates, as drawn on the photographs.')
+   +(paper&&fold.length?` Fold estimated: ${fold.join(', ')}.`:'')+(paper&&top.length?` Top edge estimated: ${top.join(', ')}.`:'')+(paper&&scale.length?` Scale estimated: ${scale.join(', ')}.`:'')
+   +(wide.length?` Text runs past one leaf, so the panel is wider: ${wide.join(', ')}.`:'')+(paper&&none.length?` Not on the parchment, so drawn in its photograph frame: ${none.join(', ')}.`:'')
+   +(gaps?'':' The list of unreadable tokens could not be loaded, so neighbour terms can reach across them here.');
  }
  // ---- the controls
  ctl.order.onchange=()=>{state.order=ctl.order.value;state.custom=[];message.textContent='';render();};
  ctl.by.onchange=()=>{state.by=ctl.by.value;state.group='all';state.pages=[];render();};
  $('group').onchange=()=>{const v=$('group').value;if(v==='selected')state.pages=[...selectedAtLoad];else{state.group=v;state.pages=[];}render();};
- for(const k of ['columns','size'])ctl[k].onchange=()=>{state[k]=ctl[k].value;render();};
+ for(const k of ['columns','size','coords','scale'])ctl[k].onchange=()=>{state[k]=ctl[k].value;render();};
+ if(!paperInfo){ctl.scale.querySelector('[value="paper"]').disabled=true;if(state.scale==='paper')state.scale='frame';}
  $('merge').onchange=()=>{state.merge=$('merge').checked;update();};
  $('resetOrder').onclick=()=>{state.custom=[];message.textContent='Back to the selected order.';render();};
  $('exportCsv').onclick=()=>{

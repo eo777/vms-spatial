@@ -101,13 +101,35 @@ test('ordinary bifolia share the widest one\'s width; a foldout keeps its own',(
  assert.equal(P.evenWidth([{width:614,plain:false}]),0,'no ordinary bifolium, no common width');
 });
 test('the address round-trips, keeps a pattern\'s colour, and shares the Page stream\'s order keys',()=>{
- const h={by:'section',group:'Herbal A',order:'path1',columns:'faces',custom:'A,B',pages:'f1r',q1:'*aiin',q3:'[li]p* OR q*',merge:'1',size:'140',open:'f1r',image:'0',labels:'1'};
+ const h={by:'section',group:'Herbal A',order:'path1',columns:'faces',custom:'A,B',pages:'f1r',q1:'*aiin',q3:'[li]p* OR q*',merge:'1',size:'140',coords:'flat',scale:'paper',open:'f1r',image:'0',labels:'1'};
  assert.deepEqual(P.serialize(P.parse(h)),h);
  assert.deepEqual(P.serialize(P.parse({})),{});
  assert.deepEqual(P.parse({q2:'x'}).layers,[{slot:2,query:'x'}]);
  assert.deepEqual(P.parse({q7:'x',size:'9'}),P.parse({}));
  assert.equal(P.parse(T.fromWorkspace({seqOrder:'path1',seqCustomOrder:'["B","A"]'})).order,'path1');
  assert.deepEqual(P.parse({seqOrder:'path1',seqCustomOrder:'["B","A"]'}).custom,['B','A']);
+});
+test('a panel is the photograph frame, or on the parchment the leaf, with the fold where the pages of a face meet; flat moves words up and down only',()=>{
+ const unit=[0,0,0,120,60,140,80,4,0,0,0],frame={width:1100,height:1500},paper={mm:2,fold:100,top:50};
+ const recto={side:'r',units:[unit],paper},verso={side:'v',units:[[0,0,0,60,60,80,80,4,0,0,0]],paper},menu=id=>[...fs.readFileSync(path.join(__dirname,'..','search.html'),'utf8').match(new RegExp(`<select id="${id}">(.*?)</select>`))[1].matchAll(/value="(\w+)"/g)].map(m=>m[1]);
+ assert.deepEqual(P.place(recto,frame),{paper:false,box:[0,0,1100,1500],rects:[[120,60,140,80]],fold:null},'recorded, in the frame');
+ assert.deepEqual(P.place(recto,frame,{coords:'flat'}).rects,[[120,56,140,76]]);
+ const r=P.place(recto,frame,{scale:'paper',leaf:[160,225]}),v=P.place(verso,frame,{scale:'paper',leaf:[160,225]});
+ assert.deepEqual([r.box,r.rects[0],r.fold],[[0,0,160,225],[10,5,20,15],0],'a recto from its fold at the left edge');
+ assert.deepEqual([v.box,v.rects[0],v.fold],[[0,0,160,225],[140,5,150,15],160],'a verso from its fold at the right edge');
+ assert.deepEqual(P.place(recto,frame,{scale:'paper',coords:'flat',leaf:[160,225]}).rects[0],[10,3,20,13]);
+ assert.deepEqual(P.place({side:'r',units:[[0,0,0,100,50,600,80,0,0,0,0]],paper},frame,{scale:'paper',leaf:[160,225]}).box,[0,0,250,225],'text past the leaf widens the panel');
+ assert.equal(P.place({side:'r',units:[unit]},frame,{scale:'paper'}).paper,false,'no paper record: the frame');
+ assert.deepEqual(menu('coords'),P.COORDS);assert.deepEqual(menu('scale'),P.SCALES);
+});
+test('on the real data an ordinary page is one leaf wide, a recto\'s words right of its fold and a verso\'s left of it',{skip:!have},()=>{
+ const pages=gz(path.join(DATA,'compare/pages.json.gz')).pages;let leaves=0;
+ for(const [f,page] of Object.entries(pages)){
+  if(!page.paper)continue;const g=P.place(page,{width:1,height:1},{scale:'paper',leaf:[160,225]});
+  if(g.box.join()==='0,0,160,225')leaves++;
+  if(page.paper.fold_method==='measured')assert.ok(g.rects.every(r=>page.side==='v'?r[2]<=162:r[0]>=-2),f);
+ }
+ assert.ok(leaves>=200,`${leaves} pages one leaf`);
 });
 test('a custom order stays only while every bifolium it names is in the list, by the Page stream\'s own rule',()=>{
  const pages={a:{node:'A'},b:{node:'B'}};

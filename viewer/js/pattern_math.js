@@ -6,7 +6,7 @@
 (function(root){
 'use strict';
 const T=(typeof module!=='undefined'&&module.exports)?require('./stream_math.js'):root.VMS_STREAM;
-const LAYERS=6,SIZES=['70','100','140','200','300','450'],ORDERS=['bifolia','path1'],MIN_SHARE=20;
+const LAYERS=6,SIZES=['70','100','140','200','300','450'],ORDERS=['bifolia','path1'],COORDS=['recorded','flat'],SCALES=['frame','paper'],MIN_SHARE=20;
 const OPERATORS={'&':'AND','|':'OR','!':'NOT',AND:'AND',OR:'OR',NOT:'NOT'};
 const core=word=>word&&word.replace(/^q/,'');
 // ---- the places a word can stand
@@ -226,21 +226,34 @@ function tiles(plan,columns='singulion'){
    evenWidth(cards) -> the width every card is given, so the cards line up: the widest ordinary card's, 0 when there is none. A foldout keeps its own width */
 const plainTile=(tile,aspect)=>tile.cells.every(c=>c.pages.length<=1&&c.pages.every(p=>aspect(p.folio)<=1));
 const evenWidth=cards=>cards.reduce((m,c)=>c.plain?Math.max(m,c.width):m,0);
+/* place(page, frame, {coords, scale, leaf}) -> where a page's word boxes go on its panel: {paper, box: [x0, y0, x1, y1], rects, fold}, one rect a unit.
+   scale 'frame' keeps the page's photograph frame, in its pixels. 'paper' puts the page on its leaf in millimetres, as the Page stream's parchment scale
+   does (page.paper): x from the fold, a verso's fold at the leaf's width (leaf = [width, height] mm), y from the leaf's top edge. The box is the leaf,
+   widened or deepened only where text runs past it (foldouts), so no word is cut. coords 'flat' takes each box's warp shift out of its y, which moves words
+   up and down only. A page with no paper record keeps its frame. */
+function place(page,frame,{coords='recorded',scale='frame',leaf=[T.LEAF_MM,225]}={}){
+ const L=scale==='paper'&&page.paper||null,k=L?1/L.mm:1,fold=L?(page.side==='v'?leaf[0]:0):null,ox=L?fold-L.fold*k:0,oy=L?-L.top*k:0;
+ const rects=page.units.map(u=>{const d=coords==='flat'?u[7]:0;return [u[3]*k+ox,(u[4]-d)*k+oy,u[5]*k+ox,(u[6]-d)*k+oy];});
+ if(!L)return {paper:false,box:[0,0,frame.width,frame.height],rects,fold};
+ const box=[0,0,leaf[0],leaf[1]];
+ for(const r of rects){box[0]=Math.min(box[0],r[0]);box[1]=Math.min(box[1],r[1]);box[2]=Math.max(box[2],r[2]);box[3]=Math.max(box[3],r[3]);}
+ return {paper:true,box,rects,fold};
+}
 // ---- the address: group, order, columns, custom and pages mean what they mean on the Page stream, so a link's tail works on both pages
 /* parse(hash) -> the page's state, every value checked; serialize(state) -> the hash, defaults left out. A pattern's key names its colour: q3 stays the third colour */
 function parse(h={}){
  const s=T.parse(h),layers=[];
  for(let slot=1;slot<=LAYERS;slot++)if(typeof h['q'+slot]==='string')layers.push({slot,query:h['q'+slot].slice(0,160)});
- return {by:s.by,group:s.group,order:ORDERS.includes(s.order)?s.order:ORDERS[0],columns:s.columns,custom:s.custom,pages:s.pages,layers:layers.length?layers:[{slot:1,query:''}],merge:h.merge==='1',size:SIZES.includes(h.size)?h.size:SIZES[0],open:typeof h.open==='string'?h.open:'',image:h.image!=='0',labels:h.labels==='1'};
+ return {by:s.by,group:s.group,order:ORDERS.includes(s.order)?s.order:ORDERS[0],columns:s.columns,custom:s.custom,pages:s.pages,layers:layers.length?layers:[{slot:1,query:''}],merge:h.merge==='1',size:SIZES.includes(h.size)?h.size:SIZES[0],coords:COORDS.includes(h.coords)?h.coords:COORDS[0],scale:SCALES.includes(h.scale)?h.scale:SCALES[0],open:typeof h.open==='string'?h.open:'',image:h.image!=='0',labels:h.labels==='1'};
 }
 /* cleanCustom(custom, pages, list) -> the order as the Page stream would keep it, for this page's state, which has no joins of its own */
 const cleanCustom=(custom,pages,list)=>T.clean({overlaps:{},folds:{},pages:[],custom},pages,list).custom;
 function serialize(s){
  const o=T.serialize({...T.parse({}),by:s.by,group:s.group,order:s.order,columns:s.columns,custom:s.custom,pages:s.pages});
  for(const l of s.layers)if(l.query.trim())o['q'+l.slot]=l.query;
- if(s.merge)o.merge='1';if(s.size!==SIZES[0])o.size=s.size;if(s.open)o.open=s.open;if(!s.image)o.image='0';if(s.labels)o.labels='1';
+ if(s.merge)o.merge='1';if(s.size!==SIZES[0])o.size=s.size;if(s.coords!==COORDS[0])o.coords=s.coords;if(s.scale!==SCALES[0])o.scale=s.scale;if(s.open)o.open=s.open;if(!s.image)o.image='0';if(s.labels)o.labels='1';
  return o;
 }
-const api={LAYERS,SIZES,ORDERS,MIN_SHARE,QUALIFIERS,core,markPageInitial,qualifierName,parsePattern,glob,occurrencePattern,indexAt,describePattern,patternQualifiers,patternTerms,literalWord,rateBase,advice,textLines,occurrences,displayParts,share,tiles,plainTile,evenWidth,parse,serialize,cleanCustom};
+const api={LAYERS,SIZES,ORDERS,COORDS,SCALES,MIN_SHARE,QUALIFIERS,core,markPageInitial,qualifierName,parsePattern,glob,occurrencePattern,indexAt,describePattern,patternQualifiers,patternTerms,literalWord,rateBase,advice,textLines,occurrences,displayParts,share,tiles,plainTile,evenWidth,place,parse,serialize,cleanCustom};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.VMS_PATTERN=api;
 })(typeof window!=='undefined'?window:globalThis);
