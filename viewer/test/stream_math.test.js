@@ -188,6 +188,21 @@ test('on the parchment a page is in millimetres from its fold and its top edge, 
  assert.ok(measured>=180,`${measured} pages measured`);assert.ok(units>30000,`${units} words`);
  assert.equal(T.register('f116v',pages.f116v,words,tokens,{scale:'paper'}).factor,1,'a page with no paper record keeps its pixels');
 });
+test('on the parchment the dewarped words stay on their leaf, whatever the tilt',{skip:!have||!compact.paper},()=>{
+ const centre=o=>[0,1].map(j=>o.words.reduce((a,w)=>a+(w.quad[0][j]+w.quad[2][j])/2,0)/o.words.length),shifts=[];
+ for(const [folio,page] of Object.entries(pages)){
+  if(!page.paper)continue;
+  const rec=T.orient(page,T.register(folio,page,words,tokens,{coords:'recorded',scale:'paper'}),'recorded','none');if(!rec.words.length)continue;
+  const flat=tilt=>T.orient(page,T.register(folio,page,words,tokens,{coords:'flat',scale:'paper'}),'flat',tilt),level=flat('none'),at=centre(level);
+  // putting the tilt back turns or shears the page about its own words, so it does not move the page off its leaf
+  for(const tilt of ['restore','turn']){const c=centre(flat(tilt));near(c[0],at[0],1e-6);near(c[1],at[1],1e-6);}
+  flat('restore').words.forEach((w,i)=>near(w.quad[0][0],level.words[i].quad[0][0],1e-9));
+  shifts.push(Math.abs(at[1]-centre(rec)[1])/T.PAPER_UNITS);
+ }
+ // dewarping keeps the page where it was recorded: its mean shift is zero over the fitted points, so a few tenths of a millimetre over all words
+ shifts.sort((a,b)=>a-b);
+ assert.ok(shifts.length>=200&&shifts[Math.floor(.95*shifts.length)]<0.5&&shifts.at(-1)<1.5,`${shifts.length} pages, 95th ${shifts[Math.floor(.95*shifts.length)]} mm, worst ${shifts.at(-1)} mm`);
+});
 test('a restored page shows its recorded angle; a page with no angle stays as it is and says so',{skip:!have},()=>{
  const f8r=T.orient(pages.f8r,T.register('f8r',pages.f8r,words,tokens),'flat','restore');
  near(f8r.angle.displayed,pages.f8r.drift.recorded.angle);near(f8r.angle.delta,pages.f8r.drift.recorded.angle-pages.f8r.drift.flat.angle);assert.ok(f8r.angle.delta>3);

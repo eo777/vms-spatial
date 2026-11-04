@@ -223,7 +223,9 @@ function register(folio,page,words,tokens,{coords='flat',scale='body_height',anc
  const opening=page.blocks[0][1][0],before=marginRows(folio,page,sel.all,tokens);
  const shift=paper?0:anchor==='source'?-sel.origin[0]*factor:anchor==='margin'&&before.length?M.median(before.map(r=>r.x)):0;
  const all=sel.all.map(u=>({...u,rect:u.rect.map((v,j)=>j%2?v:v-shift)}));
- return {...sel,folio,factor,all,chosen:all.filter(u=>u.selected),available:sel.available&&sel.all.some(u=>u.anchor&&u.line_abs===opening),shift,marginRows:marginRows(folio,page,all,tokens)};
+ // on the parchment a tilt is put back about the mean word centre, so the page stays where its leaf has it (orient)
+ const pivot=paper&&all.length?[0,1].map(j=>all.reduce((a,u)=>a+(u.rect[j]+u.rect[j+2])/2,0)/all.length):null;
+ return {...sel,folio,factor,all,chosen:all.filter(u=>u.selected),available:sel.available&&sel.all.some(u=>u.anchor&&u.line_abs===opening),shift,pivot,marginRows:marginRows(folio,page,all,tokens)};
 }
 /* orient(page, selection, coords, tilt) -> the selection's words as polygons, and its margin points, with the page's recorded median line angle put back
    (page.drift, the same lines in both states). Recorded coordinates already hold it, so nothing moves there.
@@ -231,11 +233,13 @@ function register(folio,page,words,tokens,{coords='flat',scale='body_height',anc
    recorded. It is one adjustment for the whole page: the page's median line angle comes back, each line keeps its flat shape and so not its own recorded
    angle, and the rest of the warp stays out.
    'turn' turns the page rigidly by the same angle. Word sizes and distances hold, but a rotation moves x as well, which flattening never did: each
-   drawn margin leans by the page's own turn on top of its true slope (docs/STREAM.md). Kept for comparison with the study that used it. 'none' adds nothing. */
+   drawn margin leans by the page's own turn on top of its true slope (docs/STREAM.md). Kept for comparison with the study that used it. 'none' adds nothing.
+   Both pivot at x = y = 0, or at selection.pivot when register gives one (the parchment scale): flattening took the tilt out without moving the
+   page as a whole, so putting it back about the words' mean centre leaves the page on its leaf. */
 function orient(page,selection,coords='flat',tilt='restore'){
  const drift=page.drift||{},recorded=drift.recorded?drift.recorded.angle:null,inState=drift[coords]?drift[coords].angle:null,current=inState==null?null:inState;
  const restored=tilt!=='none'&&recorded!=null&&current!=null,delta=restored?recorded-current:0,rad=Math.PI/180,c=Math.cos(delta*rad),s=Math.sin(delta*rad),k=restored?Math.tan(recorded*rad)-Math.tan(current*rad):0;
- const move=tilt==='turn'?([x,y])=>[x*c-y*s,x*s+y*c]:([x,y])=>[x,y+k*x];
+ const [px,py]=selection.pivot||[0,0],move=tilt==='turn'?([x,y])=>[px+(x-px)*c-(y-py)*s,py+(x-px)*s+(y-py)*c]:([x,y])=>[x,y+k*(x-px)];
  const words=selection.all.map(u=>({...u,quad:[[u.rect[0],u.rect[1]],[u.rect[2],u.rect[1]],[u.rect[2],u.rect[3]],[u.rect[0],u.rect[3]]].map(move)}));
  const points=words.flatMap(w=>w.quad),xs=points.map(p=>p[0]),ys=points.map(p=>p[1]);
  return {folio:selection.folio,selection,words,marginRows:selection.marginRows.map(r=>({...r,point:move([r.x,r.y])})),

@@ -22,7 +22,7 @@ it reads the same compare data as the Compare page.
 | Tilt | `tilt` = turn, none (restore is the default) | see below |
 | Words, Margin points | `words=0`, `margins=0` | EVA in the boxes; the left end of each complete body row, joined only across consecutive rows |
 | Zoom | `zoom` = 0.5, 0.75, 1.5, 2, 3 | a share of the available width; Fit is the default |
-| Coordinates, Scale, under Settings | `coords` = recorded, `scale` = pixels, paper | flat or recorded coordinates; body height scales each page in both directions alike to a common median word height; Parchment draws every page in millimetres from its fold and its leaf's top edge (below), and Align then has no part |
+| Coordinates, Scale, under Settings | `coords` = recorded, `scale` = pixels, paper | flat (dewarped) or recorded (as drawn) coordinates; body height scales each page in both directions alike to a common median word height; Parchment draws every page in millimetres from its fold and its leaf's top edge (below), and Align then has no part |
 | Bifolium, ⇤ ← → ⇥, slider, `[` `]`, page chips | `at`, a page index | navigation. In a column or chain the page scrolls and every page stays present |
 | Adjust overlaps; a ↕ label in the plot | `overlaps` = `A:1-8>F:42-47=0.333\|…`, `seam`, `strength` | drag a label, or use the arrow keys on it (1%, 5% with Shift, Home, End), or the boundary menu and exact percentage, 0 to 95% of the preceding row's text height. That row and all later rows move, and nothing else. A value belongs to a directed pair of neighbours, so another order cannot carry it to different neighbours |
 | Separate Ar / Av+Br / Bv folds, under Adjust overlaps | `foldMode` = separate (shared is the default); `foldPart` = Ar, inner, Bv; `folds` = `A:1-8>D:27-30@Ar=0.7\|…` | optional independent vertical placements for Ar, tied Av+Br, and Bv. Column handles edit one group and its successors. A missing group value falls back to that pair's shared overlap. Switching off preserves the separate values and restores shared positions |
@@ -104,6 +104,12 @@ A value that is missing or implausible is estimated, and the note under the figu
 
 Foldout pages wider than a leaf are cut at the column edge, and the note names them too. Rows are still placed by the extent of the
 text. The overlaps of a saved chain were set under body height, so on this scale they no longer line the text up as they did.
+
+Both coordinate states lie on the parchment. **Recorded** draws the words as they were drawn on the photographs. **Flat** draws
+them dewarped (docs/DEWARPING.md), which moves words up and down only and leaves the page where it was. Tilt puts the page angle
+back about the mean centre of the page's own words, so it does not lift the page off its leaf. Over every page, a dewarped page's
+mean word sits within 0.42 mm of its recorded place (95th percentile), and within 0.8 mm at worst (f101v, f8r). Each word moves a
+median of 0.46 mm with the tilt taken out, and 0.27 mm with it put back.
 
 ## Tilt
 
