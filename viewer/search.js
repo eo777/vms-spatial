@@ -218,7 +218,7 @@
   build();notes.textContent=tileNote();update();
  }
  function tileNote(){
-  const paper=state.scale==='paper',rec=f=>pages[f].paper,est=k=>plan.pages.filter(p=>rec(p.folio)&&rec(p.folio)[k]!=='measured').map(p=>p.folio);
+  const paper=state.scale==='paper',rec=f=>pages[f].paper,est=k=>plan.pages.filter(p=>rec(p.folio)&&!['measured','sheet','panel'].includes(rec(p.folio)[k])).map(p=>p.folio);
   const wide=minis.filter(m=>m.geo.paper&&(m.geo.box[0]<-.5||m.geo.box[1]<-.5||m.geo.box[2]>leaf[0]+.5||m.geo.box[3]>leaf[1]+.5)).map(m=>m.folio),none=plan.pages.filter(p=>!rec(p.folio)).map(p=>p.folio),[fold,top,scale]=['fold_method','top_method','scale_method'].map(est);
   return `Grey marks are word boxes and coloured marks are matches, `+(paper?`on the parchment: each page in millimetres from its fold (dashed) and its leaf's top edge, a panel one ${leaf[0]} × ${leaf[1]} mm leaf, as on the Page stream's estimated parchment scale.`:`each page's photograph frame at the tile height.`)
    +(state.coords==='flat'?' Dewarped (flat) coordinates: each page\'s shared curve and tilt are taken out, moving words up and down only.':' Recorded coordinates, as drawn on the photographs.')

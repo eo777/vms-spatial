@@ -89,18 +89,25 @@ The fold and the edges are measured on the Beinecke scans (`vmsspatial.leaves`, 
 Checks on the result:
 
 - Ordinary leaves measure 221 to 232 mm tall (5th to 95th percentile). Their visible width, fold to fore-edge, has a median of 157 mm.
-  The catalogue gives 160.
+  The catalogue gives 160. The width is rough: the fore-edge is the first line past the text, which can be the edge of the stack, and
+  versos read a median 12 mm wider than rectos (`visible_width_mm` in the product, left out where it lies more than 20% from 160 mm).
 - Rectos and versos share one scale: median word height 4.40 mm on rectos and 4.38 mm on versos. The two sides of one leaf differ in
   height by a median of 3.8 mm, with no consistent sign. Read that as the noise of one top or bottom edge, about 2 to 3 mm.
 - On a by-eye audit of 16 pages, 12 of them random, the fold lay on the visible edge to within 1 to 2 mm.
-- 197 folds and 220 top edges are measured. An ordinary leaf's median inner margin, fold to text, is 14.2 mm.
+- 197 folds and 221 top edges are measured. An ordinary leaf's median inner margin, fold to text, is 14.2 mm.
 
 A value that is missing or implausible is estimated, and the note under the figure names those pages:
 
-- **Fold.** From the median inner margin, for foldout panels away from the binding, a faint edge (f99v), or a page with no scan
-  registration.
-- **Top edge.** From the bottom edge less 225 mm, or from the median top margin.
-- **Scale.** From the median, for f101v. fRos is drawn in its own quarter-size scan, so its scale comes from the scan's.
+- **Fold.** A foldout panel away from the binding, and f71v, take the crease or fold placed on the scan (`fold_method` 'sheet',
+  docs/SHEETS.md). The median inner margin serves a faint edge (f99v).
+- **Top edge.** First, where the edges nearest the text are not a leaf's height apart, the strongest pair of edges that is. This
+  happens when the text is a band across the middle of the page, as on f101r, so that the nearest edges are drawings. Otherwise a
+  foldout panel takes the top edge of the panel beside it on the same scan (f90r2, f102r2), since one piece of parchment runs
+  across the crease. Failing both, the bottom edge less 225 mm, or the median top margin. Each was checked by eye on its scan
+  (2026-11-04).
+- **Scale.** Scan 1006203 (f71v and f72r) was photographed at another distance and has its own scale, from its leaves' height. f101v's
+  display image shows only its first panel, so its registration is fitted on the words of that panel alone (`images.display_transform` leaves
+  out the words clipped off the image) and holds the rest of the page in the same frame. fRos is drawn in its own quarter-size scan, so its scale comes from the scan's.
 
 Foldout pages wider than a leaf are cut at the column edge, and the note names them too. Rows are still placed by the extent of the
 text. The overlaps of a saved chain were set under body height, so on this scale they no longer line the text up as they did.

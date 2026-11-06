@@ -65,5 +65,5 @@ def test_the_product_hangs_together(product):
     for f, p in pages.items():
         if p.get('text'):
             assert p['fold'] is not None and p['top'] is not None and p['mm'] > 0, f
-            assert p['fold_method'] in ('measured', 'estimated') and p['top_method'] in ('measured', 'bottom', 'estimated') and p['scale_method'] in ('measured', 'estimated'), f
+            assert p['fold_method'] in ('measured', 'sheet', 'estimated') and p['top_method'] in ('measured', 'panel', 'bottom', 'estimated') and p['scale_method'] in ('measured', 'estimated'), f
     assert leaves.for_viewer(product, 'f1r')['fold_method'] == 'measured'

@@ -1,0 +1,70 @@
+{
+ "version": "2026.11.04.1",
+ "about": "The odd-shaped sheets of the manuscript: the foldout leaves (their panels, which page lies on which, the lines placed on the Beinecke photographs) and the bifolia that lack a leaf. Read by vmsspatial.sheets; docs/SHEETS.md is the audit.",
+ "method": "Vertical lines in full-size scan px at mid-height. A fold or crease is a full-height line (vmsspatial.leaves.edge_scores over 10 to 90% of the scan's height): between two pages on one photograph, the strongest in the gap between their text; beside a panel photographed alone, chosen among the lines there so that its width, and the place of any further fold, agree with the other face; checked by eye. An outer edge is where the parchment meets the black ground at mid-height. Line names: fold (the binding), k|k+1 (the crease between panels k and k+1, counted out from the fold), k fold (a further fold inside panel k), edge (the leaf's outer edge). A panel's width is read on the photograph where it lies flat with both of its lines clear (use, per panel r or v, with use_why); the other face's reading is kept as a check, and a difference over 5 mm is reported. A panel listed in own is read on each face's own photograph, from that face's fold (own_why): its pages' words are placed from their own fold, and the binding can hide a different strip of the panel on each face. A photograph can under-read a panel that curls or folds over, and over-read one whose edge runs into the stack.",
+ "sources": {
+  "scans": "Beinecke Rare Book and Manuscript Library, MS 408, digital collection (images.CREDIT); image ids as in vmsspatial/resources/beinecke_iiif.json",
+  "descriptions": "R. Zandbergen, the quire pages of voynich.nu (q02, q09, q10, q11, q12, q14, q15, q17, q19), read 2026-11-04"
+ },
+ "sheets": {
+  "B:12-13": {"quire": 2, "missing": [12], "notes": ["Folio 12 is missing; a stub of it is still visible (voynich.nu q02). f13 is the leaf left of the bifolium 12-13."]},
+  "L:73-74": {"quire": 12, "missing": [74], "notes": ["Folio 74 is lost, most probably cut out of the bound manuscript; a cut mark is visible on f75, and the gathering mark is presumed to have been on f74 (voynich.nu q12)."]},
+  "I:67-68": {"quire": 9, "notes": ["Both leaves fold out; f68 is a three-way foldout whose third panel is wider than normal, nearly square, with a further fold (voynich.nu q09).", "The gathering mark is on f67r1, which Zandbergen reads as the bifolium bound the wrong way round after the quire number was written. The physical record follows the binding as it is."],
+   "leaves": {
+    "67": {"panels": 2, "use": ["r", "r"], "use_why": "the recto spread lies flat; the verso agrees within 1 mm", "pages": {"f67r1": [1], "f67r2": [2], "f67v1": [1], "f67v2": [2]},
+     "photos": [{"scan": "1006194", "side": "r", "lines": {"fold": 168, "1|2": 2508, "edge": 4868}},
+                {"scan": "1006195", "side": "v", "lines": {"edge": 168, "1|2": 2512, "fold": 4872}}]},
+    "68": {"panels": 3, "use": ["v", "r", "v"], "use_why": "on the recto spread the first panel runs into the gutter and the third lies skewed; the verso spread shows both clean", "pages": {"f68r1": [1], "f68r2": [2], "f68r3": [3], "f68v1": [1], "f68v2": [2], "f68v3": [3]},
+     "photos": [{"scan": "1006196", "side": "r", "lines": {"fold": 256, "1|2": 2448, "2|3": 4504, "3 fold": 6500, "edge": 7792}},
+                {"scan": "1006197", "side": "v", "lines": {"edge": 192, "3 fold": 1588, "2|3": 3576, "1|2": 5648, "fold": 7984}}]}}},
+  "J:69-70": {"quire": 10, "notes": ["f70 folds out; its second panel is large and nearly square, with a further fold, on both sides (voynich.nu q10). The folio number is on f70v2."],
+   "leaves": {
+    "70": {"panels": 2, "use": ["r", "r"], "use_why": "the recto spread lies flat", "pages": {"f70r1": [1], "f70r2": [2], "f70v1": [1], "f70v2": [2]},
+     "photos": [{"scan": "1006199", "side": "r", "lines": {"fold": 3040, "1|2": 5356, "2 fold": 7412, "edge": 8764}},
+                {"scan": "1006200", "side": "v", "lines": {"edge": 132, "2 fold": 1456, "1|2": 3488}},
+                {"scan": "1006201", "side": "v", "lines": {"1|2": 472, "fold": 2844}}]}}},
+  "K:71-72": {"quire": 11, "notes": ["f72 is a triple foldout (voynich.nu q11): r1, r2, r3 on one side, v3, v2, v1 on the other; the folio number is on f72v2 and the gathering mark on f72v1. Its third panel has a further fold.", "Scan 1006203 (f71v and f72r) was photographed at another distance; vmsspatial.leaves gives it its own scale."],
+   "leaves": {
+    "71": {"panels": 1, "pages": {"f71v": [1]}, "note": "An ordinary leaf; its fold is placed because the scan's own was not measured.",
+     "photos": [{"scan": "1006203", "side": "v", "lines": {"fold": 2340}}]},
+    "72": {"panels": 3, "use": ["v", "v", "v"], "use_why": "the recto spread (1006203) was photographed at another distance, so its scale is set from leaf heights; the versos are at the common scale", "pages": {"f72r1": [1], "f72r2": [2], "f72r3": [3], "f72v1": [1], "f72v2": [2], "f72v3": [3]},
+     "photos": [{"scan": "1006203", "side": "r", "lines": {"fold": 2340, "1|2": 4176, "2|3": 5992, "3 fold": 7540, "edge": 8752}},
+                {"scan": "1006204", "side": "v", "lines": {"edge": 96, "3 fold": 1484, "2|3": 3536, "1|2": 5868}},
+                {"scan": "1006205", "side": "v", "lines": {"1|2": 440, "fold": 2884}}]}}},
+  "N:85-86": {"quire": 14, "notes": ["One bifolium three panels across and two down, bound at the vertical crease of its lower half, one panel (f85) on one side of the binding and two (f86) on the other; the Rosettes fill its inside (voynich.nu q14 and scans 1006228 to 1006231). Outside, the upper row is written upside down, to be read with the upper half folded down over the lower."],
+   "grid": {"cols": 3, "rows": 2,
+    "pages": {"f85r1": [1, 2, false], "f86v3": [1, 2, false], "f86v5": [2, 2, false], "f85r2": [1, 1, true], "f86v4": [1, 1, true], "f86v6": [2, 1, true]},
+    "inside": {"folio": "fRos", "frame": "detected", "fold": [795, 761], "crease": [1405, 1400], "middle": 891,
+     "note": "On the toolkit's quarter-size copy of scan 1006231 (fRos's detected frame), placed by eye to about 5 mm: the fold and the outer vertical crease in the upper and the lower row, and the horizontal crease."}}},
+  "O:87-90": {"quire": 15, "notes": ["f90 folds out, two panels a side; the folio number is on f90v2 and the gathering mark on f90v1 (voynich.nu q15). f90v2 is photographed lying in the book like a recto: its panel folds over the recto side."],
+   "leaves": {
+    "90": {"panels": 2, "use": ["r", "v"], "use_why": "on the recto spread the second panel curls down at its end; the verso photograph of it lies flat", "pages": {"f90r1": [1], "f90r2": [2], "f90v1": [1], "f90v2": [2]},
+     "photos": [{"scan": "1006235", "side": "r", "lines": {"fold": 3000, "1|2": 5376, "edge": 7652}},
+                {"scan": "1006236", "side": "v", "lines": {"edge": 92, "1|2": 2592}},
+                {"scan": "1006237", "side": "v", "lines": {"1|2": 312, "fold": 2768}}]}}},
+  "O:88-89": {"quire": 15, "notes": ["f89 folds out; f89r2 and f89v2 are wider than usual, with a vertical fold through the middle, and a stitched horizontal tear; the folio number is on f89v2 (voynich.nu q15)."],
+   "leaves": {
+    "89": {"panels": 2, "use": ["r", "r"], "use_why": "the recto spread lies flat; the verso agrees within 5 mm", "pages": {"f89r1": [1], "f89r2": [2], "f89v1": [1], "f89v2": [2]},
+     "photos": [{"scan": "1006233", "side": "r", "lines": {"fold": 2824, "1|2": 5216, "2 fold": 7372, "edge": 8980}},
+                {"scan": "1006234", "side": "v", "lines": {"edge": 100, "2 fold": 1768, "1|2": 3940}},
+                {"scan": "1006235", "side": "v", "lines": {"1|2": 612, "fold": 3000}}]}}},
+  "Q:94-95": {"quire": 17, "notes": ["f95 folds out, two panels a side; the folio number is on f95v2; a parchment strip is sewn in between folios 94 and 95 (voynich.nu q17)."],
+   "leaves": {
+    "95": {"panels": 2, "use": ["r", "v"], "use_why": "on the recto spread the second panel curls down at its end; the verso photograph of it lies flat", "pages": {"f95r1": [1], "f95r2": [2], "f95v1": [1], "f95v2": [2]},
+     "photos": [{"scan": "1006241", "side": "r", "lines": {"fold": 2988, "1|2": 5392, "edge": 7504}},
+                {"scan": "1006242", "side": "v", "lines": {"edge": 96, "1|2": 2640}},
+                {"scan": "1006243", "side": "v", "lines": {"1|2": 336, "fold": 2760}}]}}},
+  "S:99-102": {"quire": 19, "notes": ["f102 folds out; f102r2 and f102v2 are wider than normal, with a further fold; parchment is torn off the bottom of f102r1, f102r2 and f102v1; the folio number is on f102v2 and the quire number on f102v1 (voynich.nu q19)."],
+   "leaves": {
+    "102": {"panels": 2, "use": ["r", "r"], "use_why": "the recto spread lies flat; the verso agrees within 1 mm on the second panel", "pages": {"f102r1": [1], "f102r2": [2], "f102v1": [1], "f102v2": [2]},
+     "photos": [{"scan": "1006251", "side": "r", "lines": {"fold": 2872, "1|2": 5216, "2 fold": 7216, "edge": 8004}},
+                {"scan": "1006252", "side": "v", "lines": {"edge": 84, "2 fold": 888, "1|2": 2884}},
+                {"scan": "1006253", "side": "v", "lines": {"1|2": 288, "fold": 2716}}]}}},
+  "S:100-101": {"quire": 19, "notes": ["f101 is a foldout leaf that Zandbergen no longer treats as one: f101r and f101v each run across both panels, across the vertical fold (voynich.nu q19). The verso is photographed in two parts, so f101v has no scan registration."],
+   "leaves": {
+    "101": {"panels": 2, "use": ["r", "r"], "use_why": "the recto spread shows the whole leaf, its outer edge against the black ground (278 mm across); the verso is photographed in two parts, whose edges run into the stack", "own": [1], "own_why": "the binding hides about 13 mm more of the first panel on the recto than on the verso: on 1006251 the crease lies 151 mm from the verso's fold, in a clear gap in f101v's text, and f101v's text runs 278 mm from its fold; on 1006249 the crease is 138 mm from the recto's", "pages": {"f101r": [1, 2], "f101v": [1, 2]},
+     "photos": [{"scan": "1006249", "side": "r", "lines": {"fold": 2928, "1|2": 5116, "edge": 7328}},
+                {"scan": "1006250", "side": "v", "lines": {"edge": 100, "1|2": 2612}},
+                {"scan": "1006251", "side": "v", "lines": {"1|2": 476, "fold": 2872}}]}}}
+ }
+}

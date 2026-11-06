@@ -1,0 +1,58 @@
+/* The Light table, on top of compare.css and stream.css. The six sheet colours are the Word search's validated categorical slots, stepped for each theme. */
+:root{--hl-1:#2a78d6;--hl-2:#eb6834;--hl-3:#1baf7a;--hl-4:#eda100;--hl-5:#e87ba4;--hl-6:#008300}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--hl-1:#3987e5;--hl-2:#d95926;--hl-3:#199e70;--hl-4:#c98500;--hl-5:#d55181;--hl-6:#008300}}
+:root[data-theme="dark"]{--hl-1:#3987e5;--hl-2:#d95926;--hl-3:#199e70;--hl-4:#c98500;--hl-5:#d55181;--hl-6:#008300}
+/* one row a sheet: colour, name, which face is up, its pages, where it sits */
+.lt-sheets{display:grid;grid-template-columns:14px auto auto minmax(0,1fr) auto auto auto;gap:4px 10px;align-items:center;margin:6px 0 8px;font-size:12.5px}
+.lt-sheets:empty{display:none}
+.lt-row{display:contents}
+/* a colour square opens the colour chooser: the six sheet colours and ink, or any with the picker */
+.lt-swatch,.lt-chip,.lt-preset{width:14px;height:14px;padding:0;border-radius:3px;border:1px solid color-mix(in srgb,var(--ink) 25%,transparent);background:var(--sheet);cursor:pointer}
+.lt-swatch:hover,.lt-chip:hover,.lt-preset:hover{border-color:var(--ink)}
+.lt-chip{width:13px;height:13px;margin-left:6px;vertical-align:-2px}
+.lt-pop{position:fixed;z-index:120;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:10px 12px;display:flex;flex-direction:column;gap:9px;font-size:12.5px;color:var(--ink2)}
+.lt-pop[hidden]{display:none}
+.lt-presets{display:grid;grid-template-columns:repeat(7,22px);gap:6px}
+.lt-preset{width:22px;height:22px;border-radius:5px}
+.lt-preset[aria-pressed="true"]{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--ink)}
+.lt-custom{display:flex;align-items:center;gap:8px}
+.lt-custom input{width:44px;height:26px;padding:0;border:1px solid var(--line2);border-radius:5px;background:none;cursor:pointer}
+/* Add sheet, and an arrow for the menu of its leaves */
+.lt-split{position:relative;display:inline-flex}
+.lt-split .seg button{color:var(--ink);padding:5px 10px}
+.lt-split .seg #addMore{padding:5px 8px;display:inline-flex;align-items:center}
+.lt-split .seg button:disabled{opacity:.45}
+.lt-menu{position:absolute;left:0;top:calc(100% + 4px);z-index:60;min-width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:4px;display:flex;flex-direction:column}
+.lt-menu[hidden]{display:none}
+.lt-menu button{border:0;background:none;text-align:left;padding:6px 10px;border-radius:5px;white-space:nowrap}
+.lt-menu button:hover:not(:disabled),.lt-menu button:focus-visible{background:var(--bg)}
+.lt-pages .face>.lt-facecheck{color:var(--muted);font-weight:600}
+.lt-row.selected .lt-name{text-decoration:underline;text-decoration-color:var(--sheet);text-decoration-thickness:2px;text-underline-offset:3px}
+.lt-name{font-weight:600;white-space:nowrap;cursor:pointer;background:none;border:0;padding:2px 0;color:var(--ink);font:inherit;font-weight:600}
+.lt-pages{display:flex;flex-wrap:wrap;gap:2px 10px;color:var(--ink2)}
+.lt-pages .face{display:inline-flex;gap:8px;align-items:center}
+.lt-pages .face>span{color:var(--muted)}
+.lt-pages label{display:inline-flex;gap:3px;align-items:center;white-space:nowrap}
+.lt-where{color:var(--ink2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lt-row button{font-size:12px;padding:2px 8px}
+/* the table scrolls; a sheet is a canvas that drags */
+.lt-table{position:relative;overflow:auto;height:max(420px,calc(100vh - 230px));border:1px solid var(--line2);border-radius:6px;background:var(--bg);outline:none}
+.lt-surface{position:relative}
+.lt-sheet{position:absolute;touch-action:none;cursor:grab;outline:none}
+.lt-sheet.dragging{cursor:grabbing}
+.lt-sheet canvas{display:block}
+.lt-sheet:focus-visible canvas{outline:2px solid var(--accent);outline-offset:2px}
+.lt-table.panning{cursor:grabbing}
+.lt-surface{cursor:grab}
+.lt-legend{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--ink2)}
+.lt-legend[hidden]{display:none}
+/* a guide: dashed while near, solid once met, with how far off it is */
+.lt-guide{position:absolute;pointer-events:none;border:0 dashed var(--accent);z-index:100}
+.lt-guide.on{border-style:solid}
+.lt-guide.x{top:0;bottom:0;border-left-width:1px}
+.lt-guide.y{left:0;right:0;border-top-width:1px}
+.lt-guide::after{content:attr(data-label);position:absolute;padding:1px 5px;border-radius:3px;background:var(--surface);color:var(--ink);border:1px solid var(--accent);font-size:11.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lt-guide.x::after{top:var(--at,6px);left:4px}
+.lt-guide.y::after{left:var(--at,6px);top:4px}
+.lt-guide.on::after{background:var(--accent);color:var(--surface)}
+@media (max-width:760px){.lt-sheets{grid-template-columns:14px auto minmax(0,1fr) auto}.lt-where,.lt-row .lt-face{grid-column:2/-1}}

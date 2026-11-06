@@ -78,7 +78,8 @@ def test_tokenize_and_transitions(ms, ms_study):
     assert len(tok['words']) == 34977 and tok['since_par'][0] == 0
     assert (tok['pos'] < tok['linelen']).all()
     tr = transitions(ms_study)
-    assert Counter(t['cls'] for t in tr) == {'same-face': 64, 'flip': 93, 'cross-sheet': 49}
+    # fRos is on the inner face (leaf 85 verso, corrected 2026-11-04), so f85r2 -> fRos and fRos -> f86v4 are flips, not same-face turns
+    assert Counter(t['cls'] for t in tr) == {'same-face': 62, 'flip': 95, 'cross-sheet': 49}
     full = tokenize(ms)
     assert len(full['words']) == 38876 and (full['pos'] < full['linelen']).all()
     assert len(transitions(ms)) == 226

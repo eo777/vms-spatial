@@ -4,17 +4,23 @@ The Beinecke scans (``vmsspatial.images``) photograph each page in its binding o
 The leaf's top and bottom edges, and the line where it meets the binding, show as long straight edges. For each
 page this module finds on the scan
 
+* the fold of a foldout panel away from the binding, or of a panel whose fold the scan does not show: the crease or fold
+  placed on its photograph (resources/sheets.json, vmsspatial.sheets, docs/SHEETS.md);
 * the fold: walking out from the text toward the binding, the first long straight edge of at least 30% of the
   band's strongest, then the strongest within the next 8 mm (the leaf often curves into the gutter as a soft band
   before its edge). The edge where the visible leaf meets the binding stands for the fold: the strip of leaf hidden
   in the binding, if any, is not measured;
-* the top and bottom edges: the long straight edge nearest the text above it and below it.
+* the top and bottom edges: the long straight edge nearest the text above it and below it; when those two are not a
+  leaf's height apart (text in a band across the middle of the page, whose nearest edges are drawings), the strongest
+  pair that is. A foldout panel with no such pair takes the top edge of the panel beside it on the same scan, which
+  runs on across the crease.
 
 An edge's score is a low percentile (the 35th) of the gradient across it, along the whole span of the text, at the
 best angle within 1.5 degrees of the axis, so a drawing that crosses the band does not make one. The scale is set
 once for all scans: the median height of the ordinary leaves (no foldout) is the catalogue's 225 mm (Beinecke Rare
 Book and Manuscript Library, MS 408: 225 x 160 mm), so a leaf that is taller or shorter than that keeps its own
-size. The edges are mapped into the recorded frame through the stored registration (``images.Mapping``).
+size. A scan whose own leaves all measure more than 10% off at that scale was photographed at another distance
+(1006203, f71v and f72r) and takes its own, from its leaves' median height. The edges are mapped into the recorded frame through the stored registration (``images.Mapping``).
 
 A value that is missing or implausible is estimated, and says so (``fold_method``, ``top_method``, ``scale_method``):
 the fold from the median inner margin of the measured leaves, the top from the bottom edge and the median leaf
@@ -35,7 +41,7 @@ import numpy as np
 from . import paths
 
 PRODUCT_KEY = 'manuscript/leaves.json.gz'
-PRODUCT_VERSION = '2026.11.02.1'
+PRODUCT_VERSION = '2026.11.04.2'
 CATALOGUE_MM = dict(height=225.0, width=160.0, source='Beinecke Rare Book and Manuscript Library, catalogue record of MS 408 (225 x 160 mm)')
 DOWN = 4                                     # the scan is searched at a quarter of its size
 ANGLES = np.deg2rad(np.arange(-1.5, 1.5001, 0.05))
@@ -47,6 +53,9 @@ GAP_MM = 1.5                                 # the band starts this far from the
 REACH_MM = 8.0                               # how far past the first candidate the fold may lie
 WIDE_SCAN_PX = 3300                          # a scan wider than this shows a foldout
 HEIGHT_TOLERANCE = 0.04                      # a leaf height this far from the median: the top edge is not taken as measured
+SCAN_SCALE_TOLERANCE = 0.10                  # a scan whose own leaves measure this far from the median, all alike, has its own scale
+PANEL_TOLERANCE = 0.10                       # a foldout panel's own edges further than this from a leaf's height give way to its neighbour's top
+WIDTH_TOLERANCE = 0.20                       # an outer edge found this far from the catalogue width is a drawing or the stack, not the leaf's
 FOLD_MARGIN_MM = (0.5, 60.0)                 # a measured fold must leave an inner margin in this range
 MIN_FOLD_SCORE = 4.0
 
@@ -127,7 +136,7 @@ def measure_scan(gray: np.ndarray, text, recto: bool, px_per_mm: float = 15.8) -
     Gx = np.abs(np.diff(_smooth_rows(gray), axis=1, prepend=gray[:, :1]))
     Gy = np.abs(np.diff(_smooth_rows(gray.T).T, axis=0, prepend=gray[:1, :])).T
     sy0, sy1, sx0, sx1 = max(0, ty0), min(H, ty1), max(0, tx0), min(W, tx1)
-    out = {}
+    out, bands = {}, {}
     for name, G, lo, hi, span, text_last, fold in (
             ('left', Gx, 2, tx0 - gap, (sy0, sy1), True, recto), ('right', Gx, tx1 + gap, W - 2, (sy0, sy1), False, not recto),
             ('top', Gy, 2, ty0 - gap, (sx0, sx1), True, False), ('bottom', Gy, ty1 + gap, H - 2, (sx0, sx1), False, False)):
@@ -136,9 +145,31 @@ def measure_scan(gray: np.ndarray, text, recto: bool, px_per_mm: float = 15.8) -
             out[name] = None
             continue
         sc, sl = edge_scores(G, lo, hi, *span)
+        bands[name] = (sc, sl, lo, (span[0] + span[1]) / 2)
         i = pick_fold(sc, text_last, reach) if fold else pick_nearest(sc, text_last)
         out[name] = None if i is None else dict(at=float(lo + i), slope=float(sl[i]), score=float(sc[i]), peak=float(sc.max()), centre=(span[0] + span[1]) / 2)
+    out['top'], out['bottom'] = _paired(out['top'], out['bottom'], bands, CATALOGUE_MM['height'] * px_per_mm / DOWN)
     return dict(fold=out['left'] if recto else out['right'], outer=out['right'] if recto else out['left'], top=out['top'], bottom=out['bottom'])
+
+
+def _paired(top, bottom, bands, want):
+    """The top and bottom edges, a leaf's height (`want` px) apart. The edges nearest the text stand when they are that far
+    apart; when they are not, the text is a band across the middle of the page and those edges are drawings, so the
+    strongest pair of candidates (each at least NEAREST_SHARE of its band's peak) that far apart, within
+    HEIGHT_TOLERANCE, takes their place, marked `paired`. With no such pair the nearest edges stand."""
+    if 'top' not in bands or 'bottom' not in bands or (top and bottom and abs(bottom['at'] - top['at'] - want) <= HEIGHT_TOLERANCE * want):
+        return top, bottom
+    (st, lt, lot, ct), (sb, lb, lob, cb) = bands['top'], bands['bottom']
+    if st.max() <= 0 or sb.max() <= 0:
+        return top, bottom
+    tops = [i for i in _maxima(st) if st[i] >= NEAREST_SHARE * st.max()]
+    bottoms = [j for j in _maxima(sb) if sb[j] >= NEAREST_SHARE * sb.max()]
+    pairs = [(min(st[i], sb[j]), i, j) for i in tops for j in bottoms if abs((lob + j) - (lot + i) - want) <= HEIGHT_TOLERANCE * want]
+    if not pairs:
+        return top, bottom
+    _, i, j = max(pairs)
+    return (dict(at=float(lot + i), slope=float(lt[i]), score=float(st[i]), peak=float(st.max()), centre=ct, paired=True),
+            dict(at=float(lob + j), slope=float(lb[j]), score=float(sb[j]), peak=float(sb.max()), centre=cb, paired=True))
 
 
 def _page_boxes(app, ms) -> Dict[str, List[list]]:
@@ -151,7 +182,7 @@ def _page_boxes(app, ms) -> Dict[str, List[list]]:
     return out
 
 
-def _scan_edges(folio: str, boxes, rec: dict, recto: bool) -> Optional[dict]:
+def _scan_edges(folio: str, boxes, rec: dict, recto: bool, px_per_mm: float = 15.8) -> Optional[dict]:
     from PIL import Image
     from . import images
     m = images.Mapping(rec)
@@ -162,15 +193,35 @@ def _scan_edges(folio: str, boxes, rec: dict, recto: bool) -> Optional[dict]:
     img = Image.open(images.image_path(folio, 'beinecke', rec.get('image_id'))).convert('L')
     size = img.size
     gray = np.asarray(img.reduce(DOWN), float)
-    e = measure_scan(gray, [v / DOWN for v in text], recto)
+    e = measure_scan(gray, [v / DOWN for v in text], recto, px_per_mm)
     full = {}
     for k, v in e.items():
-        full[k] = None if v is None else dict(at=v['at'] * DOWN, slope=v['slope'], score=round(v['score'], 2), peak=round(v['peak'], 2), centre=v['centre'] * DOWN)
+        full[k] = None if v is None else dict(at=v['at'] * DOWN, slope=v['slope'], score=round(v['score'], 2), peak=round(v['peak'], 2), centre=v['centre'] * DOWN, **({'paired': True} if v.get('paired') else {}))
     return dict(edges=full, text_px=[float(v) for v in text], image_id=rec.get('image_id'), image_size=list(size), mapping=m)
 
 
 def _r(v, nd=1):
     return None if v is None else round(float(v), nd)
+
+
+def _panel_top(f, p, pages, raw, info) -> bool:
+    """A foldout panel whose own top and bottom edges are far from a leaf's height apart (PANEL_TOLERANCE) takes the top edge of a panel of the same
+    leaf side on the same scan, whose edges are: one piece of parchment, its top edge running across the crease between them.
+    Sets top (at this page's text centre) and top_method 'panel' with top_from; returns whether it did."""
+    me, r, h = info.get(f, {}), raw.get(f, {}), p.get('leaf_height_mm')
+    if not me.get('panel') or 'edges' not in r or (h is not None and abs(h - CATALOGUE_MM['height']) <= PANEL_TOLERANCE * CATALOGUE_MM['height']):
+        return False
+    for g, q in pages.items():
+        o, s = info.get(g, {}), raw.get(g, {})
+        if g == f or q.get('top_method') != 'measured' or 'edges' not in s or not s['edges'].get('top') or s.get('image_id') != r.get('image_id') \
+                or o.get('leaf') != me.get('leaf') or o.get('side') != me.get('side') or q.get('leaf_height_mm') is None \
+                or abs(q['leaf_height_mm'] - CATALOGUE_MM['height']) > HEIGHT_TOLERANCE * CATALOGUE_MM['height']:
+            continue
+        e, t = s['edges']['top'], r['text_px']
+        xc = (t[0] + t[2]) / 2
+        p['top'], p['top_method'], p['top_from'] = _r(r['mapping'].to_frame([[xc, e['at'] + (xc - e['centre']) * e['slope']]])[0][1]), 'panel', g
+        return True
+    return False
 
 
 def build(app=None, ms=None, out=None, log=print) -> dict:
@@ -205,6 +256,22 @@ def build(app=None, ms=None, out=None, log=print) -> dict:
     heights = [raw[f]['edges']['bottom']['at'] - raw[f]['edges']['top']['at'] for f in raw if ordinary(f) and raw[f]['edges']['top'] and raw[f]['edges']['bottom']]
     median_h = float(np.median(heights))
     ppm = median_h / CATALOGUE_MM['height']
+    # a scan photographed at another distance (1006203, f71v and f72r: its leaves measure about 174 mm at the common scale) takes its own: the
+    # median height of its leaves that measure alike is the catalogue's, and its pages are measured again at that scale
+    by_scan = {}
+    for f, r in raw.items():
+        if 'edges' in r and r['edges']['top'] and r['edges']['bottom']:
+            by_scan.setdefault(r['image_id'], []).append(r['edges']['bottom']['at'] - r['edges']['top']['at'])
+    scan_ppm = {}
+    for iid, hs in by_scan.items():
+        h = float(np.median(hs))
+        if len(hs) >= 2 and abs(h / median_h - 1) > SCAN_SCALE_TOLERANCE and sum(abs(v / h - 1) <= HEIGHT_TOLERANCE for v in hs) >= 2:
+            scan_ppm[iid] = h / CATALOGUE_MM['height']
+    for f, r in list(raw.items()):
+        if r.get('image_id') in scan_ppm:
+            raw[f] = _scan_edges(f, boxes[f], images.registration(f, 'beinecke'), _recto(f, info.get(f, {}).get('side')), scan_ppm[r['image_id']])
+    if log and scan_ppm:
+        log('scans with their own scale: %s' % ', '.join('%s %.2f px/mm' % kv for kv in sorted(scan_ppm.items())))
     pages = {}
     for f, r in raw.items():
         side = info.get(f, {}).get('side')
@@ -217,7 +284,10 @@ def build(app=None, ms=None, out=None, log=print) -> dict:
             t = r['text_px']
             xc, yc = (t[0] + t[2]) / 2, (t[1] + t[3]) / 2
             rec_c = m.to_frame([[xc, yc]])[0]
-            p.update(mm=_r(ppm / m.scale(rec_c[0], rec_c[1]), 4), scale_method='measured', image_id=r['image_id'])
+            sp = scan_ppm.get(r['image_id'], ppm)
+            p.update(mm=_r(sp / m.scale(rec_c[0], rec_c[1]), 4), scale_method='measured', image_id=r['image_id'])
+            if r['image_id'] in scan_ppm:
+                p['scan_px_per_mm'] = _r(sp, 3)
 
             def at_y(edge, y):                   # a fold or outer edge's x at scan height y
                 return edge['at'] + (y - edge['centre']) * edge['slope']
@@ -232,10 +302,10 @@ def build(app=None, ms=None, out=None, log=print) -> dict:
                 if e[k]:
                     p[k] = _r(m.to_frame([[xc, at_x(e[k], xc)]])[0][1])
             if e['top'] and e['bottom']:
-                p['leaf_height_mm'] = _r((at_x(e['bottom'], xc) - at_x(e['top'], xc)) / ppm)
-            if e['fold'] and e['outer']:
-                p['visible_width_mm'] = _r(abs(at_y(e['outer'], yc) - at_y(e['fold'], yc)) / ppm)
-            p['scan'] = dict(text_px=[_r(v) for v in t], **{k: None if v is None else dict(at=_r(v['at']), slope=_r(v['slope'], 5), score=v['score']) for k, v in e.items()})
+                p['leaf_height_mm'] = _r((at_x(e['bottom'], xc) - at_x(e['top'], xc)) / sp)
+            if e['outer']:
+                p['outer'] = _r(m.to_frame([[at_y(e['outer'], yc), yc]])[0][0])
+            p['scan'] = dict(text_px=[_r(v) for v in t], **{k: None if v is None else dict(at=_r(v['at']), slope=_r(v['slope'], 5), score=v['score'], **({'paired': True} if v.get('paired') else {})) for k, v in e.items()})
         else:
             p['reason'] = r.get('reason')
         pages[f] = p
@@ -251,6 +321,23 @@ def build(app=None, ms=None, out=None, log=print) -> dict:
                                           and p['panel'] in ('', '1')) else 'estimated'
         h = p.get('leaf_height_mm')
         p['top_method'] = 'measured' if p.get('top') is not None and h is not None and abs(h - CATALOGUE_MM['height']) <= HEIGHT_TOLERANCE * CATALOGUE_MM['height'] else None
+    # a foldout page's fold on its own photograph (resources/sheets.json): the binding for a first panel, kept only where the scan's own fold
+    # was not measured, else the crease toward the binding; fold_sheet keeps the line's place on every such page, for the audit
+    from . import sheets as sheet_lines
+    placed_outer = set()
+    for f, p in pages.items():
+        r = raw.get(f, {})
+        ln = sheet_lines.page_lines(f, r['image_id']) if 'edges' in r else None
+        if not ln or ln['fold'] is None:
+            continue
+        t = r['text_px']
+        p['fold_sheet'] = _r(r['mapping'].to_frame([[ln['fold'], (t[1] + t[3]) / 2]])[0][0])
+        if ln['outer'] is not None:              # the placed crease or edge, checked by eye on the scan
+            p['outer'] = _r(r['mapping'].to_frame([[ln['outer'], (t[1] + t[3]) / 2]])[0][0])
+            placed_outer.add(f)
+        if p['fold_method'] != 'measured' or ln['panels'][0] > 1:
+            p['fold'], p['fold_method'] = p['fold_sheet'], 'sheet'
+            p['fold_margin_mm'] = _r(margin(p))
     good = [p for f, p in pages.items() if ordinary(f) and p['fold_method'] == 'measured']
     inner = float(np.median([p['fold_margin_mm'] for p in good]))
     tops = [(p['text'][1] - p['top']) / p['mm'] for p in pages.values() if p['top_method'] == 'measured' and p.get('text')]
@@ -265,7 +352,17 @@ def build(app=None, ms=None, out=None, log=print) -> dict:
             continue
         if p['fold_method'] == 'estimated':
             p['fold'] = _r(p['text'][0] - inner * p['mm'] if p['side'] == 'r' else p['text'][2] + inner * p['mm'])
-        if p['top_method'] is None:
+        if p.get('outer') is not None:           # on the scan, to the fold kept, never to a scan line the checks rejected
+            yc = (p['text'][1] + p['text'][3]) / 2
+            xs = raw[f]['mapping'].to_image([[p['outer'], yc], [p['fold'], yc]])[:, 0]
+            w = abs(xs[0] - xs[1]) / scan_ppm.get(p['image_id'], ppm)
+            if f in placed_outer or abs(w - CATALOGUE_MM['width']) <= WIDTH_TOLERANCE * CATALOGUE_MM['width']:
+                p['visible_width_mm'] = _r(w)
+            else:
+                del p['outer']
+        if p['top_method'] is None and _panel_top(f, p, pages, raw, info):
+            pass
+        elif p['top_method'] is None:
             tm = (p['text'][1] - p['top']) / p['mm'] if p.get('top') is not None else None
             if tm is not None and lo_t <= tm <= hi_t:
                 p['top_method'] = 'measured'
@@ -275,12 +372,14 @@ def build(app=None, ms=None, out=None, log=print) -> dict:
                 p['top'], p['top_method'] = _r(p['text'][1] - top_margin * p['mm']), 'estimated'
     counts = {k: {m: sum(1 for p in pages.values() if p.get(k) == m) for m in sorted({p.get(k) for p in pages.values()} - {None})} for k in ('fold_method', 'top_method', 'scale_method')}
     prod = dict(version=PRODUCT_VERSION, built=date.today().isoformat(), frame='recorded', source='beinecke', catalogue=CATALOGUE_MM,
-                calibration=dict(scan_px_per_mm=round(ppm, 4), median_leaf_height_px=round(median_h, 1), leaves=len(heights)),
+                calibration=dict(scan_px_per_mm=round(ppm, 4), median_leaf_height_px=round(median_h, 1), leaves=len(heights), scans_own_scale={k: round(v, 3) for k, v in sorted(scan_ppm.items())}),
                 medians=dict(inner_margin_mm=round(inner, 2), top_margin_mm=round(top_margin, 2), recorded_px_per_mm=round(scale, 4)),
                 counts=counts, credit=images.CREDIT,
                 fields=dict(mm='recorded px per mm on the parchment, at the text centre', fold='recorded x of the fold (the edge where the leaf meets the binding) at the text centre height',
                             top='recorded y of the leaf top edge at the text centre', bottom='recorded y of the leaf bottom edge', text='recorded bounds of the located boxes',
-                            fold_method='measured | estimated (median inner margin) | none', top_method='measured | bottom (bottom edge less 225 mm) | estimated (median top margin) | none',
+                            outer='recorded x of the outer edge at the text centre height: the fore-edge, or the crease where a panel meets the next (placed, resources/sheets.json); absent where the line found leaves a width more than 20% from the catalogue 160 mm',
+                            visible_width_mm='outer less fold in mm on the scan: the leaf without the strip in the binding. Rough: the edge is the first line past the text, and the two faces of one leaf differ by up to about 20 mm',
+                            fold_method='measured | sheet (the fold or crease placed on the scan, resources/sheets.json) | estimated (median inner margin) | none', top_method='measured | panel (the top edge of the panel beside it on the same leaf and scan, named in top_from) | bottom (bottom edge less 225 mm) | estimated (median top margin) | none',
                             scale_method='measured (registration and the scan scale) | estimated (median)', scan='the edges on the scan, full-size px: at = offset at the text centre, slope per px along the edge'),
                 note='Estimated from the Beinecke scans: the visible edge where a leaf meets the binding stands for the fold, and the scale is set by the catalogue leaf height (docs/STREAM.md).',
                 pages=pages)

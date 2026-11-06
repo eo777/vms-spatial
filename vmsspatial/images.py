@@ -375,6 +375,8 @@ def display_transform(folio: str, review: Optional[dict] = None) -> dict:
         if g.get('page') != folio or not g.get('display_parts') or len(g['display_parts']) != len(g.get('parts') or []):
             continue
         for a, b in zip(g['parts'], g['display_parts']):
+            if b[2] <= b[0] or b[3] <= b[1]:             # clipped to nothing: off the display image, which shows only part of f101v
+                continue
             P.append(a)
             D.append(b)
     if len(P) < 3:

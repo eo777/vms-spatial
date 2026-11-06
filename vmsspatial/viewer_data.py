@@ -415,6 +415,12 @@ def _round(v, nd=2):
     return None if v is None else round(float(v), nd)
 
 
+def sheet_layouts() -> dict:
+    """The foldout sheets for the Light table (vmsspatial.sheets.for_viewer): panel widths, the pages' panels, further folds, the Rosettes grid."""
+    from .sheets import for_viewer
+    return for_viewer()
+
+
 def compare_data(out_dir=None, app=None, ms=None, baseline='auto', top=50, bundle_key='manuscript', log=print, scan=True) -> dict:
     """The comparison extras of the atlas (viewer/data/compare): per page the units with their recorded rectangles,
     flat shifts and baseline anchors, the blocks, the break markers; the wheels; the orders; the first-line pair
@@ -468,6 +474,7 @@ def compare_data(out_dir=None, app=None, ms=None, baseline='auto', top=50, bundl
                     paper=dict(version=leaves['version'], catalogue=leaves['catalogue'], calibration=leaves['calibration'], medians=leaves['medians'], counts=leaves['counts']) if leaves else None,
                     note='Comparison extras of the atlas (vmsspatial.viewer_data.compare_data). Translation-only overlay scores describe resemblance, not copying; '
                          'a centred wheel composite is a display transform, not evidence (docs/PITFALLS.md 24, 25).',
+                    sheets=sheet_layouts(),
                     pages=pages_out), out / 'compare' / 'pages.json.gz')
     # wheels: the shipped product with ring members as unit ids of the page
     prod = wheels_for(app, ms)

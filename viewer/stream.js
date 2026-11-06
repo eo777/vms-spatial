@@ -231,7 +231,7 @@
  }
  // ---- the parchment scale says what was measured and what was estimated, for the pages on show
  function paperNote(records){
-  const P=compact.paper,rec=f=>pages[f].paper,on=k=>plan.pages.filter(p=>rec(p.folio)&&rec(p.folio)[k]!=='measured').map(p=>p.folio),edge=T.LEAF_MM*T.PAPER_UNITS;
+  const P=compact.paper,rec=f=>pages[f].paper,on=k=>plan.pages.filter(p=>rec(p.folio)&&!['measured','sheet','panel'].includes(rec(p.folio)[k])).map(p=>p.folio),edge=T.LEAF_MM*T.PAPER_UNITS;
   const none=plan.pages.filter(p=>!rec(p.folio)).map(p=>p.folio),wide=records.filter(r=>r.selection.available&&rec(r.folio)&&(r.bounds.xmin<-1||r.bounds.xmax>edge+1)).map(r=>r.folio),fold=on('fold_method'),top=on('top_method'),scale=on('scale_method');
   return `Parchment scale, estimated: each page in millimetres from the edge where its leaf meets the binding, taken as the fold, and from the leaf's top edge, both found on the Beinecke scans, which are scaled so that the median leaf is the catalogue's ${P?P.catalogue.height:225} mm tall. A column is one ${T.LEAF_MM} mm leaf; the strip of a leaf hidden in the binding is not measured. `
    +(state.coords==='flat'?`Words dewarped: each page's shared curve and tilt are taken out of the vertical positions, about the page's own text, so it stays on its leaf${state.tilt==='none'?'':'; Tilt puts the recorded page angle back'}. `:'Words as drawn on the photographs: Coordinates, under Settings, has Flat for the dewarped text. ')
